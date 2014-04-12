@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Denominator will always be positive (so sign is carried by numerator,
  * and a zero-denominator is impossible).
  * 
- * @author Kip Robinson, http://www.vacant-nebula.com
+ * @author Kip Robinson, https://github.com/kiprobinson
  */
 public final class BigFraction extends Number implements Comparable<Number>
 {

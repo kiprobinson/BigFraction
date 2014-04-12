@@ -16,6 +16,11 @@ import com.github.kiprobinson.util.BigFraction;
 import org.junit.Test;
 
 
+/**
+ * JUnit tests for BigFraction class.
+ * 
+ * @author Kip Robinson, https://github.com/kiprobinson
+ */
 public class BigFractionTest {
   
   @Test
