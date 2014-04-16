@@ -767,32 +767,32 @@ public final class BigFraction extends Number implements Comparable<Number>
     }
     else if (exponent < 52)
     {
-    	if(!isSubnormal)
-    	{
-	      //The gcd of (2^52 + mantissa) / 2^(52 - exponent)  must be of the form 2^y,
-	      //since the only prime factors of the denominator are 2.  In base-2, it is
-	      //easy to determine how many factors of 2 a number has--it is the number of
-	      //trailing "0" bits at the end of the number.  (This is the same as the number
-	      //of trailing 0's of a base-10 number indicating the number of factors of 10
-	      //the number has).
-	      int y = Math.min(tmpNumerator.getLowestSetBit(), 52 - exponent);
-	      
-	      //Now 2^y = gcd( 2^52 + mantissa, 2^(52 - exponent) ), giving:
-	      // (2^52 + mantissa) / 2^(52 - exponent)
-	      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent) / 2^y)
-	      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent - y))
-	      //      = ((2^52 + mantissa) >> y) / (1 << (52 - exponent - y))
-	      tmpNumerator = tmpNumerator.shiftRight(y);
-	      tmpDenominator = tmpDenominator.shiftLeft(52 - exponent - y);
-    	}
-    	else
-    	{
-    		//using the same logic as above, except now we are finding gcd of tmpNumerator/2^1074
-	      int y = Math.min(tmpNumerator.getLowestSetBit(), 1074);
-	      
-	      tmpNumerator = tmpNumerator.shiftRight(y);
-	      tmpDenominator = tmpDenominator.shiftLeft(1074 - y);
-    	}
+      if(!isSubnormal)
+      {
+        //The gcd of (2^52 + mantissa) / 2^(52 - exponent)  must be of the form 2^y,
+        //since the only prime factors of the denominator are 2.  In base-2, it is
+        //easy to determine how many factors of 2 a number has--it is the number of
+        //trailing "0" bits at the end of the number.  (This is the same as the number
+        //of trailing 0's of a base-10 number indicating the number of factors of 10
+        //the number has).
+        int y = Math.min(tmpNumerator.getLowestSetBit(), 52 - exponent);
+        
+        //Now 2^y = gcd( 2^52 + mantissa, 2^(52 - exponent) ), giving:
+        // (2^52 + mantissa) / 2^(52 - exponent)
+        //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent) / 2^y)
+        //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent - y))
+        //      = ((2^52 + mantissa) >> y) / (1 << (52 - exponent - y))
+        tmpNumerator = tmpNumerator.shiftRight(y);
+        tmpDenominator = tmpDenominator.shiftLeft(52 - exponent - y);
+      }
+      else
+      {
+        //using the same logic as above, except now we are finding gcd of tmpNumerator/2^1074
+        int y = Math.min(tmpNumerator.getLowestSetBit(), 1074);
+        
+        tmpNumerator = tmpNumerator.shiftRight(y);
+        tmpDenominator = tmpDenominator.shiftLeft(1074 - y);
+      }
     }
     //else: exponent == 52: do nothing
     
