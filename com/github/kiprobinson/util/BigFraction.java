@@ -729,20 +729,35 @@ public final class BigFraction extends Number implements Comparable<Number>
     final int sign = (int)(bits >> 63) & 0x1;
     final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
     final long mantissa = bits & 0xfffffffffffffL;
+    final boolean isSubnormal = (exponent == -0x3ff);
     
     //Number is: (-1)^sign * 2^(exponent) * 1.mantissa
     //Neglecting sign bit, this gives:
     //           2^(exponent) * 1.mantissa
     //         = 2^(exponent) * (1 + mantissa/2^52)
     //         = 2^(exponent) * (2^52 + mantissa)/2^52
+    // Letting tmpNumerator=(2^52 + mantissa):
+    //         = 2^(exponent) * tmpNumerator/2^52
+    //  
     //  For exponent > 52:
-    //         = 2^(exponent - 52) * (2^52 + mantissa)
+    //         = tmpNumerator * 2^(exponent - 52)
     //  For exponent = 52:
-    //         = 2^52 + mantissa
+    //         = tmpNumerator
     //  For exponent < 52:
-    //         = (2^52 + mantissa) / 2^(52 - exponent)
+    //         = tmpNumerator / 2^(52 - exponent)
+    //
+    //SPECIAL CASE: Subnormals - if all exponent bits are 0 (in my code, this
+    //would mean exponent is -0x3ff, or -1023), then the formula is:
+    //    (-1)^sign * 2^(exponent+1) * 0.mantissa
+    //    
+    //Again neglecting sign bit, this gives:
+    //           2^(exponent + 1) * 0.mantissa
+    //         = 2^(-1022) * (mantissa/2^52)
+    //         = mantissa / 2^1074
+    // Letting tmpNumerator = mantissa:
+    //         = tmpNumerator / 2^1074
     
-    BigInteger tmpNumerator = BigInteger.valueOf(0x10000000000000L + mantissa);
+    BigInteger tmpNumerator = BigInteger.valueOf((isSubnormal ? 0L : 0x10000000000000L) + mantissa);
     BigInteger tmpDenominator = BigInteger.ONE;
     
     if(exponent > 52)
@@ -752,21 +767,32 @@ public final class BigFraction extends Number implements Comparable<Number>
     }
     else if (exponent < 52)
     {
-      //The gcd of (2^52 + mantissa) / 2^(52 - exponent)  must be of the form 2^y,
-      //since the only prime factors of the denominator are 2.  In base-2, it is
-      //easy to determine how many factors of 2 a number has--it is the number of
-      //trailing "0" bits at the end of the number.  (This is the same as the number
-      //of trailing 0's of a base-10 number indicating the number of factors of 10
-      //the number has).
-      int y = Math.min(tmpNumerator.getLowestSetBit(), 52 - exponent);
-      
-      //Now 2^y = gcd( 2^52 + mantissa, 2^(52 - exponent) ), giving:
-      // (2^52 + mantissa) / 2^(52 - exponent)
-      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent) / 2^y)
-      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent - y))
-      //      = ((2^52 + mantissa) >> y) / (1 << (52 - exponent - y))
-      tmpNumerator = tmpNumerator.shiftRight(y);
-      tmpDenominator = tmpDenominator.shiftLeft(52 - exponent - y);
+    	if(!isSubnormal)
+    	{
+	      //The gcd of (2^52 + mantissa) / 2^(52 - exponent)  must be of the form 2^y,
+	      //since the only prime factors of the denominator are 2.  In base-2, it is
+	      //easy to determine how many factors of 2 a number has--it is the number of
+	      //trailing "0" bits at the end of the number.  (This is the same as the number
+	      //of trailing 0's of a base-10 number indicating the number of factors of 10
+	      //the number has).
+	      int y = Math.min(tmpNumerator.getLowestSetBit(), 52 - exponent);
+	      
+	      //Now 2^y = gcd( 2^52 + mantissa, 2^(52 - exponent) ), giving:
+	      // (2^52 + mantissa) / 2^(52 - exponent)
+	      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent) / 2^y)
+	      //      = ((2^52 + mantissa) / 2^y) / (2^(52 - exponent - y))
+	      //      = ((2^52 + mantissa) >> y) / (1 << (52 - exponent - y))
+	      tmpNumerator = tmpNumerator.shiftRight(y);
+	      tmpDenominator = tmpDenominator.shiftLeft(52 - exponent - y);
+    	}
+    	else
+    	{
+    		//using the same logic as above, except now we are finding gcd of tmpNumerator/2^1074
+	      int y = Math.min(tmpNumerator.getLowestSetBit(), 1074);
+	      
+	      tmpNumerator = tmpNumerator.shiftRight(y);
+	      tmpDenominator = tmpDenominator.shiftLeft(1074 - y);
+    	}
     }
     //else: exponent == 52: do nothing
     

@@ -95,6 +95,33 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testSubnormals() {
+  	double minSubnormal = Double.longBitsToDouble(0x0000000000000001L);
+  	double arbSubnormal = Double.longBitsToDouble(0x000deadbeef01010L);
+		double maxSubnormal = Double.longBitsToDouble(0x000fffffffffffffL);
+		double negMinSubnormal = Double.longBitsToDouble(0x8000000000000001L);
+		double negArbSubnormal = Double.longBitsToDouble(0x800deadbeef01010L);
+		double negMaxSubnormal = Double.longBitsToDouble(0x800fffffffffffffL);
+		
+		//NOTE: For these first tests, I'm relying on the Java team to have correctly implemented this in the BigDecimal class...
+  	assertEquals("minimum subnormal value", new BigDecimal(minSubnormal).toString(), BigFraction.valueOf(minSubnormal).toBigDecimal().toString());
+  	assertEquals("arbitrary subnormal value", new BigDecimal(arbSubnormal).toString(), BigFraction.valueOf(arbSubnormal).toBigDecimal().toString());
+  	assertEquals("maximum subnormal value", new BigDecimal(maxSubnormal).toString(), BigFraction.valueOf(maxSubnormal).toBigDecimal().toString());
+  	
+  	assertEquals("negative minimum subnormal value", new BigDecimal(negMinSubnormal).toString(), BigFraction.valueOf(negMinSubnormal).toBigDecimal().toString());
+  	assertEquals("negative arbitrary subnormal value", new BigDecimal(negArbSubnormal).toString(), BigFraction.valueOf(negArbSubnormal).toBigDecimal().toString());
+  	assertEquals("negative maximum subnormal value", new BigDecimal(negMaxSubnormal).toString(), BigFraction.valueOf(negMaxSubnormal).toBigDecimal().toString());
+  	
+  	//the minimum subnormal is 1/(2^1074). make sure we get that fraction
+  	BigInteger minExponent = BigInteger.valueOf(2).pow(1074);
+  	assertEquals("minimum subnormal fraction", "1/" + minExponent.toString(), BigFraction.valueOf(minSubnormal).toString());
+  	assertEquals("negative minimum subnormal fraction", "-1/" + minExponent.toString(), BigFraction.valueOf(negMinSubnormal).toString());
+  	
+  	//ensure that we are reducing correctly. 96/(2^1074) should reduce to 3/(2^1069)
+  	assertEquals("3/" + BigInteger.valueOf(2).pow(1069).toString(), BigFraction.valueOf(Double.longBitsToDouble(96L)).toString());
+  }
+  
+  @Test
   public void testPow() {
     //Note: 0^0 returns 1 (just like Math.pow())
     assertEquals("(0/1)^(0)", "1/1", BigFraction.valueOf(0,1).pow(0).toString());
