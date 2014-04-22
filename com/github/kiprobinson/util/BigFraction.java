@@ -288,6 +288,38 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns the integer part of this fraction; that is, the part that
+   * would come before the decimal point if this were written as a decimal
+   * number. Carries the same sign as this fraction.
+   */
+  public BigInteger getIntegerPart() {
+    return numerator.divide(denominator);
+  }
+  
+  /**
+   * Returns the fraction part of this fraction; that is, the fraction that
+   * represents the part that would come after the decimal point if this
+   * were written as a decimal number. Carries the same sign as this
+   * fraction, unless the fraction part is zero.
+   */
+  public BigFraction getFractionPart() {
+    return new BigFraction(numerator.remainder(denominator), denominator, Reduced.YES);
+  }
+  
+  /**
+   * Returns the integer and fraction parts of this fraction. The return
+   * array is guaranteed to have exactly two elements. The first is guaranteed
+   * to be a BigInteger, equivalent to the result of getIntegerPart().
+   * The second element is guaranteed to be a BigFraction, equivalent to
+   * the result of getFractionPart().
+   */
+  public Number[] getParts() {
+    final BigInteger[] divmod = numerator.divideAndRemainder(denominator);
+    
+    return new Number[]{divmod[0], new BigFraction(divmod[1], denominator, Reduced.YES)};
+  }
+  
+  /**
    * Returns this rounded to the nearest whole number, using
    * RoundingMode.HALF_UP as the default rounding mode.
    */
@@ -394,6 +426,46 @@ public final class BigFraction extends Number implements Comparable<Number>
     }
     
     return intVal;
+  }
+  
+  
+  /**
+   * Rounds the given fraction to the nearest fraction having the given denominator,
+   * using HALF_UP rouding method, and returns the numerator of that fraction. For
+   * example, given the fraction 7/15, if you wanted to know the nearest fraction
+   * with denominator 6, it would be 2.8/6, which rounds to 3/6. This function would
+   * return 3. NOTE that this is not reduced--3/6 is equivalent to 1/2, but this
+   * function would still return 3. If newDenominator is 1, this method is equivalent
+   * to round(). If this object is negative, the returned numerator will also be
+   * negative.
+   * 
+   * @return numerator of rounded fraction (unreduced)
+   */
+  public BigInteger roundToDenominator(BigInteger newDenominator)
+  {
+    return this.roundToDenominator(newDenominator, RoundingMode.HALF_UP);
+  }
+  
+  /**
+   * Rounds the given fraction to the nearest fraction having the given denominator,
+   * using the given rounding method, and returns the numerator of that fraction.
+   * 
+   * @return numerator of rounded fraction (unreduced)
+   * 
+   * @throws ArithmeticException if RoundingMode.UNNECESSARY is used but
+   *         this fraction does not exactly represent an integer. Also thrown
+   *         if newDenominator is zero or negative.
+   */
+  public BigInteger roundToDenominator(BigInteger newDenominator, RoundingMode roundingMode)
+  {
+    if(newDenominator == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    if(newDenominator.compareTo(BigInteger.ZERO) <= 0)
+      throw new ArithmeticException("newDenominator must be positive");
+    
+    //n1/d1 = x/d2  =>   x = n1*d1/d2
+    return this.multiply(newDenominator).round(roundingMode);
   }
   
   /**
@@ -991,17 +1063,82 @@ public final class BigFraction extends Number implements Comparable<Number>
   {
     if(n instanceof BigInteger)
       return (BigInteger)n;
-    else
+    
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong)
       return BigInteger.valueOf(n.longValue());
+    
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).numerator;
+    
+    if(n instanceof Double || n instanceof Float)
+    {
+      final double d = n.doubleValue();
+      
+      if(d == 0.0)
+        return BigInteger.ZERO;
+      
+      //This is similar to valueOfHelper(double), except we know that the exponent is greater than 52. See the comments
+      //in valueOfHelper(double) for much more detailed information
+      final long bits = Double.doubleToRawLongBits(d);
+      final int sign = (int)(bits >> 63) & 0x1;
+      final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
+      final long mantissa = bits & 0xfffffffffffffL;
+      
+      BigInteger ret = BigInteger.valueOf(0x10000000000000L + mantissa).shiftLeft(exponent - 52);
+      return sign == 0 ? ret : ret.negate();
+    }
+    
+    if(n instanceof BigDecimal)
+    {
+      final BigDecimal bd = (BigDecimal)n;
+      return bd.unscaledValue().multiply(BigInteger.TEN.pow(-bd.scale()));
+    }
+    
+    //we should never get here...
+    assert false : "Critical error in toBigInteger. n=" + n.toString() + " [" + n.getClass().getName() + "]";
+    return null;
   }
   
   /**
-   * Returns true if the given type represents an integer (Long, Integer, Short, Byte, or BigInteger).
+   * Returns true if the given type can be converted to a BigInteger without loss
+   * of precision. Returns true for the primitive integer types (Long, Integer, Short,
+   * Byte, AtomicInteger, AtomicLong, or BigInteger).
+   * 
+   * For BigFraction, returns true if denominator is 1.
+   * 
+   * For double, float, and BigDecimal, analyzes the data. Otherwise returns false.
+   * 
    * Used to determine if a Number is appropriate to be passed into toBigInteger() method.
    */
   private static boolean isInt(Number n)
   {
-    return n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof BigInteger || n instanceof AtomicInteger || n instanceof AtomicLong;
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof BigInteger || n instanceof AtomicInteger || n instanceof AtomicLong)
+      return true;
+    
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).denominator.equals(BigInteger.ONE);
+    
+    if(n instanceof Double || n instanceof Float)
+    {
+      final double d = n.doubleValue();
+      if(d == 0.0)
+        return true;
+      
+      if(Double.isInfinite(d) || Double.isNaN(d))
+        return false;
+      
+      final long bits = Double.doubleToRawLongBits(d);
+      final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
+      
+      return (exponent >= 52);
+    }
+    
+    //BigDecimal format: unscaled / 10^scale
+    if(n instanceof BigDecimal)
+      return (((BigDecimal)n).scale() <= 0);
+    
+    //unknown type... play it safe...
+    return false;
   }
   
   /**

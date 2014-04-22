@@ -133,6 +133,53 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testGetIntegerPart() {
+    assertEquals("1", BigFraction.valueOf("4/3").getIntegerPart().toString());
+    assertEquals("-1", BigFraction.valueOf("-4/3").getIntegerPart().toString());
+    assertEquals("2", BigFraction.valueOf("6/3").getIntegerPart().toString());
+    assertEquals("-2", BigFraction.valueOf("6/-3").getIntegerPart().toString());
+    assertEquals("0", BigFraction.valueOf("2/3").getIntegerPart().toString());
+    assertEquals("0", BigFraction.valueOf("2/-3").getIntegerPart().toString());
+    assertEquals("0", BigFraction.valueOf("0/3").getIntegerPart().toString());
+    assertEquals("0", BigFraction.valueOf("0/-3").getIntegerPart().toString());
+  }
+  
+  @Test
+  public void testGetFractionPart() {
+    assertEquals("1/3", BigFraction.valueOf("4/3").getFractionPart().toString());
+    assertEquals("-1/3", BigFraction.valueOf("-4/3").getFractionPart().toString());
+    assertEquals("0/1", BigFraction.valueOf("6/3").getFractionPart().toString());
+    assertEquals("0/1", BigFraction.valueOf("6/-3").getFractionPart().toString());
+    assertEquals("2/3", BigFraction.valueOf("2/3").getFractionPart().toString());
+    assertEquals("-2/3", BigFraction.valueOf("2/-3").getFractionPart().toString());
+    assertEquals("0/1", BigFraction.valueOf("0/3").getFractionPart().toString());
+    assertEquals("0/1", BigFraction.valueOf("0/-3").getFractionPart().toString());
+  }
+  
+  
+  @Test
+  public void testGetParts() {
+    assertEquals("1", BigFraction.valueOf("4/3").getParts()[0].toString());
+    assertEquals("-1", BigFraction.valueOf("-4/3").getParts()[0].toString());
+    assertEquals("2", BigFraction.valueOf("6/3").getParts()[0].toString());
+    assertEquals("-2", BigFraction.valueOf("6/-3").getParts()[0].toString());
+    assertEquals("0", BigFraction.valueOf("2/3").getParts()[0].toString());
+    assertEquals("0", BigFraction.valueOf("2/-3").getParts()[0].toString());
+    assertEquals("0", BigFraction.valueOf("0/3").getParts()[0].toString());
+    assertEquals("0", BigFraction.valueOf("0/-3").getParts()[0].toString());
+    
+    assertEquals("1/3", BigFraction.valueOf("4/3").getParts()[1].toString());
+    assertEquals("-1/3", BigFraction.valueOf("-4/3").getParts()[1].toString());
+    assertEquals("0/1", BigFraction.valueOf("6/3").getParts()[1].toString());
+    assertEquals("0/1", BigFraction.valueOf("6/-3").getParts()[1].toString());
+    assertEquals("2/3", BigFraction.valueOf("2/3").getParts()[1].toString());
+    assertEquals("-2/3", BigFraction.valueOf("2/-3").getParts()[1].toString());
+    assertEquals("0/1", BigFraction.valueOf("0/3").getParts()[1].toString());
+    assertEquals("0/1", BigFraction.valueOf("0/-3").getParts()[1].toString());
+  }
+  
+  
+  @Test
   public void testToMixedString() {
     assertEquals("4/3 == 1 1/3", "1 1/3", BigFraction.valueOf("4/3").toMixedString());
     assertEquals("-4/3 == -1 1/3", "-1 1/3", BigFraction.valueOf("-4/3").toMixedString());
@@ -168,6 +215,31 @@ public class BigFractionTest {
     new RoundingTest("-1.6", "-2", "-1", "-1", "-2", "-2", "-2", "-2", "ArithmeticException").test();
     new RoundingTest("-2.5", "-3", "-2", "-2", "-3", "-3", "-2", "-2", "ArithmeticException").test();
     new RoundingTest("-5.5", "-6", "-5", "-5", "-6", "-6", "-5", "-6", "ArithmeticException").test();
+  }
+  
+  @Test
+  public void testRoundToDenominator() {
+    new RoundingToDenominatorTest("5.5", 1, "6", "5", "6", "5", "6", "5", "6", "ArithmeticException").test();
+    new RoundingToDenominatorTest("7/15", 6, "3", "2", "3", "2", "3", "3", "3", "ArithmeticException").test();
+    new RoundingToDenominatorTest("7/15", 15, "7", "7", "7", "7", "7", "7", "7", "7").test();
+    new RoundingToDenominatorTest("7/15", 30, "14", "14", "14", "14", "14", "14", "14", "14").test();
+    new RoundingToDenominatorTest("7/15", 43, "21", "20", "21", "20", "20", "20", "20", "ArithmeticException").test();
+    new RoundingToDenominatorTest("5/4", 2, "3", "2", "3", "2", "3", "2", "2", "ArithmeticException").test();
+    new RoundingToDenominatorTest("3/4", 2, "2", "1", "2", "1", "2", "1", "2", "ArithmeticException").test();
+    new RoundingToDenominatorTest("1/4", 2, "1", "0", "1", "0", "1", "0", "0", "ArithmeticException").test();
+    new RoundingToDenominatorTest("0", 1, "0", "0", "0", "0", "0", "0", "0", "0").test();
+    new RoundingToDenominatorTest("0", 2, "0", "0", "0", "0", "0", "0", "0", "0").test();
+    new RoundingToDenominatorTest("0", 3, "0", "0", "0", "0", "0", "0", "0", "0").test();
+    new RoundingToDenominatorTest("0", 9999, "0", "0", "0", "0", "0", "0", "0", "0").test();
+    new RoundingToDenominatorTest("-1/4", 2, "-1", "0", "0", "-1", "-1", "0", "0", "ArithmeticException").test();
+    new RoundingToDenominatorTest("-3/4", 2, "-2", "-1", "-1", "-2", "-2", "-1", "-2", "ArithmeticException").test();
+    new RoundingToDenominatorTest("-5/4", 2, "-3", "-2", "-2", "-3", "-3", "-2", "-2", "ArithmeticException").test();
+    new RoundingToDenominatorTest("-7/15", 43, "-21", "-20", "-20", "-21", "-20", "-20", "-20", "ArithmeticException").test();
+    new RoundingToDenominatorTest("-7/15", 30, "-14", "-14", "-14", "-14", "-14", "-14", "-14", "-14").test();
+    new RoundingToDenominatorTest("-7/15", 15, "-7", "-7", "-7", "-7", "-7", "-7", "-7", "-7").test();
+    new RoundingToDenominatorTest("-7/15", 6, "-3", "-2", "-2", "-3", "-3", "-3", "-3", "ArithmeticException").test();
+    new RoundingToDenominatorTest("-5.5", 1, "-6", "-5", "-5", "-6", "-6", "-5", "-6", "ArithmeticException").test();
+    
   }
   
   @Test
@@ -362,7 +434,22 @@ public class BigFractionTest {
     BigFraction.ZERO.pow(-3);
   }
   
+  @Test(expected=ArithmeticException.class)
+  public void testRoundToDenominatorZero() {
+    BigFraction.valueOf(11,17).roundToDenominator(BigInteger.ZERO);
+  }
   
+  @Test(expected=ArithmeticException.class)
+  public void testRoundToDenominatorNegative() {
+    BigFraction.valueOf(11,17).roundToDenominator(BigInteger.valueOf(-4));
+  }
+  
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for rounding. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for that rounding method.
+   */
   private static class RoundingTest
   {
     private final String input;
@@ -400,6 +487,54 @@ public class BigFractionTest {
       
       //test that default rounding mode is the same as HALF_UP
       assertEquals("round(" + input + ")", expected.get(RoundingMode.HALF_UP), bf.round().toString());
+    }
+  }
+  
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for roundToDenominator. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for that rounding method.
+   */
+  private static class RoundingToDenominatorTest
+  {
+    private final String input;
+    private final BigFraction bf;
+    private final BigInteger denominator;
+    private final Map<RoundingMode, String> expected = new HashMap<RoundingMode, String>();
+    
+    public RoundingToDenominatorTest(String input, long denominator, String up, String down, String ceiling, String floor,
+            String halfUp, String halfDown, String halfEven, String unnecessary)
+    {
+      this.input = input;
+      bf = BigFraction.valueOf(input);
+      this.denominator = BigInteger.valueOf(denominator);
+      expected.put(RoundingMode.UP, up);
+      expected.put(RoundingMode.DOWN, down);
+      expected.put(RoundingMode.CEILING, ceiling);
+      expected.put(RoundingMode.FLOOR, floor);
+      expected.put(RoundingMode.HALF_UP, halfUp);
+      expected.put(RoundingMode.HALF_DOWN, halfDown);
+      expected.put(RoundingMode.HALF_EVEN, halfEven);
+      expected.put(RoundingMode.UNNECESSARY, unnecessary);
+    }
+    
+    public void test()
+    {
+      for(Map.Entry<RoundingMode, String> entry : expected.entrySet())
+      {
+        String actual;
+        try {
+          actual = bf.roundToDenominator(denominator, entry.getKey()).toString();
+        }
+        catch(Exception e) {
+          actual = e.getClass().getSimpleName();
+        }
+        assertEquals("roundToDenominator(" + input + ", " + denominator + ", " + entry.getKey() + ")", entry.getValue(), actual);
+      }
+      
+      //test that default rounding mode is the same as HALF_UP
+      assertEquals("round(" + input + ", " + denominator + ")", expected.get(RoundingMode.HALF_UP), bf.roundToDenominator(denominator).toString());
     }
   }
 }
