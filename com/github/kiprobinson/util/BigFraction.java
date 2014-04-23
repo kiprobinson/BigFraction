@@ -33,8 +33,6 @@ public final class BigFraction extends Number implements Comparable<Number>
   //some constants used
   private final static BigInteger BIGINT_TWO = BigInteger.valueOf(2);
   private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
-  private final static BigInteger BIGINT_MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
-  private final static BigInteger BIGINT_MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
   
   private static enum Reduced { YES, NO };
   
@@ -292,7 +290,8 @@ public final class BigFraction extends Number implements Comparable<Number>
    * would come before the decimal point if this were written as a decimal
    * number. Carries the same sign as this fraction.
    */
-  public BigInteger getIntegerPart() {
+  public BigInteger getIntegerPart()
+  {
     return numerator.divide(denominator);
   }
   
@@ -302,7 +301,8 @@ public final class BigFraction extends Number implements Comparable<Number>
    * were written as a decimal number. Carries the same sign as this
    * fraction, unless the fraction part is zero.
    */
-  public BigFraction getFractionPart() {
+  public BigFraction getFractionPart()
+  {
     return new BigFraction(numerator.remainder(denominator), denominator, Reduced.YES);
   }
   
@@ -313,7 +313,8 @@ public final class BigFraction extends Number implements Comparable<Number>
    * The second element is guaranteed to be a BigFraction, equivalent to
    * the result of getFractionPart().
    */
-  public Number[] getParts() {
+  public Number[] getParts()
+  {
     final BigInteger[] divmod = numerator.divideAndRemainder(denominator);
     
     return new Number[]{divmod[0], new BigFraction(divmod[1], denominator, Reduced.YES)};
@@ -704,11 +705,24 @@ public final class BigFraction extends Number implements Comparable<Number>
   public long longValue()
   {
     BigInteger rounded = this.round(RoundingMode.DOWN);
-    if(rounded.compareTo(BIGINT_MAX_LONG) > 0)
-      return Long.MAX_VALUE;
-    else if (rounded.compareTo(BIGINT_MIN_LONG) < 0)
-      return Long.MIN_VALUE;
+    if(rounded.bitLength() > 63)
+      return rounded.signum() < 0 ? Long.MIN_VALUE : Long.MAX_VALUE;
+    
     return rounded.longValue();
+  }
+  
+  /**
+   * Returns an exact long representation of this fraction.
+   * 
+   * @throws ArithmeticException if this has a nonzero fractional
+   *                             part, or will not fit in a long.
+   */
+  public long longValueExact()
+  {
+    if(!denominator.equals(BigInteger.ONE) || numerator.bitLength() > 63)
+      throw new ArithmeticException("Value does not have an exact long representation");
+    
+    return numerator.longValue();
   }
   
   /**
@@ -725,6 +739,20 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns an exact int representation of this fraction.
+   * 
+   * @throws ArithmeticException if this has a nonzero fractional
+   *                             part, or will not fit in a int.
+   */
+  public int intValueExact()
+  {
+    if(!denominator.equals(BigInteger.ONE) || numerator.bitLength() > 31)
+      throw new ArithmeticException("Value does not have an exact int representation");
+    
+    return numerator.intValue();
+  }
+  
+  /**
    * Returns a short representation of this fraction.  This value is
    * obtained by integer division of numerator by denominator.  If
    * the value is greater than Short.MAX_VALUE, Short.MAX_VALUE will be
@@ -738,6 +766,20 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns an exact short representation of this fraction.
+   * 
+   * @throws ArithmeticException if this has a nonzero fractional
+   *                             part, or will not fit in a short.
+   */
+  public short shortValueExact()
+  {
+    if(!denominator.equals(BigInteger.ONE) || numerator.bitLength() > 15)
+      throw new ArithmeticException("Value does not have an exact short representation");
+    
+    return numerator.shortValue();
+  }
+  
+  /**
    * Returns a byte representation of this fraction.  This value is
    * obtained by integer division of numerator by denominator.  If
    * the value is greater than Byte.MAX_VALUE, Byte.MAX_VALUE will be
@@ -748,6 +790,20 @@ public final class BigFraction extends Number implements Comparable<Number>
   public byte byteValue()
   {
     return (byte)Math.max(Byte.MIN_VALUE, Math.min(Byte.MAX_VALUE, longValue()));
+  }
+  
+  /**
+   * Returns an exact byte representation of this fraction.
+   * 
+   * @throws ArithmeticException if this has a nonzero fractional
+   *                             part, or will not fit in a byte.
+   */
+  public byte byteValueExact()
+  {
+    if(!denominator.equals(BigInteger.ONE) || numerator.bitLength() > 7)
+      throw new ArithmeticException("Value does not have an exact byte representation");
+    
+    return numerator.byteValue();
   }
   
   /**
