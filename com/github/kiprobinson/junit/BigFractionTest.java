@@ -393,7 +393,60 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testLongValueExtremes() {
+  public void testDoubleValue() {
+    final long MIN = Double.doubleToRawLongBits(Double.MIN_VALUE);
+    final long MAX = Double.doubleToRawLongBits(Double.MAX_VALUE);
+    
+    //Selected 60k tests because that is about how many took 1 second for me.
+    //Then I picked the closest prime to that number to use as the divisor
+    final long NUM_TESTS = 59999L;
+    final long DELTA = (MAX-MIN)/NUM_TESTS;
+    
+    //note i>0 check is to prevent overflow into negatives
+    for(long i = MIN; i <= MAX && i > 0; i+= DELTA)
+    {
+      double in = Double.longBitsToDouble(i);
+      double out = BigFraction.valueOf(in).doubleValue();
+      assertEquals("failed to get back the same double we put in for raw bits: " + i, in, out, 0.0);
+      
+      //make sure we get same behavior with negative value
+      double negOut = BigFraction.valueOf(-in).doubleValue();
+      assertEquals("failed to get back the same double we put in with negative value for raw bits: " + i, -in, negOut, 0.0);
+      
+      //make sure we also test with the max value on the last iteration
+      if(i < MAX && (i + DELTA > MAX || i + DELTA < 0))
+        i = MAX - DELTA;
+    }
+  }
+  
+  @Test
+  public void testFloatValue() {
+    final long MIN = Float.floatToRawIntBits(Float.MIN_VALUE);
+    final long MAX = Float.floatToRawIntBits(Float.MAX_VALUE);
+    
+    //Selected 60k tests because that is about how many took 1 second for me.
+    //Then I picked the closest prime to that number to use as the divisor
+    final long NUM_TESTS = 59999L;
+    final long DELTA = (MAX-MIN)/NUM_TESTS;
+    
+    for(long i = MIN; i <= MAX; i+= DELTA)
+    {
+      float in = Float.intBitsToFloat((int)i);
+      float out = BigFraction.valueOf(in).floatValue();
+      assertEquals("failed to get back the same float we put in for raw bits: " + i, in, out, 0.0f);
+      
+      //make sure we get same behavior with negative value
+      float negOut = BigFraction.valueOf(-in).floatValue();
+      assertEquals("failed to get back the same float we put in with negative value for raw bits: " + i, -in, negOut, 0.0f);
+      
+      //make sure we also test with the max value on the last iteration
+      if(i < MAX && i + DELTA > MAX)
+        i = MAX - DELTA;
+    }
+  }
+  
+  @Test
+  public void testLongValue() {
     assertEquals(Long.MAX_VALUE, BigFraction.valueOf(Long.MAX_VALUE).longValue());
     assertEquals(Long.MAX_VALUE-1, BigFraction.valueOf(Long.MAX_VALUE-1).longValue());
     assertEquals(Long.MAX_VALUE, BigFraction.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)).longValue());
@@ -410,7 +463,7 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testIntValueExtremes() {
+  public void testIntValue() {
     assertEquals(Integer.MAX_VALUE, BigFraction.valueOf(Integer.MAX_VALUE).intValue());
     assertEquals(Integer.MAX_VALUE-1, BigFraction.valueOf(Integer.MAX_VALUE-1L).intValue());
     assertEquals(Integer.MAX_VALUE, BigFraction.valueOf(Integer.MAX_VALUE+1L).intValue());
@@ -427,7 +480,7 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testShortValueExtremes() {
+  public void testShortValue() {
     assertEquals(Short.MAX_VALUE, BigFraction.valueOf(Short.MAX_VALUE).shortValue());
     assertEquals(Short.MAX_VALUE-1, BigFraction.valueOf(Short.MAX_VALUE-1L).shortValue());
     assertEquals(Short.MAX_VALUE, BigFraction.valueOf(Short.MAX_VALUE+1L).shortValue());
@@ -444,7 +497,7 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testByteValueExtremes() {
+  public void testByteValue() {
     assertEquals(Byte.MAX_VALUE, BigFraction.valueOf(Byte.MAX_VALUE).byteValue());
     assertEquals(Byte.MAX_VALUE-1, BigFraction.valueOf(Byte.MAX_VALUE-1L).byteValue());
     assertEquals(Byte.MAX_VALUE, BigFraction.valueOf(Byte.MAX_VALUE+1L).byteValue());
