@@ -1,0 +1,15 @@
+I don't have the resources to sue you if you violate this license. You're on the honor system.
+
+---------------------------------
+
+This code is free to use for any purpose, even commercial software, under the following conditions:
+
+1. You leave the "@author" tag in the source code.
+2. You reference the URL to GitHub repository wherever you include legal text in your app (usually an "about" page).
+
+---------------------------------
+
+NO WARRANTY IMPLIED OR EXPRESSED
+
+So if you use this code to control air traffic control systems, and it calculates a fraction incorrectly, resulting
+in a bunch of planes crashing and burning... that's on you, brah.
