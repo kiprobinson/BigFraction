@@ -219,6 +219,7 @@ public class BigFractionTest {
   
   @Test
   public void testRound() {
+    new RoundingTest("9.5", "10", "9", "10", "9", "10", "9", "10", "ArithmeticException").test();
     new RoundingTest("5.5", "6", "5", "6", "5", "6", "5", "6", "ArithmeticException").test();
     new RoundingTest("2.5", "3", "2", "3", "2", "3", "2", "2", "ArithmeticException").test();
     new RoundingTest("1.6", "2", "1", "2", "1", "2", "2", "2", "ArithmeticException").test();
@@ -241,6 +242,7 @@ public class BigFractionTest {
     new RoundingTest("-1.6", "-2", "-1", "-1", "-2", "-2", "-2", "-2", "ArithmeticException").test();
     new RoundingTest("-2.5", "-3", "-2", "-2", "-3", "-3", "-2", "-2", "ArithmeticException").test();
     new RoundingTest("-5.5", "-6", "-5", "-5", "-6", "-6", "-5", "-6", "ArithmeticException").test();
+    new RoundingTest("-9.5", "-10", "-9", "-9", "-10", "-10", "-9", "-10", "ArithmeticException").test();
   }
   
   @Test
@@ -265,6 +267,41 @@ public class BigFractionTest {
     new RoundingToDenominatorTest("-7/15", 15, "-7", "-7", "-7", "-7", "-7", "-7", "-7", "-7").test();
     new RoundingToDenominatorTest("-7/15", 6, "-3", "-2", "-2", "-3", "-3", "-3", "-3", "ArithmeticException").test();
     new RoundingToDenominatorTest("-5.5", 1, "-6", "-5", "-5", "-6", "-6", "-5", "-6", "ArithmeticException").test();
+    
+  }
+  
+  @Test
+  public void testToDecimalString() {
+    new ToDecimalStringTest("55/10", 1, "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5").test();
+    new ToDecimalStringTest("555/100", 1, "5.6", "5.5", "5.6", "5.5", "5.6", "5.5", "5.6", "ArithmeticException").test();
+    new ToDecimalStringTest("545/100", 1, "5.5", "5.4", "5.5", "5.4", "5.5", "5.4", "5.4", "ArithmeticException").test();
+    new ToDecimalStringTest("55/10", 4, "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000").test();
+    
+    new ToDecimalStringTest("-55/10", 1, "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5").test();
+    new ToDecimalStringTest("-555/100", 1, "-5.6", "-5.5", "-5.5", "-5.6", "-5.6", "-5.5", "-5.6", "ArithmeticException").test();
+    new ToDecimalStringTest("-545/100", 1, "-5.5", "-5.4", "-5.4", "-5.5", "-5.5", "-5.4", "-5.4", "ArithmeticException").test();
+    new ToDecimalStringTest("-55/10", 4, "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000").test();
+    
+    //3/7 = 0.428571 428571 428571 ...
+    new ToDecimalStringTest("3/7", 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
+    new ToDecimalStringTest("3/7", 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
+    new ToDecimalStringTest("3/7", 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
+    
+    new ToDecimalStringTest("-3/7", 3, "-0.429", "-0.428", "-0.428", "-0.429", "-0.429", "-0.429", "-0.429", "ArithmeticException").test();
+    new ToDecimalStringTest("-3/7", 5, "-0.42858", "-0.42857", "-0.42857", "-0.42858", "-0.42857", "-0.42857", "-0.42857", "ArithmeticException").test();
+    new ToDecimalStringTest("-3/7", 9, "-0.428571429", "-0.428571428", "-0.428571428", "-0.428571429", "-0.428571429", "-0.428571429", "-0.428571429", "ArithmeticException").test();
+    
+    //test scenarios where the rounding causes an additional digit before the decimal
+    new ToDecimalStringTest("99/10", 1, "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9").test();
+    new ToDecimalStringTest("995/100", 1, "10.0", "9.9", "10.0", "9.9", "10.0", "9.9", "10.0", "ArithmeticException").test();
+    
+    new ToDecimalStringTest("-99/10", 1, "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9").test();
+    new ToDecimalStringTest("-995/100", 1, "-10.0", "-9.9", "-9.9", "-10.0", "-10.0", "-9.9", "-10.0", "ArithmeticException").test();
+    
+    //test leading zeros scenario
+    new ToDecimalStringTest("5/10000", 3, "0.001", "0.000", "0.001", "0.000", "0.001", "0.000", "0.000", "ArithmeticException").test();
+    new ToDecimalStringTest("0/10000", 3, "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000").test();
+    new ToDecimalStringTest("-5/10000", 3, "-0.001", "0.000", "0.000", "-0.001", "-0.001", "0.000", "0.000", "ArithmeticException").test();
     
   }
   
@@ -296,14 +333,6 @@ public class BigFractionTest {
     
     List<BigFraction> lst = new ArrayList<BigFraction>(set);
     Collections.sort(lst);
-    
-    /*
-    String expected = "[-1/1, -9/10, -8/9, -7/8, -6/7, -5/6, -4/5, -7/9, -3/4, -5/7, -7/10, -2/3, -5/8"
-                    + ", -3/5, -4/7, -5/9, -1/2, -4/9, -3/7, -2/5, -3/8, -1/3, -3/10, -2/7, -1/4, -2/9"
-                    + ", -1/5, -1/6, -1/7, -1/8, -1/9, -1/10, 0/1, 1/10, 1/9, 1/8, 1/7, 1/6, 1/5, 2/9"
-                    + ", 1/4, 2/7, 3/10, 1/3, 3/8, 2/5, 3/7, 4/9, 1/2, 5/9, 4/7, 3/5, 5/8, 2/3, 7/10"
-                    + ", 5/7, 3/4, 7/9, 4/5, 5/6, 6/7, 7/8, 8/9, 9/10, 1/1]";
-    */
     
     String expected = "[-20/1, -19/1, -18/1, -17/1, -16/1, -15/1, -14/1, -13/1, -12/1, -11/1, -10/1"
                     + ", -19/2, -9/1, -17/2, -8/1, -15/2, -7/1, -20/3, -13/2, -19/3, -6/1, -17/3"
@@ -741,6 +770,53 @@ public class BigFractionTest {
       
       //test that default rounding mode is the same as HALF_UP
       assertEquals("round(" + input + ", " + denominator + ")", expected.get(RoundingMode.HALF_UP), bf.roundToDenominator(denominator).toString());
+    }
+  }
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for toDecimalString. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for that rounding method.
+   */
+  private static class ToDecimalStringTest
+  {
+    private final String input;
+    private final BigFraction bf;
+    private final int digits;
+    private final Map<RoundingMode, String> expected = new HashMap<RoundingMode, String>();
+    
+    public ToDecimalStringTest(String input, int digits, String up, String down, String ceiling, String floor,
+            String halfUp, String halfDown, String halfEven, String unnecessary)
+    {
+      this.input = input;
+      bf = BigFraction.valueOf(input);
+      this.digits = digits;
+      expected.put(RoundingMode.UP, up);
+      expected.put(RoundingMode.DOWN, down);
+      expected.put(RoundingMode.CEILING, ceiling);
+      expected.put(RoundingMode.FLOOR, floor);
+      expected.put(RoundingMode.HALF_UP, halfUp);
+      expected.put(RoundingMode.HALF_DOWN, halfDown);
+      expected.put(RoundingMode.HALF_EVEN, halfEven);
+      expected.put(RoundingMode.UNNECESSARY, unnecessary);
+    }
+    
+    public void test()
+    {
+      for(Map.Entry<RoundingMode, String> entry : expected.entrySet())
+      {
+        String actual;
+        try {
+          actual = bf.toDecimalString(digits, entry.getKey()).toString();
+        }
+        catch(Exception e) {
+          actual = e.getClass().getSimpleName();
+        }
+        assertEquals("toDecimalString(" + input + ", " + digits + ", " + entry.getKey() + ")", entry.getValue(), actual);
+      }
+      
+      //test that default rounding mode is the same as HALF_UP
+      assertEquals("round(" + input + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toDecimalString(digits).toString());
     }
   }
 }

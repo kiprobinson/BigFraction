@@ -497,7 +497,77 @@ public final class BigFraction extends Number implements Comparable<Number>
       return toString();
     
     BigInteger[] divmod = numerator.divideAndRemainder(denominator);
+    
     return divmod[0] + " " + divmod[1].abs() + "/" + denominator;
+  }
+  
+  
+  /**
+   * Returns decimal string representation of the fraction with the given number
+   * of decimal digits using roundingMode ROUND_HALF_UP
+   */
+  public String toDecimalString(int numDecimalDigits)
+  {
+    return toDecimalString(numDecimalDigits, RoundingMode.HALF_UP);
+  }
+  
+  /**
+   * Converts the fraction to a string with the given number of decimal digits.
+   * For example, if f is 1/3, f.toDecimalString(1): 0.3; f.toDecimalString(4): 0.3333.
+   * If numDecimalDigits is 0, this method is equivalent to round().toString().
+   * Will append trailing 0s as needed: (1/2).toDecimalString(3) is 0.500.
+   * 
+   * @param numDecimalDigits Number of digits to be displayed after the decimal
+   * @param roundingMode How to round the number if necessary
+   * 
+   * @return
+   */
+  public String toDecimalString(int numDecimalDigits, RoundingMode roundingMode)
+  {
+    if(numDecimalDigits < 0)
+      throw new IllegalArgumentException("numDecimalDigits must be nonnegative");
+    
+    //shortcut - if we don't want any decimal digits, this is equivalent to round()
+    if(numDecimalDigits == 0)
+      return this.round(roundingMode).toString();
+    
+    //multiply by 10^(digits), then round to integer
+    BigInteger rounded = this.multiply(BigInteger.TEN.pow(numDecimalDigits)).round(roundingMode);
+    
+    //get the actual digits (ignoring the sign bit)
+    String digits = rounded.abs().toString();
+    
+    String beforeDecimal = "0";
+    String afterDecimal = digits;
+    int padLen = 0; //number of zeros we need to pad afterDecimal with with
+    
+    if(digits.length() > numDecimalDigits)
+    {
+      //we got too many digits... need to split into before/after decimal parts
+      beforeDecimal = digits.substring(0, digits.length() - numDecimalDigits);
+      afterDecimal = digits.substring(digits.length() - numDecimalDigits);
+    }
+    else if (digits.length() < numDecimalDigits)
+    {
+      //we don't have enough digits. We will have to pad with zeros
+      padLen = numDecimalDigits - digits.length();
+    }
+    //else: we got exactly the right number of digits. nothing to do!
+    
+    //create string builder to hold result. init buffer to max possible size: lenth of parts plus length of padding plus space for . and -
+    StringBuilder sb = new StringBuilder(beforeDecimal.length() + afterDecimal.length() + padLen + 2);
+    
+    if(rounded.signum() < 0)
+      sb.append('-');
+    
+    sb.append(beforeDecimal).append('.');
+    
+    for(int i = 0; i < padLen; i++)
+      sb.append('0');
+    
+    sb.append(afterDecimal);
+    
+    return sb.toString();
   }
   
   /**
