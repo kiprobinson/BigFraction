@@ -67,57 +67,57 @@ public class BigFractionTest {
   
   @Test
   public void testAdd() {
-    assertEquals("5/1 + -3", "2/1", BigFraction.valueOf(5).add(-3).toString());
-    assertEquals("11/17 + 2/3", "67/51", BigFraction.valueOf("11/17").add(BigFraction.valueOf("2/3")).toString());
-    assertEquals("1/6 + 1/15", "7/30", BigFraction.valueOf("1/6").add(BigFraction.valueOf("1/15")).toString());
-    assertEquals("1/6 + 1/6", "1/3", BigFraction.valueOf("1/6").add(BigFraction.valueOf("1/6")).toString());
-    assertEquals("-1/6 + 1/6", "0/1", BigFraction.valueOf("-1/6").add(BigFraction.valueOf("1/6")).toString());
-    assertEquals("-1/6 + -1/6", "-1/3", BigFraction.valueOf("-1/6").add(BigFraction.valueOf("-1/6")).toString());
-    assertEquals("-1/6 + 1/15", "-1/10", BigFraction.valueOf("-1/6").add(BigFraction.valueOf("1/15")).toString());
+    assertEquals("5/1 + -3", "2/1", bf(5).add(-3).toString());
+    assertEquals("11/17 + 2/3", "67/51", bf("11/17").add(bf("2/3")).toString());
+    assertEquals("1/6 + 1/15", "7/30", bf("1/6").add(bf("1/15")).toString());
+    assertEquals("1/6 + 1/6", "1/3", bf("1/6").add(bf("1/6")).toString());
+    assertEquals("-1/6 + 1/6", "0/1", bf("-1/6").add(bf("1/6")).toString());
+    assertEquals("-1/6 + -1/6", "-1/3", bf("-1/6").add(bf("-1/6")).toString());
+    assertEquals("-1/6 + 1/15", "-1/10", bf("-1/6").add(bf("1/15")).toString());
   }
   
   @Test
   public void testSubtract() {
-    assertEquals("5/1 - -3/1", "8/1", BigFraction.valueOf(5).subtract(-3).toString());
-    assertEquals("-5/1 - 2/1", "-7/1", BigFraction.valueOf(-5).subtract(2).toString());
-    assertEquals("-5/1 - -2/1", "-3/1", BigFraction.valueOf(-5).subtract(-2).toString());
-    assertEquals("11/17 - 2/3", "-1/51", BigFraction.valueOf("11/17").subtract(BigFraction.valueOf("2/3")).toString());
-    assertEquals("1/6 - 1/6", "0/1", BigFraction.valueOf("1/6").subtract(BigFraction.valueOf("1/6")).toString());
-    assertEquals("-1/6 - 1/6", "-1/3", BigFraction.valueOf("-1/6").subtract(BigFraction.valueOf("1/6")).toString());
+    assertEquals("5/1 - -3/1", "8/1", bf(5).subtract(-3).toString());
+    assertEquals("-5/1 - 2/1", "-7/1", bf(-5).subtract(2).toString());
+    assertEquals("-5/1 - -2/1", "-3/1", bf(-5).subtract(-2).toString());
+    assertEquals("11/17 - 2/3", "-1/51", bf("11/17").subtract(bf("2/3")).toString());
+    assertEquals("1/6 - 1/6", "0/1", bf("1/6").subtract(bf("1/6")).toString());
+    assertEquals("-1/6 - 1/6", "-1/3", bf("-1/6").subtract(bf("1/6")).toString());
   }
   
   @Test
   public void testMultiply() {
-    assertEquals("(11/17)(0/1)", "0/1", BigFraction.valueOf("11/17").multiply(-0.0).toString());
-    assertEquals("(1/3)(3/4)", "1/4", BigFraction.valueOf("1/3").multiply(BigFraction.valueOf("3/4")).toString());
-    assertEquals("(-1/12)(16/5)", "-4/15", BigFraction.valueOf("-1/12").multiply(BigFraction.valueOf("16/5")).toString());
-    assertEquals("(-7/6)(-5/9)", "35/54", BigFraction.valueOf("-7/6").multiply(BigFraction.valueOf("-5/9")).toString());
-    assertEquals("(4/5)(-7/2)", "-14/5", BigFraction.valueOf("4/5").multiply(BigFraction.valueOf("7/-2")).toString());
+    assertEquals("(11/17)(0/1)", "0/1", bf("11/17").multiply(-0.0).toString());
+    assertEquals("(1/3)(3/4)", "1/4", bf("1/3").multiply(bf("3/4")).toString());
+    assertEquals("(-1/12)(16/5)", "-4/15", bf("-1/12").multiply(bf("16/5")).toString());
+    assertEquals("(-7/6)(-5/9)", "35/54", bf("-7/6").multiply(bf("-5/9")).toString());
+    assertEquals("(4/5)(-7/2)", "-14/5", bf("4/5").multiply(bf("7/-2")).toString());
   }
   
   @Test
   public void testDivide() {
-    assertEquals("(1/3)/(4/3)", "1/4", BigFraction.valueOf("1/3").divide(BigFraction.valueOf("4/3")).toString());
-    assertEquals("(-1/12)/(5/16)", "-4/15", BigFraction.valueOf("-1/12").divide(BigFraction.valueOf("5/16")).toString());
-    assertEquals("(-7/6)/(-9/5)", "35/54", BigFraction.valueOf("-7/6").divide(BigFraction.valueOf("9/-5")).toString());
-    assertEquals("(4/5)/(-2/7)", "-14/5", BigFraction.valueOf("4/5").divide(BigFraction.valueOf("-2/7")).toString());
+    assertEquals("(1/3)/(4/3)", "1/4", bf("1/3").divide(bf("4/3")).toString());
+    assertEquals("(-1/12)/(5/16)", "-4/15", bf("-1/12").divide(bf("5/16")).toString());
+    assertEquals("(-7/6)/(-9/5)", "35/54", bf("-7/6").divide(bf("9/-5")).toString());
+    assertEquals("(4/5)/(-2/7)", "-14/5", bf("4/5").divide(bf("-2/7")).toString());
   }
   
   @Test
   public void testReciprocal() {
-    assertEquals("(1/1).reciprocal", "1/1", BigFraction.valueOf(1.0).reciprocal().toString());
-    assertEquals("(1/2).reciprocal", "2/1", BigFraction.valueOf(2,4).reciprocal().toString());
-    assertEquals("(-10/-14).reciprocal", "7/5", BigFraction.valueOf(-10,-14).reciprocal().toString());
-    assertEquals("(-6/1).reciprocal", "-1/6", BigFraction.valueOf(-6).reciprocal().toString());
+    assertEquals("(1/1).reciprocal", "1/1", bf(1.0).reciprocal().toString());
+    assertEquals("(1/2).reciprocal", "2/1", bf(2,4).reciprocal().toString());
+    assertEquals("(-10/-14).reciprocal", "7/5", bf(-10,-14).reciprocal().toString());
+    assertEquals("(-6/1).reciprocal", "-1/6", bf(-6).reciprocal().toString());
   }
   
   @Test
   public void testComplement() {
-    assertEquals("(10/14).complement", "2/7", BigFraction.valueOf(10,14).complement().toString());
-    assertEquals("(1/1).complement", "0/1", BigFraction.valueOf(1).complement().toString());
-    assertEquals("(-1/1).complement", "2/1", BigFraction.valueOf(-1).complement().toString());
-    assertEquals("(0/1).complement", "1/1", BigFraction.valueOf(0).complement().toString());
-    assertEquals("(17/11).complement", "-6/11", BigFraction.valueOf(17,11).complement().toString());
+    assertEquals("(10/14).complement", "2/7", bf(10,14).complement().toString());
+    assertEquals("(1/1).complement", "0/1", bf(1).complement().toString());
+    assertEquals("(-1/1).complement", "2/1", bf(-1).complement().toString());
+    assertEquals("(0/1).complement", "1/1", bf(0).complement().toString());
+    assertEquals("(17/11).complement", "-6/11", bf(17,11).complement().toString());
   }
   
   @Test
@@ -130,78 +130,78 @@ public class BigFractionTest {
     double negMaxSubnormal = Double.longBitsToDouble(0x800fffffffffffffL);
     
     //NOTE: For these first tests, I'm relying on the Java team to have correctly implemented this in the BigDecimal class...
-    assertEquals("minimum subnormal value", new BigDecimal(minSubnormal).toString(), BigFraction.valueOf(minSubnormal).toBigDecimal().toString());
-    assertEquals("arbitrary subnormal value", new BigDecimal(arbSubnormal).toString(), BigFraction.valueOf(arbSubnormal).toBigDecimal().toString());
-    assertEquals("maximum subnormal value", new BigDecimal(maxSubnormal).toString(), BigFraction.valueOf(maxSubnormal).toBigDecimal().toString());
+    assertEquals("minimum subnormal value", new BigDecimal(minSubnormal).toString(), bf(minSubnormal).toBigDecimal().toString());
+    assertEquals("arbitrary subnormal value", new BigDecimal(arbSubnormal).toString(), bf(arbSubnormal).toBigDecimal().toString());
+    assertEquals("maximum subnormal value", new BigDecimal(maxSubnormal).toString(), bf(maxSubnormal).toBigDecimal().toString());
     
-    assertEquals("negative minimum subnormal value", new BigDecimal(negMinSubnormal).toString(), BigFraction.valueOf(negMinSubnormal).toBigDecimal().toString());
-    assertEquals("negative arbitrary subnormal value", new BigDecimal(negArbSubnormal).toString(), BigFraction.valueOf(negArbSubnormal).toBigDecimal().toString());
-    assertEquals("negative maximum subnormal value", new BigDecimal(negMaxSubnormal).toString(), BigFraction.valueOf(negMaxSubnormal).toBigDecimal().toString());
+    assertEquals("negative minimum subnormal value", new BigDecimal(negMinSubnormal).toString(), bf(negMinSubnormal).toBigDecimal().toString());
+    assertEquals("negative arbitrary subnormal value", new BigDecimal(negArbSubnormal).toString(), bf(negArbSubnormal).toBigDecimal().toString());
+    assertEquals("negative maximum subnormal value", new BigDecimal(negMaxSubnormal).toString(), bf(negMaxSubnormal).toBigDecimal().toString());
     
     //the minimum subnormal is 1/(2^1074). make sure we get that fraction
     BigInteger minExponent = BigInteger.valueOf(2).pow(1074);
-    assertEquals("minimum subnormal fraction", "1/" + minExponent.toString(), BigFraction.valueOf(minSubnormal).toString());
-    assertEquals("negative minimum subnormal fraction", "-1/" + minExponent.toString(), BigFraction.valueOf(negMinSubnormal).toString());
+    assertEquals("minimum subnormal fraction", "1/" + minExponent.toString(), bf(minSubnormal).toString());
+    assertEquals("negative minimum subnormal fraction", "-1/" + minExponent.toString(), bf(negMinSubnormal).toString());
     
     //ensure that we are reducing correctly. 96/(2^1074) should reduce to 3/(2^1069)
-    assertEquals("3/" + BigInteger.valueOf(2).pow(1069).toString(), BigFraction.valueOf(Double.longBitsToDouble(96L)).toString());
+    assertEquals("3/" + BigInteger.valueOf(2).pow(1069).toString(), bf(Double.longBitsToDouble(96L)).toString());
   }
   
   @Test
   public void testPow() {
     //Note: 0^0 returns 1 (just like Math.pow())
-    assertEquals("(0/1)^(0)", "1/1", BigFraction.valueOf(0,1).pow(0).toString());
-    assertEquals("(11/17)^(5)", "161051/1419857", BigFraction.valueOf(11,17).pow(5).toString());
-    assertEquals("(11/17)^(-5)", "1419857/161051", BigFraction.valueOf(11,17).pow(-5).toString());
-    assertEquals("(5/8)^(0)", "1/1", BigFraction.valueOf(5,8).pow(0).toString());
-    assertEquals("(9/16)^(-1)", "16/9", BigFraction.valueOf(9,16).pow(-1).toString());
-    assertEquals("(9/16)^(1)", "9/16", BigFraction.valueOf(9,16).pow(1).toString());
+    assertEquals("(0/1)^(0)", "1/1", bf(0,1).pow(0).toString());
+    assertEquals("(11/17)^(5)", "161051/1419857", bf(11,17).pow(5).toString());
+    assertEquals("(11/17)^(-5)", "1419857/161051", bf(11,17).pow(-5).toString());
+    assertEquals("(5/8)^(0)", "1/1", bf(5,8).pow(0).toString());
+    assertEquals("(9/16)^(-1)", "16/9", bf(9,16).pow(-1).toString());
+    assertEquals("(9/16)^(1)", "9/16", bf(9,16).pow(1).toString());
   }
   
   @Test
   public void testGetIntegerPart() {
-    assertEquals("1", BigFraction.valueOf("4/3").getIntegerPart().toString());
-    assertEquals("-1", BigFraction.valueOf("-4/3").getIntegerPart().toString());
-    assertEquals("2", BigFraction.valueOf("6/3").getIntegerPart().toString());
-    assertEquals("-2", BigFraction.valueOf("6/-3").getIntegerPart().toString());
-    assertEquals("0", BigFraction.valueOf("2/3").getIntegerPart().toString());
-    assertEquals("0", BigFraction.valueOf("2/-3").getIntegerPart().toString());
-    assertEquals("0", BigFraction.valueOf("0/3").getIntegerPart().toString());
-    assertEquals("0", BigFraction.valueOf("0/-3").getIntegerPart().toString());
+    assertEquals("1", bf("4/3").getIntegerPart().toString());
+    assertEquals("-1", bf("-4/3").getIntegerPart().toString());
+    assertEquals("2", bf("6/3").getIntegerPart().toString());
+    assertEquals("-2", bf("6/-3").getIntegerPart().toString());
+    assertEquals("0", bf("2/3").getIntegerPart().toString());
+    assertEquals("0", bf("2/-3").getIntegerPart().toString());
+    assertEquals("0", bf("0/3").getIntegerPart().toString());
+    assertEquals("0", bf("0/-3").getIntegerPart().toString());
   }
   
   @Test
   public void testGetFractionPart() {
-    assertEquals("1/3", BigFraction.valueOf("4/3").getFractionPart().toString());
-    assertEquals("-1/3", BigFraction.valueOf("-4/3").getFractionPart().toString());
-    assertEquals("0/1", BigFraction.valueOf("6/3").getFractionPart().toString());
-    assertEquals("0/1", BigFraction.valueOf("6/-3").getFractionPart().toString());
-    assertEquals("2/3", BigFraction.valueOf("2/3").getFractionPart().toString());
-    assertEquals("-2/3", BigFraction.valueOf("2/-3").getFractionPart().toString());
-    assertEquals("0/1", BigFraction.valueOf("0/3").getFractionPart().toString());
-    assertEquals("0/1", BigFraction.valueOf("0/-3").getFractionPart().toString());
+    assertEquals("1/3", bf("4/3").getFractionPart().toString());
+    assertEquals("-1/3", bf("-4/3").getFractionPart().toString());
+    assertEquals("0/1", bf("6/3").getFractionPart().toString());
+    assertEquals("0/1", bf("6/-3").getFractionPart().toString());
+    assertEquals("2/3", bf("2/3").getFractionPart().toString());
+    assertEquals("-2/3", bf("2/-3").getFractionPart().toString());
+    assertEquals("0/1", bf("0/3").getFractionPart().toString());
+    assertEquals("0/1", bf("0/-3").getFractionPart().toString());
   }
   
   
   @Test
   public void testGetParts() {
-    assertEquals("1", BigFraction.valueOf("4/3").getParts()[0].toString());
-    assertEquals("-1", BigFraction.valueOf("-4/3").getParts()[0].toString());
-    assertEquals("2", BigFraction.valueOf("6/3").getParts()[0].toString());
-    assertEquals("-2", BigFraction.valueOf("6/-3").getParts()[0].toString());
-    assertEquals("0", BigFraction.valueOf("2/3").getParts()[0].toString());
-    assertEquals("0", BigFraction.valueOf("2/-3").getParts()[0].toString());
-    assertEquals("0", BigFraction.valueOf("0/3").getParts()[0].toString());
-    assertEquals("0", BigFraction.valueOf("0/-3").getParts()[0].toString());
+    assertEquals("1", bf("4/3").getParts()[0].toString());
+    assertEquals("-1", bf("-4/3").getParts()[0].toString());
+    assertEquals("2", bf("6/3").getParts()[0].toString());
+    assertEquals("-2", bf("6/-3").getParts()[0].toString());
+    assertEquals("0", bf("2/3").getParts()[0].toString());
+    assertEquals("0", bf("2/-3").getParts()[0].toString());
+    assertEquals("0", bf("0/3").getParts()[0].toString());
+    assertEquals("0", bf("0/-3").getParts()[0].toString());
     
-    assertEquals("1/3", BigFraction.valueOf("4/3").getParts()[1].toString());
-    assertEquals("-1/3", BigFraction.valueOf("-4/3").getParts()[1].toString());
-    assertEquals("0/1", BigFraction.valueOf("6/3").getParts()[1].toString());
-    assertEquals("0/1", BigFraction.valueOf("6/-3").getParts()[1].toString());
-    assertEquals("2/3", BigFraction.valueOf("2/3").getParts()[1].toString());
-    assertEquals("-2/3", BigFraction.valueOf("2/-3").getParts()[1].toString());
-    assertEquals("0/1", BigFraction.valueOf("0/3").getParts()[1].toString());
-    assertEquals("0/1", BigFraction.valueOf("0/-3").getParts()[1].toString());
+    assertEquals("1/3", bf("4/3").getParts()[1].toString());
+    assertEquals("-1/3", bf("-4/3").getParts()[1].toString());
+    assertEquals("0/1", bf("6/3").getParts()[1].toString());
+    assertEquals("0/1", bf("6/-3").getParts()[1].toString());
+    assertEquals("2/3", bf("2/3").getParts()[1].toString());
+    assertEquals("-2/3", bf("2/-3").getParts()[1].toString());
+    assertEquals("0/1", bf("0/3").getParts()[1].toString());
+    assertEquals("0/1", bf("0/-3").getParts()[1].toString());
   }
   
   
@@ -334,14 +334,14 @@ public class BigFractionTest {
   
   @Test
   public void testToMixedString() {
-    assertEquals("4/3 == 1 1/3", "1 1/3", BigFraction.valueOf("4/3").toMixedString());
-    assertEquals("-4/3 == -1 1/3", "-1 1/3", BigFraction.valueOf("-4/3").toMixedString());
-    assertEquals("6/3 == 2", BigFraction.valueOf("6/3").toMixedString(), "2");
-    assertEquals("6/-3 == -2", BigFraction.valueOf("6/-3").toMixedString(), "-2");
-    assertEquals("2/3 == 2/3", BigFraction.valueOf("2/3").toMixedString(), "2/3");
-    assertEquals("2/-3 == -2/3", BigFraction.valueOf("2/-3").toMixedString(), "-2/3");
-    assertEquals("0/3 == 0", BigFraction.valueOf("0/3").toMixedString(), "0");
-    assertEquals("0/-3 == 0", BigFraction.valueOf("0/-3").toMixedString(), "0");
+    assertEquals("4/3 == 1 1/3", "1 1/3", bf("4/3").toMixedString());
+    assertEquals("-4/3 == -1 1/3", "-1 1/3", bf("-4/3").toMixedString());
+    assertEquals("6/3 == 2", bf("6/3").toMixedString(), "2");
+    assertEquals("6/-3 == -2", bf("6/-3").toMixedString(), "-2");
+    assertEquals("2/3 == 2/3", bf("2/3").toMixedString(), "2/3");
+    assertEquals("2/-3 == -2/3", bf("2/-3").toMixedString(), "-2/3");
+    assertEquals("0/3 == 0", bf("0/3").toMixedString(), "0");
+    assertEquals("0/-3 == 0", bf("0/-3").toMixedString(), "0");
   }
   
   @Test
@@ -452,7 +452,7 @@ public class BigFractionTest {
     {
       for(int den = 1; den <= 10; den++)
       {
-        BigFraction bf = BigFraction.valueOf(num, den);
+        BigFraction bf = bf(num, den);
         set.add(bf);
         set.add(bf.negate());
       }
@@ -496,7 +496,7 @@ public class BigFractionTest {
     {
       for(int den = 1; den <= 10; den++)
       {
-        BigFraction bf = BigFraction.valueOf(num, den);
+        BigFraction bf = bf(num, den);
         set.add(bf);
         set.add(bf.negate());
       }
@@ -562,11 +562,11 @@ public class BigFractionTest {
     for(long i = MIN; i <= MAX && i > 0; i+= DELTA)
     {
       double in = Double.longBitsToDouble(i);
-      double out = BigFraction.valueOf(in).doubleValue();
+      double out = bf(in).doubleValue();
       assertEquals("failed to get back the same double we put in for raw bits: " + i, in, out, 0.0);
       
       //make sure we get same behavior with negative value
-      double negOut = BigFraction.valueOf(-in).doubleValue();
+      double negOut = bf(-in).doubleValue();
       assertEquals("failed to get back the same double we put in with negative value for raw bits: " + i, -in, negOut, 0.0);
       
       //make sure we also test with the max value on the last iteration
@@ -588,11 +588,11 @@ public class BigFractionTest {
     for(long i = MIN; i <= MAX; i+= DELTA)
     {
       float in = Float.intBitsToFloat((int)i);
-      float out = BigFraction.valueOf(in).floatValue();
+      float out = bf(in).floatValue();
       assertEquals("failed to get back the same float we put in for raw bits: " + i, in, out, 0.0f);
       
       //make sure we get same behavior with negative value
-      float negOut = BigFraction.valueOf(-in).floatValue();
+      float negOut = bf(-in).floatValue();
       assertEquals("failed to get back the same float we put in with negative value for raw bits: " + i, -in, negOut, 0.0f);
       
       //make sure we also test with the max value on the last iteration
@@ -603,70 +603,70 @@ public class BigFractionTest {
   
   @Test
   public void testLongValue() {
-    assertEquals(Long.MAX_VALUE, BigFraction.valueOf(Long.MAX_VALUE).longValue());
-    assertEquals(Long.MAX_VALUE-1, BigFraction.valueOf(Long.MAX_VALUE-1).longValue());
-    assertEquals(Long.MAX_VALUE, BigFraction.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)).longValue());
+    assertEquals(Long.MAX_VALUE, bf(Long.MAX_VALUE).longValue());
+    assertEquals(Long.MAX_VALUE-1, bf(Long.MAX_VALUE-1).longValue());
+    assertEquals(Long.MAX_VALUE, bf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)).longValue());
     
-    assertEquals(Long.MIN_VALUE, BigFraction.valueOf(Long.MIN_VALUE).longValue());
-    assertEquals(Long.MIN_VALUE+1, BigFraction.valueOf(Long.MIN_VALUE+1).longValue());
-    assertEquals(Long.MIN_VALUE, BigFraction.valueOf(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)).longValue());
+    assertEquals(Long.MIN_VALUE, bf(Long.MIN_VALUE).longValue());
+    assertEquals(Long.MIN_VALUE+1, bf(Long.MIN_VALUE+1).longValue());
+    assertEquals(Long.MIN_VALUE, bf(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)).longValue());
     
-    assertEquals(Long.MAX_VALUE, BigFraction.valueOf(Long.MAX_VALUE).longValueExact());
-    assertEquals(Long.MAX_VALUE-1, BigFraction.valueOf(Long.MAX_VALUE-1).longValueExact());
+    assertEquals(Long.MAX_VALUE, bf(Long.MAX_VALUE).longValueExact());
+    assertEquals(Long.MAX_VALUE-1, bf(Long.MAX_VALUE-1).longValueExact());
     
-    assertEquals(Long.MIN_VALUE, BigFraction.valueOf(Long.MIN_VALUE).longValueExact());
-    assertEquals(Long.MIN_VALUE+1, BigFraction.valueOf(Long.MIN_VALUE+1).longValueExact());
+    assertEquals(Long.MIN_VALUE, bf(Long.MIN_VALUE).longValueExact());
+    assertEquals(Long.MIN_VALUE+1, bf(Long.MIN_VALUE+1).longValueExact());
   }
   
   @Test
   public void testIntValue() {
-    assertEquals(Integer.MAX_VALUE, BigFraction.valueOf(Integer.MAX_VALUE).intValue());
-    assertEquals(Integer.MAX_VALUE-1, BigFraction.valueOf(Integer.MAX_VALUE-1L).intValue());
-    assertEquals(Integer.MAX_VALUE, BigFraction.valueOf(Integer.MAX_VALUE+1L).intValue());
+    assertEquals(Integer.MAX_VALUE, bf(Integer.MAX_VALUE).intValue());
+    assertEquals(Integer.MAX_VALUE-1, bf(Integer.MAX_VALUE-1L).intValue());
+    assertEquals(Integer.MAX_VALUE, bf(Integer.MAX_VALUE+1L).intValue());
     
-    assertEquals(Integer.MIN_VALUE, BigFraction.valueOf(Integer.MIN_VALUE).intValue());
-    assertEquals(Integer.MIN_VALUE+1, BigFraction.valueOf(Integer.MIN_VALUE+1L).intValue());
-    assertEquals(Integer.MIN_VALUE, BigFraction.valueOf(Integer.MIN_VALUE-1L).intValue());
+    assertEquals(Integer.MIN_VALUE, bf(Integer.MIN_VALUE).intValue());
+    assertEquals(Integer.MIN_VALUE+1, bf(Integer.MIN_VALUE+1L).intValue());
+    assertEquals(Integer.MIN_VALUE, bf(Integer.MIN_VALUE-1L).intValue());
     
-    assertEquals(Integer.MAX_VALUE, BigFraction.valueOf(Integer.MAX_VALUE).intValueExact());
-    assertEquals(Integer.MAX_VALUE-1, BigFraction.valueOf(Integer.MAX_VALUE-1L).intValueExact());
+    assertEquals(Integer.MAX_VALUE, bf(Integer.MAX_VALUE).intValueExact());
+    assertEquals(Integer.MAX_VALUE-1, bf(Integer.MAX_VALUE-1L).intValueExact());
     
-    assertEquals(Integer.MIN_VALUE, BigFraction.valueOf(Integer.MIN_VALUE).intValueExact());
-    assertEquals(Integer.MIN_VALUE+1, BigFraction.valueOf(Integer.MIN_VALUE+1L).intValueExact());
+    assertEquals(Integer.MIN_VALUE, bf(Integer.MIN_VALUE).intValueExact());
+    assertEquals(Integer.MIN_VALUE+1, bf(Integer.MIN_VALUE+1L).intValueExact());
   }
   
   @Test
   public void testShortValue() {
-    assertEquals(Short.MAX_VALUE, BigFraction.valueOf(Short.MAX_VALUE).shortValue());
-    assertEquals(Short.MAX_VALUE-1, BigFraction.valueOf(Short.MAX_VALUE-1L).shortValue());
-    assertEquals(Short.MAX_VALUE, BigFraction.valueOf(Short.MAX_VALUE+1L).shortValue());
+    assertEquals(Short.MAX_VALUE, bf(Short.MAX_VALUE).shortValue());
+    assertEquals(Short.MAX_VALUE-1, bf(Short.MAX_VALUE-1L).shortValue());
+    assertEquals(Short.MAX_VALUE, bf(Short.MAX_VALUE+1L).shortValue());
     
-    assertEquals(Short.MIN_VALUE, BigFraction.valueOf(Short.MIN_VALUE).shortValue());
-    assertEquals(Short.MIN_VALUE+1, BigFraction.valueOf(Short.MIN_VALUE+1L).shortValue());
-    assertEquals(Short.MIN_VALUE, BigFraction.valueOf(Short.MIN_VALUE-1L).shortValue());
+    assertEquals(Short.MIN_VALUE, bf(Short.MIN_VALUE).shortValue());
+    assertEquals(Short.MIN_VALUE+1, bf(Short.MIN_VALUE+1L).shortValue());
+    assertEquals(Short.MIN_VALUE, bf(Short.MIN_VALUE-1L).shortValue());
     
-    assertEquals(Short.MAX_VALUE, BigFraction.valueOf(Short.MAX_VALUE).shortValueExact());
-    assertEquals(Short.MAX_VALUE-1, BigFraction.valueOf(Short.MAX_VALUE-1L).shortValueExact());
+    assertEquals(Short.MAX_VALUE, bf(Short.MAX_VALUE).shortValueExact());
+    assertEquals(Short.MAX_VALUE-1, bf(Short.MAX_VALUE-1L).shortValueExact());
     
-    assertEquals(Short.MIN_VALUE, BigFraction.valueOf(Short.MIN_VALUE).shortValueExact());
-    assertEquals(Short.MIN_VALUE+1, BigFraction.valueOf(Short.MIN_VALUE+1L).shortValueExact());
+    assertEquals(Short.MIN_VALUE, bf(Short.MIN_VALUE).shortValueExact());
+    assertEquals(Short.MIN_VALUE+1, bf(Short.MIN_VALUE+1L).shortValueExact());
   }
   
   @Test
   public void testByteValue() {
-    assertEquals(Byte.MAX_VALUE, BigFraction.valueOf(Byte.MAX_VALUE).byteValue());
-    assertEquals(Byte.MAX_VALUE-1, BigFraction.valueOf(Byte.MAX_VALUE-1L).byteValue());
-    assertEquals(Byte.MAX_VALUE, BigFraction.valueOf(Byte.MAX_VALUE+1L).byteValue());
+    assertEquals(Byte.MAX_VALUE, bf(Byte.MAX_VALUE).byteValue());
+    assertEquals(Byte.MAX_VALUE-1, bf(Byte.MAX_VALUE-1L).byteValue());
+    assertEquals(Byte.MAX_VALUE, bf(Byte.MAX_VALUE+1L).byteValue());
     
-    assertEquals(Byte.MIN_VALUE, BigFraction.valueOf(Byte.MIN_VALUE).byteValue());
-    assertEquals(Byte.MIN_VALUE+1, BigFraction.valueOf(Byte.MIN_VALUE+1L).byteValue());
-    assertEquals(Byte.MIN_VALUE, BigFraction.valueOf(Byte.MIN_VALUE-1L).byteValue());
+    assertEquals(Byte.MIN_VALUE, bf(Byte.MIN_VALUE).byteValue());
+    assertEquals(Byte.MIN_VALUE+1, bf(Byte.MIN_VALUE+1L).byteValue());
+    assertEquals(Byte.MIN_VALUE, bf(Byte.MIN_VALUE-1L).byteValue());
     
-    assertEquals(Byte.MAX_VALUE, BigFraction.valueOf(Byte.MAX_VALUE).byteValueExact());
-    assertEquals(Byte.MAX_VALUE-1, BigFraction.valueOf(Byte.MAX_VALUE-1L).byteValueExact());
+    assertEquals(Byte.MAX_VALUE, bf(Byte.MAX_VALUE).byteValueExact());
+    assertEquals(Byte.MAX_VALUE-1, bf(Byte.MAX_VALUE-1L).byteValueExact());
     
-    assertEquals(Byte.MIN_VALUE, BigFraction.valueOf(Byte.MIN_VALUE).byteValueExact());
-    assertEquals(Byte.MIN_VALUE+1, BigFraction.valueOf(Byte.MIN_VALUE+1L).byteValueExact());
+    assertEquals(Byte.MIN_VALUE, bf(Byte.MIN_VALUE).byteValueExact());
+    assertEquals(Byte.MIN_VALUE+1, bf(Byte.MIN_VALUE+1L).byteValueExact());
   }
   
   //exception testing
@@ -674,57 +674,57 @@ public class BigFractionTest {
   
   @Test(expected=IllegalArgumentException.class)
   public void testNaN() {
-    BigFraction.valueOf(Double.NaN);
+    bf(Double.NaN);
   }
   
   @Test(expected=IllegalArgumentException.class)
   public void testPositiveInfinity() {
-    BigFraction.valueOf(Double.POSITIVE_INFINITY);
+    bf(Double.POSITIVE_INFINITY);
   }
   
   @Test(expected=IllegalArgumentException.class)
   public void testNegativeInfinity() {
-    BigFraction.valueOf(Double.NEGATIVE_INFINITY);
+    bf(Double.NEGATIVE_INFINITY);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testZeroDenominator1() {
-    BigFraction.valueOf(0,0);
+    bf(0,0);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testZeroDenominator2() {
-    BigFraction.valueOf(100.9,0.0);
+    bf(100.9,0.0);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testZeroDenominator3() {
-    BigFraction.valueOf("900/0");
+    bf("900/0");
   }
   
   @Test(expected=ArithmeticException.class)
   public void testZeroDenominator4() {
-    BigFraction.valueOf(BigFraction.valueOf(900),BigFraction.valueOf(0,488));
+    bf(bf(900),bf(0,488));
   }
   
   @Test(expected=ArithmeticException.class)
   public void testDivideZero1() {
-    BigFraction.valueOf(0).divide(BigFraction.valueOf(0));
+    bf(0).divide(bf(0));
   }
   
   @Test(expected=ArithmeticException.class)
   public void testDivideZero2() {
-    BigFraction.valueOf(10).divide(0);
+    bf(10).divide(0);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testDivideZero3() {
-    BigFraction.valueOf(90).divide(0.0);
+    bf(90).divide(0.0);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testDivideZero4() {
-    BigFraction.valueOf(16).divide(new BigDecimal("0"));
+    bf(16).divide(new BigDecimal("0"));
   }
   
   @Test(expected=ArithmeticException.class)
@@ -739,72 +739,72 @@ public class BigFractionTest {
   
   @Test(expected=ArithmeticException.class)
   public void testRoundToDenominatorZero() {
-    BigFraction.valueOf(11,17).roundToDenominator(BigInteger.ZERO);
+    bf(11,17).roundToDenominator(BigInteger.ZERO);
   }
   
   @Test(expected=ArithmeticException.class)
   public void testRoundToDenominatorNegative() {
-    BigFraction.valueOf(11,17).roundToDenominator(BigInteger.valueOf(-4));
+    bf(11,17).roundToDenominator(BigInteger.valueOf(-4));
   }
   
   @Test(expected=ArithmeticException.class)
   public void testLongValueExactOverflowPositive() {
-    BigFraction.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)).longValueExact();
+    bf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)).longValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testLongValueExactOverflowNegative() {
-    BigFraction.valueOf(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)).longValueExact();
+    bf(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)).longValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testLongValueExactFraction() {
-    BigFraction.valueOf(BigFraction.valueOf(1,2)).longValueExact();
+    bf(bf(1,2)).longValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testIntValueExactOverflowPositive() {
-    BigFraction.valueOf(Integer.MAX_VALUE + 1L).intValueExact();
+    bf(Integer.MAX_VALUE + 1L).intValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testIntValueExactOverflowNegative() {
-    BigFraction.valueOf(Integer.MIN_VALUE - 1L).intValueExact();
+    bf(Integer.MIN_VALUE - 1L).intValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testIntValueExactFraction() {
-    BigFraction.valueOf(BigFraction.valueOf(1,2)).intValueExact();
+    bf(bf(1,2)).intValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testShortValueExactOverflowPositive() {
-    BigFraction.valueOf(Short.MAX_VALUE + 1L).shortValueExact();
+    bf(Short.MAX_VALUE + 1L).shortValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testShortValueExactOverflowNegative() {
-    BigFraction.valueOf(Short.MIN_VALUE - 1L).shortValueExact();
+    bf(Short.MIN_VALUE - 1L).shortValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testShortValueExactFraction() {
-    BigFraction.valueOf(BigFraction.valueOf(1,2)).shortValueExact();
+    bf(bf(1,2)).shortValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testByteValueExactOverflowPositive() {
-    BigFraction.valueOf(Integer.MAX_VALUE + 1L).byteValueExact();
+    bf(Integer.MAX_VALUE + 1L).byteValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testByteValueExactOverflowNegative() {
-    BigFraction.valueOf(Integer.MIN_VALUE - 1L).byteValueExact();
+    bf(Integer.MIN_VALUE - 1L).byteValueExact();
   }
   
   @Test(expected=ArithmeticException.class)
   public void testByteValueExactFraction() {
-    BigFraction.valueOf(BigFraction.valueOf(1,2)).byteValueExact();
+    bf(bf(1,2)).byteValueExact();
   }
   
   /**
@@ -822,7 +822,7 @@ public class BigFractionTest {
             String halfUp, String halfDown, String halfEven, String unnecessary)
     {
       this.input = input;
-      bf = BigFraction.valueOf(input);
+      bf = bf(input);
       expected.put(RoundingMode.UP, up);
       expected.put(RoundingMode.DOWN, down);
       expected.put(RoundingMode.CEILING, ceiling);
@@ -869,7 +869,7 @@ public class BigFractionTest {
             String halfUp, String halfDown, String halfEven, String unnecessary)
     {
       this.input = input;
-      bf = BigFraction.valueOf(input);
+      bf = bf(input);
       this.denominator = BigInteger.valueOf(denominator);
       expected.put(RoundingMode.UP, up);
       expected.put(RoundingMode.DOWN, down);
@@ -916,7 +916,7 @@ public class BigFractionTest {
             String halfUp, String halfDown, String halfEven, String unnecessary)
     {
       this.input = input;
-      bf = BigFraction.valueOf(input);
+      bf = bf(input);
       this.digits = digits;
       expected.put(RoundingMode.UP, up);
       expected.put(RoundingMode.DOWN, down);
@@ -948,7 +948,7 @@ public class BigFractionTest {
   }
   
   //helper functions to save typing...
-  private BigFraction bf(Number n) { return BigFraction.valueOf(n); }
-  private BigFraction bf(Number n, Number d) { return BigFraction.valueOf(n, d); }
-  private BigFraction bf(String s) { return BigFraction.valueOf(s); }
+  private final static BigFraction bf(Number n) { return BigFraction.valueOf(n); }
+  private final static BigFraction bf(Number n, Number d) { return BigFraction.valueOf(n, d); }
+  private final static BigFraction bf(String s) { return BigFraction.valueOf(s); }
 }
