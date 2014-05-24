@@ -35,6 +35,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
   
   private static enum Reduced { YES, NO };
+  private static enum FareyMode { NEXT, PREV, CLOSEST };
   
   /**
    * Constructs a BigFraction from given number. If the number is not one of the
@@ -639,6 +640,130 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns the next fraction in the Farey sequence with denominator less than
+   * or equal to the given denominator. This is the smallest fraction that is
+   * larger than this, with a denominator less than or equal to maxDenominator.
+   * Algorithm is O(maxDenominator), and not optimized for generating entire
+   * sequence by sequentially calling this function.
+   * 
+   * @throws IllegalArgumentException if maxDenominator is non-positive.
+   */
+  public BigFraction fareyNext(int maxDenominator)
+  {
+    return fareySequence(maxDenominator, FareyMode.NEXT);
+  }
+  
+  /**
+   * Returns the previous fraction in the Farey sequence with denominator less than
+   * or equal to the given denominator. This is the largest fraction that is
+   * smaller than this, with a denominator less than or equal to maxDenominator.
+   * Algorithm is O(maxDenominator), and not optimized for generating entire
+   * sequence by sequentially calling this function.
+   * 
+   * @throws IllegalArgumentException if maxDenominator is non-positive.
+   */
+  public BigFraction fareyPrev(int maxDenominator)
+  {
+    return fareySequence(maxDenominator, FareyMode.PREV);
+  }
+  
+  /**
+   * Returns the closest fraction with denominator less than or equal to
+   * the given denominator. Algorithm is O(maxDenominator).
+   * 
+   * @throws IllegalArgumentException if maxDenominator is non-positive.
+   */
+  public BigFraction fareyClosest(int maxDenominator)
+  {
+    return fareySequence(maxDenominator, FareyMode.CLOSEST);
+  }
+  
+  /**
+   * Common private function for handling the Farey Sequence methods.
+   * 
+   * @throws IllegalArgumentException if maxDenominator is non-positive.
+   */
+  private BigFraction fareySequence(int maxDenominator, FareyMode fareyMode)
+  {
+    if(maxDenominator <= 0)
+      throw new IllegalArgumentException("maxDenominator must be positive");
+    
+    //shortcut - if we are finding closest, but we are actually already in the sequence, just return this
+    if(fareyMode == FareyMode.CLOSEST && denominator.compareTo(BigInteger.valueOf(maxDenominator)) <= 0)
+      return this;
+    
+    //shortcut - if this is a whole number, and we want next/prev, we just add or subtract 1/maxDenominator
+    if(denominator.equals(BigInteger.ONE))
+    {
+      BigInteger bigMaxDenominator = BigInteger.valueOf(maxDenominator);
+      
+      // a/1 + 1/b = ab/b + 1/b = (ab+1)/b
+      if(fareyMode == FareyMode.NEXT)
+        return new BigFraction(numerator.multiply(bigMaxDenominator).add(BigInteger.ONE), bigMaxDenominator, Reduced.YES);
+      else if(fareyMode == FareyMode.PREV)
+        return new BigFraction(numerator.multiply(bigMaxDenominator).subtract(BigInteger.ONE), bigMaxDenominator, Reduced.YES);
+    }
+    
+    //For negatives, we call negate this then call the sequence on the opposite mode, then negate the result
+    if(numerator.signum() < 0)
+    {
+      if(fareyMode == FareyMode.NEXT)
+        return this.negate().fareySequence(maxDenominator, FareyMode.PREV).negate();
+      else if(fareyMode == FareyMode.PREV)
+        return this.negate().fareySequence(maxDenominator, FareyMode.NEXT).negate();
+      else
+        return this.negate().fareySequence(maxDenominator, fareyMode).negate();
+    }
+    
+    //The algorithm needs a number between 0 and 1. If this is an improper fraction, get the sequence value for
+    //the fraction part, then add back the whole number
+    if(numerator.compareTo(denominator) > 0)
+    {
+      BigInteger[] divmod = numerator.divideAndRemainder(denominator);
+      
+      BigFraction fPartSeq = new BigFraction(divmod[1], denominator, Reduced.YES).fareySequence(maxDenominator, fareyMode);
+      
+      // n + a/b = nb/b + a/b = (nb + a)/b
+      return new BigFraction(divmod[0].multiply(fPartSeq.denominator).add(fPartSeq.numerator), fPartSeq.denominator, Reduced.YES);
+    }
+    
+    //Now... do the actual algorithm. We have lower bound a/b (initally 0/1), and upper bound c/d (initially 1/0).
+    //We repeatedly take the mediant of a/b and c/d -- that is, (a+c)/(b+d). This is guaranteed to be a fraction
+    //between a/b and c/d. Then we see which side of the mediant this is on, and set either upper bound or lower
+    //bound to the mediant, and repeat until denominator is greater than maxDenominator
+    long a=0, b=1, c=1, d=1;
+    while(b+d <= maxDenominator)
+    {
+      long med_n = a+c, med_d = b+d;
+      int cmp = BigInteger.valueOf(med_n).multiply(this.denominator).compareTo(BigInteger.valueOf(med_d).multiply(this.numerator));
+      if(cmp < 0 || (cmp == 0 && fareyMode == FareyMode.NEXT))
+      {
+        a = med_n;
+        b = med_d;
+      }
+      else
+      {
+        c = med_n;
+        d = med_d;
+      }
+    }
+    
+    if(fareyMode == FareyMode.NEXT)
+      return new BigFraction(BigInteger.valueOf(c), BigInteger.valueOf(d), Reduced.YES);
+    if(fareyMode == FareyMode.PREV)
+      return new BigFraction(BigInteger.valueOf(a), BigInteger.valueOf(b), Reduced.YES);
+    
+    //else: we need to determine whether lowerbound or upper bound is closer to this
+    BigFraction lower = new BigFraction(BigInteger.valueOf(c), BigInteger.valueOf(d), Reduced.YES);
+    BigFraction upper = new BigFraction(BigInteger.valueOf(a), BigInteger.valueOf(b), Reduced.YES);
+    
+    if(this.subtract(lower).compareTo(upper.subtract(this)) > 0)
+      return lower;
+    else
+      return upper;
+  }
+  
+  /**
    * Returns the smaller of this and f.
    */
   public BigFraction min(BigFraction f)
@@ -680,6 +805,19 @@ public final class BigFraction extends Number implements Comparable<Number>
       throw new IllegalArgumentException("Null argument");
     
     return (this.compareTo(n) >= 0 ? this : n);
+  }
+  
+  /**
+   * Returns the mediant of this and n. The mediant of a/b and c/d is
+   * (a+c)/(b+d). It is guaranteed to be between a/b and c/d. 
+   */
+  public BigFraction mediant(BigFraction f)
+  {
+    //if the two fractions are equal, we can avoid the math
+    if(this.equals(f))
+      return this;
+    
+    return new BigFraction(this.numerator.add(f.numerator), this.denominator.add(f.denominator), Reduced.NO);
   }
   
   /**

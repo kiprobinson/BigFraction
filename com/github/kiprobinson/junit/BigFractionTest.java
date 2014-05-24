@@ -206,6 +206,133 @@ public class BigFractionTest {
   
   
   @Test
+  public void testMediant() {
+    //assertTrue(false);
+    assertEquals("mediant(1/1,1/2)", bf(1,2), bf(1,1).mediant(bf(1,3)));
+    
+    //ensure that we are always reducing to lowest terms
+    assertEquals("mediant(2/2,1/2)", bf(1,2), bf(2,2).mediant(bf(1,3)));
+    
+    //things to test: zero, negative, self
+    assertEquals("mediant(3/29,7/15)", bf(5,22), bf(3,29).mediant(bf(7,15)));
+    assertEquals("mediant(29/3,15/7)", bf(22,5), bf(29,3).mediant(bf(15,7)));
+    assertEquals("mediant(-3/29,7/15)", bf(1,11), bf(-3,29).mediant(bf(7,15)));
+    assertEquals("mediant(-29/3,15/7)", bf(-7,5), bf(-29,3).mediant(bf(15,7)));
+    assertEquals("mediant(3/29,-7/15)", bf(-1,11), bf(3,29).mediant(bf(-7,15)));
+    assertEquals("mediant(29/3,-15/7)", bf(7,5), bf(29,3).mediant(bf(-15,7)));
+    assertEquals("mediant(-3/29,-7/15)", bf(-5,22), bf(-3,29).mediant(bf(-7,15)));
+    assertEquals("mediant(-29/3,-15/7)", bf(-22,5), bf(-29,3).mediant(bf(-15,7)));
+    
+    assertEquals("mediant(19/81,19/81)", bf(19,81), bf(19,81).mediant(bf(19,81)));
+    assertEquals("mediant(-19/81,19/81)", bf(0), bf(-19,81).mediant(bf(19,81)));
+    assertEquals("mediant(19/81,-19/81)", bf(0), bf(19,81).mediant(bf(-19,81)));
+    assertEquals("mediant(-19/81,-19/81)", bf(-19,81), bf(-19,81).mediant(bf(-19,81)));
+    
+    assertEquals("mediant(0,81/19)", bf(81,20), bf(0).mediant(bf(81,19)));
+    assertEquals("mediant(0,-81/19)", bf(-81,20), bf(0).mediant(bf(-81,19)));
+    assertEquals("mediant(0,0)", bf(0), bf(0).mediant(bf(0)));
+  }
+  
+  
+  @Test
+  public void testFareyPrevNext() {
+    final int MAX_VAL = 3;
+    final int MAX_DEN = 20;
+    
+    //Create a set of all fractions from -MAX_VAL to +MAX_VAL, with denominator <= MAX_DEN.
+    //There will be a lot of repetition but reducing to lowest terms should make HashSet
+    //see them as equivalent
+    Set<BigFraction> fareySet = new HashSet<BigFraction>();
+    for(long d = 1; d <= MAX_DEN; d++) {
+      for(long n = 0; n <= MAX_VAL*d; n++) {
+        fareySet.add(bf(n, d));
+        fareySet.add(bf(-n, d));
+      }
+    }
+    
+    //sort the sequence
+    List<BigFraction> fareySeq = new ArrayList<BigFraction>(fareySet);
+    Collections.sort(fareySeq);
+    
+    BigFraction last = bf(-MAX_VAL*MAX_DEN-1, MAX_DEN);
+    for(BigFraction expected : fareySeq){
+      BigFraction actual = last.fareyNext(MAX_DEN);
+      assertEquals("(" + last.toString() + ").fareyNext(" + MAX_DEN + ")", expected.toString(), actual.toString());
+      last = actual;
+    }
+    
+    //now try in reverse to test fareyPrev
+    Collections.reverse(fareySeq);
+    last = bf(MAX_VAL*MAX_DEN+1, MAX_DEN);
+    for(BigFraction expected : fareySeq){
+      BigFraction actual = last.fareyPrev(MAX_DEN);
+      assertEquals("(" + last.toString() + ").fareyPrev(" + MAX_DEN + ")", expected.toString(), actual.toString());
+      last = actual;
+    }
+    
+  }
+  
+  
+  @Test
+  public void testFareyClosest() {
+    BigFraction bfPi = bf(Math.PI);
+    BigFraction bfNegPi = bfPi.negate();
+    
+    //Test fareyClosest() by using rational approximations of pi with denominator less than 300.
+    //Found these here: http://www.isi.edu/~johnh/BLOG/1999/0728_RATIONAL_PI/
+    Map<Integer,String> rationalPi= new HashMap<Integer,String>();
+    rationalPi.put(1, "3/1");
+    rationalPi.put(4, "13/4");
+    rationalPi.put(5, "16/5");
+    rationalPi.put(6, "19/6");
+    rationalPi.put(7, "22/7");
+    rationalPi.put(57, "179/57");
+    rationalPi.put(64, "201/64");
+    rationalPi.put(71, "223/71");
+    rationalPi.put(78, "245/78");
+    rationalPi.put(85, "267/85");
+    rationalPi.put(92, "289/92");
+    rationalPi.put(99, "311/99");
+    rationalPi.put(106, "333/106");
+    rationalPi.put(113, "355/113");
+    
+    String expected = null;
+    for(int i = 1; i < 300; i++) {
+      if(rationalPi.containsKey(i))
+        expected = rationalPi.get(i);
+      assertEquals("PI.FareyClosest(" + i + ")", expected, bfPi.fareyClosest(i).toString());
+      assertEquals("(-PI).FareyClosest(" + i + ")", "-" + expected, bfNegPi.fareyClosest(i).toString());
+    }
+    
+    //also test with approximations of e
+    BigFraction bfE = bf(Math.E);
+    BigFraction bfNegE = bfE.negate();
+    
+    Map<Integer,String> rationalE= new HashMap<Integer,String>();
+    rationalE.put(1, "3/1");
+    rationalE.put(2, "5/2");
+    rationalE.put(3, "8/3");
+    rationalE.put(4, "11/4");
+    rationalE.put(7, "19/7");
+    rationalE.put(18, "49/18");
+    rationalE.put(25, "68/25");
+    rationalE.put(32, "87/32");
+    rationalE.put(39, "106/39");
+    rationalE.put(71, "193/71");
+    rationalE.put(252, "685/252");
+    
+    expected = null;
+    for(int i = 1; i < 300; i++) {
+      if(rationalE.containsKey(i))
+        expected = rationalE.get(i);
+      assertEquals("e.FareyClosest(" + i + ")", expected, bfE.fareyClosest(i).toString());
+      assertEquals("(-e).FareyClosest(" + i + ")", "-" + expected, bfNegE.fareyClosest(i).toString());
+    }
+    
+  }
+  
+  
+  @Test
   public void testToMixedString() {
     assertEquals("4/3 == 1 1/3", "1 1/3", BigFraction.valueOf("4/3").toMixedString());
     assertEquals("-4/3 == -1 1/3", "-1 1/3", BigFraction.valueOf("-4/3").toMixedString());
@@ -819,4 +946,9 @@ public class BigFractionTest {
       assertEquals("round(" + input + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toDecimalString(digits).toString());
     }
   }
+  
+  //helper functions to save typing...
+  private BigFraction bf(Number n) { return BigFraction.valueOf(n); }
+  private BigFraction bf(Number n, Number d) { return BigFraction.valueOf(n, d); }
+  private BigFraction bf(String s) { return BigFraction.valueOf(s); }
 }
