@@ -184,6 +184,31 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns n - this. Sometimes this results in cleaner code than
+   * rearranging the code to use subtract().
+   */
+  public BigFraction subtractFrom(Number n)
+  {
+    if(n == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    if(isInt(n))
+    {
+      //n1 - n2/d2 = (d2*n1 - n2)/d2
+      return new BigFraction(denominator.multiply(toBigInteger(n)).subtract(numerator),
+                             denominator, Reduced.YES);
+    }
+    else
+    {
+      BigFraction f = valueOf(n);
+      
+      //n1/d1 - n2/d2 = (n1*d2 - d1*n2)/(d1*d2)
+      return new BigFraction(f.numerator.multiply(denominator).subtract(f.denominator.multiply(numerator)),
+                             f.denominator.multiply(denominator), Reduced.NO);
+    }
+  }
+  
+  /**
    * Returns this * n.
    */
   public BigFraction multiply(Number n)
@@ -214,6 +239,26 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
     return new BigFraction(numerator.multiply(f.denominator), denominator.multiply(f.numerator), Reduced.NO);
+  }
+  
+  /**
+   * Returns n / this. Sometimes this results in cleaner code than
+   * rearranging the code to use divide().
+   * 
+   * @throws ArithemeticException if this == 0.
+   */
+  public BigFraction divideInto(Number n)
+  {
+    if(n == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    if(numerator.equals(BigInteger.ZERO))
+      throw new ArithmeticException("Divide by zero");
+    
+    BigFraction f = valueOf(n);
+    
+    //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
+    return new BigFraction(f.numerator.multiply(denominator), f.denominator.multiply(numerator), Reduced.NO);
   }
   
   /**
@@ -809,7 +854,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns the mediant of this and n. The mediant of a/b and c/d is
-   * (a+c)/(b+d). It is guaranteed to be between a/b and c/d. 
+   * (a+c)/(b+d). It is guaranteed to be between a/b and c/d. Not to
+   * be confused with the median!
    */
   public BigFraction mediant(BigFraction f)
   {

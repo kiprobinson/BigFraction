@@ -87,6 +87,16 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testSubtractFrom() {
+    assertEquals("-3/1 - 5/1", "-8/1", bf(5).subtractFrom(-3).toString());
+    assertEquals("2/1 - -5/1", "7/1", bf(-5).subtractFrom(2).toString());
+    assertEquals("-2/1 - -5/1", "3/1", bf(-5).subtractFrom(-2).toString());
+    assertEquals("2/3 - 11/17", "1/51", bf("11/17").subtractFrom(bf("2/3")).toString());
+    assertEquals("1/6 - 1/6", "0/1", bf("1/6").subtractFrom(bf("1/6")).toString());
+    assertEquals("1/6 - -1/6", "1/3", bf("-1/6").subtractFrom(bf("1/6")).toString());
+  }
+  
+  @Test
   public void testMultiply() {
     assertEquals("(11/17)(0/1)", "0/1", bf("11/17").multiply(-0.0).toString());
     assertEquals("(1/3)(3/4)", "1/4", bf("1/3").multiply(bf("3/4")).toString());
@@ -101,6 +111,14 @@ public class BigFractionTest {
     assertEquals("(-1/12)/(5/16)", "-4/15", bf("-1/12").divide(bf("5/16")).toString());
     assertEquals("(-7/6)/(-9/5)", "35/54", bf("-7/6").divide(bf("9/-5")).toString());
     assertEquals("(4/5)/(-2/7)", "-14/5", bf("4/5").divide(bf("-2/7")).toString());
+  }
+  
+  @Test
+  public void testDivideInto() {
+    assertEquals("(4/3)/(1/3)", "4/1", bf("1/3").divideInto(bf("4/3")).toString());
+    assertEquals("(5/16)/(-1/12)", "-15/4", bf("-1/12").divideInto(bf("5/16")).toString());
+    assertEquals("(-9/5)/(-7/6)", "54/35", bf("-7/6").divideInto(bf("9/-5")).toString());
+    assertEquals("(-2/7)/(4/5)", "-5/14", bf("4/5").divideInto(bf("-2/7")).toString());
   }
   
   @Test
