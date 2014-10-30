@@ -511,7 +511,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(newDenominator.compareTo(BigInteger.ZERO) <= 0)
       throw new ArithmeticException("newDenominator must be positive");
     
-    //n1/d1 = x/d2  =>   x = n1*d1/d2
+    //n1/d1 = x/d2  =>   x = (n1/d1)*d2
     return this.multiply(newDenominator).round(roundingMode);
   }
   
@@ -655,12 +655,15 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns a negative, zero, or positive number, indicating if this object
-   * is less than, equal to, or greater than f, respectively.
+   * is less than, equal to, or greater than n, respectively.
    */
-  public int compareTo(BigFraction f)
+  @Override
+  public int compareTo(Number n)
   {
-    if(f == null)
+    if(n == null)
       throw new IllegalArgumentException("Null argument");
+    
+    BigFraction f = valueOf(n);
     
     //easy case: this and f have different signs
     if(signum() != f.signum())
@@ -672,16 +675,6 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //not an easy case, so first make the denominators equal then compare the numerators 
     return numerator.multiply(f.denominator).compareTo(denominator.multiply(f.numerator));
-  }
-  
-  /**
-   * Returns a negative, zero, or positive number, indicating if this object
-   * is less than, equal to, or greater than n, respectively.
-   */
-  @Override
-  public int compareTo(Number n)
-  {
-    return compareTo(valueOf(n));
   }
   
   /**
@@ -809,17 +802,6 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns the smaller of this and f.
-   */
-  public BigFraction min(BigFraction f)
-  {
-    if(f == null)
-      throw new IllegalArgumentException("Null argument");
-    
-    return (this.compareTo(f) <= 0 ? this : f);
-  }
-  
-  /**
    * Returns the smaller of this and n.
    */
   public Number min(Number n)
@@ -828,17 +810,6 @@ public final class BigFraction extends Number implements Comparable<Number>
       throw new IllegalArgumentException("Null argument");
     
     return (this.compareTo(n) <= 0 ? this : n);
-  }
-  
-  /**
-   * Returns the maximum of this and f.
-   */
-  public BigFraction max(BigFraction f)
-  {
-    if(f == null)
-      throw new IllegalArgumentException("Null argument");
-    
-    return (this.compareTo(f) >= 0 ? this : f);
   }
   
   /**
