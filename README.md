@@ -3,6 +3,10 @@ BigFraction
 
 Java class that represents a fraction as a ratio of two BigIntegers, reduced to lowest terms. Originally created for use Project Euler problems.
 
+###Support for Older Java Versions
+
+Switch to the java7 branch for a version of this library that compiles in Java7. I think it will also compile in Java 5-6. Master branch will keep up to date with latest Java version.
+
 ###Creating BigFractions
 
 Constructors are protected. Create new BigFractions using `valueOf(Number numerator)`, `valueOf(Number numerator, Number denominator)`, or `valueOf(String)`:
@@ -57,7 +61,7 @@ A few exceptions:
     BigFraction.valueOf(Double.POSITIVE_INFINITY); //IllegalArgumentException
     BigFraction.valueOf(Double.NaN); //IllegalArgumentException
 
-### Mathematical operations
+### Mathematical Operations
 
     BigFraction a = BigFraction.valueOf(1,2);
     BigFraction b = BigFraction.valueOf(3,4);
