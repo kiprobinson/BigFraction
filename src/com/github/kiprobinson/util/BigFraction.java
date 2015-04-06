@@ -1058,7 +1058,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     //One test: if denominator.bitLength() != 1, then this cannot be represented exactly
     
     double doubleVal = this.doubleValue();
-    if(Double.isFinite(doubleVal)) {
+    if(!Double.isInfinite(doubleVal) && !Double.isNaN(doubleVal)) {
       BigFraction copy = valueOfHelper(doubleVal);
       if(this.equals(copy))
         return doubleVal;
@@ -1093,7 +1093,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     //then make sure the copy of copy is identical to the original.
     
     float floatVal = this.floatValue();
-    if(Float.isFinite(floatVal)) {
+    if(!Float.isInfinite(floatVal) && !Float.isNaN(floatVal)) {
       BigFraction copy = valueOfHelper(floatVal);
       if(this.equals(copy))
         return floatVal;
