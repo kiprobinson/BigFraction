@@ -4,6 +4,10 @@ import java.math.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.DoubleAccumulator;
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.concurrent.atomic.LongAccumulator;
+import java.util.concurrent.atomic.LongAdder;
 
 /**
  * Arbitrary-precision fraction, utilizing BigIntegers for numerator and
@@ -16,7 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class BigFraction extends Number implements Comparable<Number>
 {
-  private static final long serialVersionUID = 2L; //because Number is Serializable
+  private static final long serialVersionUID = 3L; //because Number is Serializable
   private final BigInteger numerator;
   private final BigInteger denominator;
   
@@ -1345,7 +1349,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(n instanceof BigInteger)
       return (BigInteger)n;
     
-    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong)
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
       return BigInteger.valueOf(n.longValue());
     
     if(n instanceof BigFraction)
@@ -1383,23 +1387,23 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns true if the given type can be converted to a BigInteger without loss
    * of precision. Returns true for the primitive integer types (Long, Integer, Short,
-   * Byte, AtomicInteger, AtomicLong, or BigInteger).
+   * Byte, AtomicInteger, AtomicLong, LongAdder, LongAccumulator, or BigInteger).
    * 
    * For BigFraction, returns true if denominator is 1.
    * 
-   * For double, float, and BigDecimal, analyzes the data. Otherwise returns false.
+   * For double, float, DoubleAdder, DoubleAccumulator, and BigDecimal, analyzes the data. Otherwise returns false.
    * 
    * Used to determine if a Number is appropriate to be passed into toBigInteger() method.
    */
   private static boolean isInt(Number n)
   {
-    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof BigInteger || n instanceof AtomicInteger || n instanceof AtomicLong)
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof BigInteger || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
       return true;
     
     if(n instanceof BigFraction)
       return ((BigFraction)n).denominator.equals(BigInteger.ONE);
     
-    if(n instanceof Double || n instanceof Float)
+    if(n instanceof Double || n instanceof Float || n instanceof DoubleAdder || n instanceof DoubleAccumulator)
     {
       final double d = n.doubleValue();
       if(d == 0.0)
@@ -1423,10 +1427,10 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns true if n is a floating-point primitive type (Double or Float).
+   * Returns true if n is a type that can be converted to a double without loss of precision (Float, Double, DoubleAdder, and DoubleAccumulator)
    */
   private static boolean isFloat(Number n)
   {
-    return n instanceof Double || n instanceof Float;
+    return n instanceof Double || n instanceof Float || n instanceof DoubleAdder || n instanceof DoubleAccumulator;
   }
 }
