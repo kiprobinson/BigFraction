@@ -1043,9 +1043,32 @@ public final class BigFraction extends Number implements Comparable<Number>
   @Override
   public double doubleValue()
   {
+    //TODO: UNOPTIMIZED! Currently converting to BigDecimal then converting that to double.
+    
     //note: must use precision+2 so that  new BigFraction(d).doubleValue() == d,
     //      for all possible double values.
     return toBigDecimal(MathContext.DECIMAL64.getPrecision() + 2).doubleValue();
+  }
+  
+  /**
+   * Returns an exact double representation of this fraction.
+   * 
+   * @throws ArithmeticException if this cannot be represented exactly as a double.
+   */
+  public double doubleValueExact()
+  {
+    //TODO: UNOPTIMIZED! Algorithm is simply to convert to double, then convert back to BigFraction,
+    //then make sure the copy of copy is identical to the original.
+    //One test: if denominator.bitLength() != 1, then this cannot be represented exactly
+    
+    double doubleVal = this.doubleValue();
+    if(Double.isFinite(doubleVal)) {
+      BigFraction copy = valueOfHelper(doubleVal);
+      if(this.equals(copy))
+        return doubleVal;
+    }
+    
+    throw new ArithmeticException("Value does not have an exact double representation");
   }
   
   /**
@@ -1056,9 +1079,31 @@ public final class BigFraction extends Number implements Comparable<Number>
   @Override
   public float floatValue()
   {
+    //TODO: UNOPTIMIZED! Currently converting to BigDecimal then converting that to float.
+    
     //note: must use precision+2 so that  new BigFraction(f).floatValue() == f,
     //      for all possible float values.
     return toBigDecimal(MathContext.DECIMAL32.getPrecision() + 2).floatValue(); 
+  }
+  
+  /**
+   * Returns an exact float representation of this fraction.
+   * 
+   * @throws ArithmeticException if this cannot be represented exactly as a float.
+   */
+  public float floatValueExact()
+  {
+    //TODO: UNOPTIMIZED! Algorithm is simply to convert to float, then convert back to BigFraction,
+    //then make sure the copy of copy is identical to the original.
+    
+    float floatVal = this.floatValue();
+    if(Float.isFinite(floatVal)) {
+      BigFraction copy = valueOfHelper(floatVal);
+      if(this.equals(copy))
+        return floatVal;
+    }
+    
+    throw new ArithmeticException("Value does not have an exact float representation");
   }
   
   

@@ -576,6 +576,9 @@ public class BigFractionTest {
   
   @Test
   public void testDoubleValue() {
+    //test strategy here: split up all possible double values into NUM_TESTS tests, roughly evenly
+    //distributed. Then check that converting from double to BigFraction and back to double returns
+    //exactly equivalent result.
     final long MIN = Double.doubleToRawLongBits(Double.MIN_VALUE);
     final long MAX = Double.doubleToRawLongBits(Double.MAX_VALUE);
     
@@ -588,12 +591,22 @@ public class BigFractionTest {
     for(long i = MIN; i <= MAX && i > 0; i+= DELTA)
     {
       double in = Double.longBitsToDouble(i);
-      double out = bf(in).doubleValue();
+      BigFraction f = bf(in);
+      double out = f.doubleValue();
       assertEquals("failed to get back the same double we put in for raw bits: " + i, in, out, 0.0);
       
+      //this should not throw exception, because we started with an exact double.
+      double exactOut = f.doubleValueExact();
+      assertEquals("failed to get back the same double we put in, using doubleValueExact(), for raw bits: " + i, in, exactOut, 0.0);
+      
       //make sure we get same behavior with negative value
-      double negOut = bf(-in).doubleValue();
+      BigFraction negF = bf(-in);
+      double negOut = negF.doubleValue();
       assertEquals("failed to get back the same double we put in with negative value for raw bits: " + i, -in, negOut, 0.0);
+      
+      //this should not throw exception, because we started with an exact double.
+      double negExactOut = f.doubleValueExact();
+      assertEquals("failed to get back the same double we put in with negative value, using doubleValueExact(), for raw bits: " + i, in, negExactOut, 0.0);
       
       //make sure we also test with the max value on the last iteration
       if(i < MAX && (i + DELTA > MAX || i + DELTA < 0))
@@ -603,6 +616,9 @@ public class BigFractionTest {
   
   @Test
   public void testFloatValue() {
+    //test strategy here: split up all possible float values into NUM_TESTS tests, roughly evenly
+    //distributed. Then check that converting from float to BigFraction and back to float returns
+    //exactly equivalent result.
     final long MIN = Float.floatToRawIntBits(Float.MIN_VALUE);
     final long MAX = Float.floatToRawIntBits(Float.MAX_VALUE);
     
@@ -614,12 +630,22 @@ public class BigFractionTest {
     for(long i = MIN; i <= MAX; i+= DELTA)
     {
       float in = Float.intBitsToFloat((int)i);
-      float out = bf(in).floatValue();
+      BigFraction f = bf(in);
+      float out = f.floatValue();
       assertEquals("failed to get back the same float we put in for raw bits: " + i, in, out, 0.0f);
       
+      //this should not throw exception, because we started with an exact float.
+      float exactOut = f.floatValueExact();
+      assertEquals("failed to get back the same float we put in, using floatValueExact(), for raw bits: " + i, in, exactOut, 0.0);
+      
       //make sure we get same behavior with negative value
-      float negOut = bf(-in).floatValue();
+      BigFraction negF = bf(-in);
+      float negOut = negF.floatValue();
       assertEquals("failed to get back the same float we put in with negative value for raw bits: " + i, -in, negOut, 0.0f);
+      
+      //this should not throw exception, because we started with an exact float.
+      float negExactOut = f.floatValueExact();
+      assertEquals("failed to get back the same float we put in with negative value, using floatValueExact(), for raw bits: " + i, in, negExactOut, 0.0);
       
       //make sure we also test with the max value on the last iteration
       if(i < MAX && i + DELTA > MAX)
