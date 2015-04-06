@@ -39,7 +39,7 @@ public class BigFractionTest {
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(10), 0)).toString());
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(1), -1)).toString());
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(100), 1)).toString());
-
+    
     assertEquals("123000/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(123), -3)).toString());
     assertEquals("12300/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(123), -2)).toString());
     assertEquals("1230/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(123), -1)).toString());
@@ -62,6 +62,14 @@ public class BigFractionTest {
     
     assertEquals("-2/9", BigFraction.valueOf(0.5, -2.25).toString());
     assertEquals("-2/9", BigFraction.valueOf(-2.0, 9.0).toString());
+  }
+  
+  @Test
+  public void testValueOf_CustomNumberInterface() {
+    assertEquals("Custom Number representing an integer", "123456/1", bf(new CustomNumber(123456.0)).toString());
+    assertEquals("Custom Number representing a floating-point number", "987653/8", bf(new CustomNumber(123456.625)).toString());
+    assertEquals("Custom Number representing a negative number", "-1/8", bf(new CustomNumber(-0.125)).toString());
+    assertEquals("Custom Number representing zero", "0/1", bf(new CustomNumber(0)).toString());
   }
   
   
@@ -705,6 +713,21 @@ public class BigFractionTest {
     bf(Double.NEGATIVE_INFINITY);
   }
   
+  @Test(expected=IllegalArgumentException.class)
+  public void testNaN_CustomNumber() {
+    bf(new CustomNumber(Double.NaN));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testPositiveInfinity_CustomNumber() {
+    bf(new CustomNumber(Double.POSITIVE_INFINITY));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testNegativeInfinity_CustomNumber() {
+    bf(new CustomNumber(Double.NEGATIVE_INFINITY));
+  }
+  
   @Test(expected=ArithmeticException.class)
   public void testZeroDenominator1() {
     bf(0,0);
@@ -963,6 +986,30 @@ public class BigFractionTest {
       //test that default rounding mode is the same as HALF_UP
       assertEquals("round(" + input + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toDecimalString(digits).toString());
     }
+  }
+  
+  /**
+   * Custom implementation of Number class. Used in test to ensure that BigFraction.valueOf() falls back to doubleValue() if it
+   * doesn't recognize the type. Returns hard-coded values for every getter except doubleValue().
+   */
+  private static class CustomNumber extends Number {
+    
+    private static final long serialVersionUID = 1L;
+    private final double doubleVal;
+    CustomNumber(double doubleVal) { this.doubleVal = doubleVal; }
+    
+    @Override
+    public int intValue() { return 98; }
+    
+    @Override
+    public long longValue() { return 865; }
+    
+    @Override
+    public float floatValue() { return 1437.625f; }
+    
+    @Override
+    public double doubleValue() { return doubleVal; }
+    
   }
   
   //helper functions to save typing...
