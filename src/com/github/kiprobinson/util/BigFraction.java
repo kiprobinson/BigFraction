@@ -164,6 +164,15 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns a + b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).add(b).
+   * Provided as static method to make code easier to write in some instances.
+   */
+  public static BigFraction sum(Number a, Number b)
+  {
+    return valueOf(a).add(b);
+  }
+  
+  /**
    * Returns this - n.
    */
   public BigFraction subtract(Number n)
@@ -213,6 +222,15 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns a - b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).subtract(b).
+   * Provided as static method to make code easier to write in some instances.
+   */
+  public static BigFraction difference(Number a, Number b)
+  {
+    return valueOf(a).subtract(b);
+  }
+  
+  /**
    * Returns this * n.
    */
   public BigFraction multiply(Number n)
@@ -224,6 +242,15 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //(n1/d1)*(n2/d2) = (n1*n2)/(d1*d2)
     return new BigFraction(numerator.multiply(f.numerator), denominator.multiply(f.denominator), Reduced.NO);
+  }
+  
+  /**
+   * Returns a * b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).multiply(b).
+   * Provided as static method to make code easier to write in some instances.
+   */
+  public static BigFraction product(Number a, Number b)
+  {
+    return valueOf(a).multiply(b);
   }
   
   /**
@@ -263,6 +290,16 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
     return new BigFraction(f.numerator.multiply(denominator), f.denominator.multiply(numerator), Reduced.NO);
+  }
+  
+  /**
+   * Returns a / b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).divide(b).
+   * Provided as static method to make code easier to write in some instances.
+   */
+  public static BigFraction quotient(Number a, Number b)
+  {
+    //Note: a/b is the same thing as constructing a new fraction from a and b.
+    return valueOf(a, b);
   }
   
   /**
@@ -1127,11 +1164,10 @@ public final class BigFraction extends Number implements Comparable<Number>
       return BigFraction.ZERO;
     
     //Per IEEE spec...
-    final long bits = Double.doubleToLongBits(d);
-    final int sign = (int)(bits >> 63) & 0x1;
-    final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
-    final long mantissa = bits & 0xfffffffffffffL;
-    final boolean isSubnormal = (exponent == -0x3ff);
+    final int sign = DoubleUtil.getSign(d);
+    final int exponent = DoubleUtil.getExponent(d);
+    final long mantissa = DoubleUtil.getMantissa(d);
+    final boolean isSubnormal = DoubleUtil.isSubnormal(d);
     
     //Number is: (-1)^sign * 2^(exponent) * 1.mantissa
     //Neglecting sign bit, this gives:
@@ -1409,10 +1445,9 @@ public final class BigFraction extends Number implements Comparable<Number>
       
       //This is similar to valueOfHelper(double), except we know that the exponent is greater than 52. See the comments
       //in valueOfHelper(double) for much more detailed information
-      final long bits = Double.doubleToRawLongBits(d);
-      final int sign = (int)(bits >> 63) & 0x1;
-      final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
-      final long mantissa = bits & 0xfffffffffffffL;
+      final int sign = DoubleUtil.getSign(d);
+      final int exponent = DoubleUtil.getExponent(d);
+      final long mantissa = DoubleUtil.getMantissa(d);
       
       BigInteger ret = BigInteger.valueOf(0x10000000000000L + mantissa).shiftLeft(exponent - 52);
       return sign == 0 ? ret : ret.negate();
@@ -1457,10 +1492,7 @@ public final class BigFraction extends Number implements Comparable<Number>
       if(Double.isInfinite(d) || Double.isNaN(d))
         return false;
       
-      final long bits = Double.doubleToRawLongBits(d);
-      final int exponent = ((int)(bits >> 52) & 0x7ff) - 0x3ff;
-      
-      return (exponent >= 52);
+      return (DoubleUtil.getExponent(d) >= 52);
     }
     
     //BigDecimal format: unscaled / 10^scale

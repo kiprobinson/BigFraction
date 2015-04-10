@@ -85,6 +85,13 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testSum() {
+    assertEquals("2/1", BigFraction.sum(5, -3).toString());
+    assertEquals("13/4", BigFraction.sum(6.5, -3.25f).toString());
+    assertEquals("9937/100", BigFraction.sum(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
+  }
+  
+  @Test
   public void testSubtract() {
     assertEquals("5/1 - -3/1", "8/1", bf(5).subtract(-3).toString());
     assertEquals("-5/1 - 2/1", "-7/1", bf(-5).subtract(2).toString());
@@ -105,12 +112,26 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testDifference() {
+    assertEquals("8/1", BigFraction.difference(5, -3).toString());
+    assertEquals("39/4", BigFraction.difference(6.5, -3.25f).toString());
+    assertEquals("3263/100", BigFraction.difference(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
+  }
+  
+  @Test
   public void testMultiply() {
     assertEquals("(11/17)(0/1)", "0/1", bf("11/17").multiply(-0.0).toString());
     assertEquals("(1/3)(3/4)", "1/4", bf("1/3").multiply(bf("3/4")).toString());
     assertEquals("(-1/12)(16/5)", "-4/15", bf("-1/12").multiply(bf("16/5")).toString());
     assertEquals("(-7/6)(-5/9)", "35/54", bf("-7/6").multiply(bf("-5/9")).toString());
     assertEquals("(4/5)(-7/2)", "-14/5", bf("4/5").multiply(bf("7/-2")).toString());
+  }
+  
+  @Test
+  public void testProduct() {
+    assertEquals("-15/1", BigFraction.product(5, -3).toString());
+    assertEquals("-169/8", BigFraction.product(6.5, -3.25f).toString());
+    assertEquals("110121/50", BigFraction.product(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
   }
   
   @Test
@@ -127,6 +148,13 @@ public class BigFractionTest {
     assertEquals("(5/16)/(-1/12)", "-15/4", bf("-1/12").divideInto(bf("5/16")).toString());
     assertEquals("(-9/5)/(-7/6)", "54/35", bf("-7/6").divideInto(bf("9/-5")).toString());
     assertEquals("(-2/7)/(4/5)", "-5/14", bf("4/5").divideInto(bf("-2/7")).toString());
+  }
+  
+  @Test
+  public void testQuotient() {
+    assertEquals("-5/3", BigFraction.quotient(5, -3).toString());
+    assertEquals("-2/1", BigFraction.quotient(6.5, -3.25f).toString());
+    assertEquals("6600/3337", BigFraction.quotient(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
   }
   
   @Test
@@ -795,6 +823,21 @@ public class BigFractionTest {
   }
   
   @Test(expected=ArithmeticException.class)
+  public void testDivideZero5() {
+    BigFraction.quotient(1, new BigDecimal("0"));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideZero6() {
+    BigFraction.quotient(1, -0.0);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideZero7() {
+    BigFraction.quotient(1, bf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
   public void testZeroReciprocal() {
     BigFraction.ZERO.reciprocal();
   }
@@ -1022,7 +1065,7 @@ public class BigFractionTest {
     
     private static final long serialVersionUID = 1L;
     private final double doubleVal;
-    CustomNumber(double doubleVal) { this.doubleVal = doubleVal; }
+    public CustomNumber(double doubleVal) { this.doubleVal = doubleVal; }
     
     @Override
     public int intValue() { return 98; }
