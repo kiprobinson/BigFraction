@@ -62,6 +62,18 @@ public class BigFractionTest {
     
     assertEquals("-2/9", BigFraction.valueOf(0.5, -2.25).toString());
     assertEquals("-2/9", BigFraction.valueOf(-2.0, 9.0).toString());
+    
+    //per spec, Double.MIN_VALUE == 2^(-1074)
+    assertEquals("1/" + BigInteger.valueOf(2).pow(1074), BigFraction.valueOf(Double.MIN_VALUE).toString());
+    assertEquals("-1/" + BigInteger.valueOf(2).pow(1074), BigFraction.valueOf(-Double.MIN_VALUE).toString());
+    
+    //per spec, Double.MIN_VALUE == 2^(-1022)
+    assertEquals("1/" + BigInteger.valueOf(2).pow(1022), BigFraction.valueOf(Double.MIN_NORMAL).toString());
+    assertEquals("-1/" + BigInteger.valueOf(2).pow(1022), BigFraction.valueOf(-Double.MIN_NORMAL).toString());
+    
+    //per spec, Double.MAX_VALUE == (2-2^(-52))·2^(1023) == 2^(1024) - 2^(971)
+    assertEquals(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)).toString() + "/1", BigFraction.valueOf(Double.MAX_VALUE).toString());
+    assertEquals(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)).negate().toString() + "/1", BigFraction.valueOf(-Double.MAX_VALUE).toString());
   }
   
   @Test
