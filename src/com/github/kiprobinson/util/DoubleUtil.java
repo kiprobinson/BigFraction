@@ -71,7 +71,48 @@ public final class DoubleUtil
   public static boolean isSubnormal(double d)
   {
     long bits = Double.doubleToRawLongBits(d);
-    return ((bits & 0x7ff0000000000000L) == 0) && ((bits & MANTISSA_MASK) != 0);
+    return ((bits & EXPONENT_MASK) == 0) && ((bits & MANTISSA_MASK) != 0);
+  }
+  
+  
+  /**
+   * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
+   * 
+   * @returns array with four elements:
+   *     return[0]: Equivalent to getSign(d)
+   *     return[1]: Equivalent to getExponent(d)
+   *     return[2]: Equivalent to getMantissa(d)
+   *     return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.
+   */
+  public static long[] getAllParts(double d)
+  {
+    return getAllParts(d, false);
+  }
+  
+  /**
+   * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
+   * 
+   * @returns array with four elements:
+   *     return[0]: Equivalent to getSign(d)
+   *     return[1]: Equivalent to (exponentAsBits ? getExponentBits(d) : getExponent(d))
+   *     return[2]: Equivalent to getMantissa(d)
+   *     return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.
+   */
+  public static long[] getAllParts(double d, boolean exponentAsBits)
+  {
+    long[] segments = new long[4];
+    long bits = Double.doubleToRawLongBits(d);
+    
+    segments[0] = (bits & SIGN_MASK) >>> SIGN_POS;
+    segments[1] = (bits & EXPONENT_MASK) >>> EXPONENT_POS;
+    segments[2] = bits & MANTISSA_MASK;
+    segments[3] = (segments[1] == 0L && segments[2] != 0L ? 1L : 0L);
+    
+    
+    if(!exponentAsBits)
+      segments[1] -= EXPONENT_OFFSET;
+    
+    return segments;
   }
   
   /**

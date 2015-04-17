@@ -127,5 +127,18 @@ public class DoubleUtilTest {
     
     double tmp2 = DoubleUtil.getDouble(sign, exponentBits, mantissa, true);
     assertEquals("getDouble(" + val + ") - with exponent as bits", Double.doubleToRawLongBits(val), Double.doubleToRawLongBits(tmp2));
+    
+    long[] parts = DoubleUtil.getAllParts(val, false);
+    assertEquals("getAllParts(" + val + ") - signed exponent - sign", sign, parts[0]);
+    assertEquals("getAllParts(" + val + ") - signed exponent - exponent", exponent, parts[1]);
+    assertEquals("getAllParts(" + val + ") - signed exponent - mantissa", mantissa, parts[2]);
+    assertEquals("getAllParts(" + val + ") - signed exponent - isSubnormal - " + parts[3], isSubnormal, (parts[3] != 0L));
+    
+    parts = DoubleUtil.getAllParts(val, true);
+    assertEquals("getAllParts(" + val + ") - unsigned exponent - sign", sign, parts[0]);
+    assertEquals("getAllParts(" + val + ") - unsigned exponent - exponent", exponentBits, parts[1]);
+    assertEquals("getAllParts(" + val + ") - unsigned exponent - mantissa", mantissa, parts[2]);
+    assertEquals("getAllParts(" + val + ") - unsigned exponent - isSubnormal", isSubnormal, (parts[3] != 0L));
+    
   }
 }
