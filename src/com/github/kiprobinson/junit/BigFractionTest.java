@@ -67,13 +67,27 @@ public class BigFractionTest {
     assertEquals("1/" + BigInteger.valueOf(2).pow(1074), BigFraction.valueOf(Double.MIN_VALUE).toString());
     assertEquals("-1/" + BigInteger.valueOf(2).pow(1074), BigFraction.valueOf(-Double.MIN_VALUE).toString());
     
-    //per spec, Double.MIN_VALUE == 2^(-1022)
+    //per spec, Double.MIN_NORMAL == 2^(-1022)
     assertEquals("1/" + BigInteger.valueOf(2).pow(1022), BigFraction.valueOf(Double.MIN_NORMAL).toString());
     assertEquals("-1/" + BigInteger.valueOf(2).pow(1022), BigFraction.valueOf(-Double.MIN_NORMAL).toString());
     
     //per spec, Double.MAX_VALUE == (2-2^(-52))�2^(1023) == 2^(1024) - 2^(971)
     assertEquals(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)).toString() + "/1", BigFraction.valueOf(Double.MAX_VALUE).toString());
     assertEquals(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)).negate().toString() + "/1", BigFraction.valueOf(-Double.MAX_VALUE).toString());
+    
+    
+    //per spec, Float.MIN_VALUE == 2^(-149)
+    assertEquals("1/" + BigInteger.valueOf(2).pow(149), BigFraction.valueOf(Float.MIN_VALUE).toString());
+    assertEquals("-1/" + BigInteger.valueOf(2).pow(149), BigFraction.valueOf(-Float.MIN_VALUE).toString());
+    
+    //per spec, Float.MIN_NORMAL == 2^(-126)
+    assertEquals("1/" + BigInteger.valueOf(2).pow(126), BigFraction.valueOf(Float.MIN_NORMAL).toString());
+    assertEquals("-1/" + BigInteger.valueOf(2).pow(126), BigFraction.valueOf(-Float.MIN_NORMAL).toString());
+    
+    //per spec, Float.MAX_VALUE == (2-2^(-23))�2^(127) == 2^(128) - 2^(104)
+    assertEquals(BigInteger.valueOf(2).pow(128).subtract(BigInteger.valueOf(2).pow(104)).toString() + "/1", BigFraction.valueOf(Float.MAX_VALUE).toString());
+    assertEquals(BigInteger.valueOf(2).pow(128).subtract(BigInteger.valueOf(2).pow(104)).negate().toString() + "/1", BigFraction.valueOf(-Float.MAX_VALUE).toString());
+    
   }
   
   @Test
@@ -655,7 +669,7 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testDoubleValue_Zero() {
+  public void testDoubleValue_EdgeCases() {
     //test behavior with +0.0 and -0.0. Since BigFraction does not have concept of negative zero, both should be equal to +0.0.
     final double POSITIVE_ZERO = +0.0;
     final double NEGATIVE_ZERO = -0.0;
@@ -665,12 +679,39 @@ public class BigFractionTest {
     assertEquals("Test setup issue: -0.0 doesn't have expected raw bits.", 0x8000000000000000L, Double.doubleToRawLongBits(NEGATIVE_ZERO));
     
     BigFraction f = bf(POSITIVE_ZERO);
-    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValue()));
-    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValueExact()));
+    assertEquals("doubleValue for positive zero", 0L, Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for positive zero", 0L, Double.doubleToRawLongBits(f.doubleValueExact()));
     
     f = bf(NEGATIVE_ZERO);
-    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValue()));
-    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValueExact()));
+    assertEquals("doubleValue for negative zero", 0L, Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for negative zero", 0L, Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    //per spec, Double.MIN_VALUE == 2^(-1074)
+    f = bf(1, BigInteger.valueOf(2).pow(1074));
+    assertEquals("doubleValue for positive Double.MIN_VALUE", Double.doubleToRawLongBits(Double.MIN_VALUE), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for positive Double.MIN_VALUE", Double.doubleToRawLongBits(Double.MIN_VALUE), Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    f = bf(-1, BigInteger.valueOf(2).pow(1074));
+    assertEquals("doubleValue for negative Double.MIN_VALUE", Double.doubleToRawLongBits(-Double.MIN_VALUE), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for negative Double.MIN_VALUE", Double.doubleToRawLongBits(-Double.MIN_VALUE), Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    //per spec, Double.MIN_NORMAL == 2^(-1022)
+    f = bf(1, BigInteger.valueOf(2).pow(1022));
+    assertEquals("doubleValue for positive Double.MIN_NORMAL", Double.doubleToRawLongBits(Double.MIN_NORMAL), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for positive Double.MIN_NORMAL", Double.doubleToRawLongBits(Double.MIN_NORMAL), Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    f = bf(-1, BigInteger.valueOf(2).pow(1022));
+    assertEquals("doubleValue for negative Double.MIN_NORMAL", Double.doubleToRawLongBits(-Double.MIN_NORMAL), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for negative Double.MIN_NORMAL", Double.doubleToRawLongBits(-Double.MIN_NORMAL), Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    //per spec, Double.MAX_VALUE == (2-2^(-52))�2^(1023) == 2^(1024) - 2^(971)
+    f = bf(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)));
+    assertEquals("doubleValue for positive Double.MAX_VALUE", Double.doubleToRawLongBits(Double.MAX_VALUE), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for positive Double.MAX_VALUE", Double.doubleToRawLongBits(Double.MAX_VALUE), Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    f = bf(BigInteger.valueOf(2).pow(1024).subtract(BigInteger.valueOf(2).pow(971)).negate());
+    assertEquals("doubleValue for negative Double.MAX_VALUE", Double.doubleToRawLongBits(-Double.MAX_VALUE), Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals("doubleValueExact for negative Double.MAX_VALUE", Double.doubleToRawLongBits(-Double.MAX_VALUE), Double.doubleToRawLongBits(f.doubleValueExact()));
   }
   
   @Test
@@ -713,7 +754,7 @@ public class BigFractionTest {
   }
   
   @Test
-  public void testFloatValue_Zero() {
+  public void testFloatValue_EdgeCases() {
     //test behavior with +0.0 and -0.0. Since BigFraction does not have concept of negative zero, both should be equal to +0.0.
     final float POSITIVE_ZERO = +0.0f;
     final float NEGATIVE_ZERO = -0.0f;
@@ -723,12 +764,39 @@ public class BigFractionTest {
     assertEquals("Test setup issue: -0.0f doesn't have expected raw bits.", 0x80000000, Float.floatToRawIntBits(NEGATIVE_ZERO));
     
     BigFraction f = bf(POSITIVE_ZERO);
-    assertEquals(0, Float.floatToRawIntBits(f.floatValue()));
-    assertEquals(0, Float.floatToRawIntBits(f.floatValueExact()));
+    assertEquals("floatValue for positive zero", 0, Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for positive zero", 0, Float.floatToRawIntBits(f.floatValueExact()));
     
     f = bf(NEGATIVE_ZERO);
-    assertEquals(0, Float.floatToRawIntBits(f.floatValue()));
-    assertEquals(0, Float.floatToRawIntBits(f.floatValueExact()));
+    assertEquals("floatValue for negative zero", 0, Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for negative zero", 0, Float.floatToRawIntBits(f.floatValueExact()));
+    
+    //per spec, Float.MIN_VALUE == 2^(-149)
+    f = bf(1, BigInteger.valueOf(2).pow(149));
+    assertEquals("floatValue for positive Float.MIN_VALUE", Float.floatToRawIntBits(Float.MIN_VALUE), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for positive Float.MIN_VALUE", Float.floatToRawIntBits(Float.MIN_VALUE), Float.floatToRawIntBits(f.floatValueExact()));
+    
+    f = bf(-1, BigInteger.valueOf(2).pow(149));
+    assertEquals("floatValue for negative Float.MIN_VALUE", Float.floatToRawIntBits(-Float.MIN_VALUE), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for negative Float.MIN_VALUE", Float.floatToRawIntBits(-Float.MIN_VALUE), Float.floatToRawIntBits(f.floatValueExact()));
+    
+    //per spec, Float.MIN_NORMAL == 2^(-126)
+    f = bf(1, BigInteger.valueOf(2).pow(126));
+    assertEquals("floatValue for positive Float.MIN_NORMAL", Float.floatToRawIntBits(Float.MIN_NORMAL), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for positive Float.MIN_NORMAL", Float.floatToRawIntBits(Float.MIN_NORMAL), Float.floatToRawIntBits(f.floatValueExact()));
+    
+    f = bf(-1, BigInteger.valueOf(2).pow(126));
+    assertEquals("floatValue for negative Float.MIN_NORMAL", Float.floatToRawIntBits(-Float.MIN_NORMAL), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for negative Float.MIN_NORMAL", Float.floatToRawIntBits(-Float.MIN_NORMAL), Float.floatToRawIntBits(f.floatValueExact()));
+    
+    //per spec, Float.MAX_VALUE == (2-2^(-23))�2^(127) == 2^(128) - 2^(104)
+    f = bf(BigInteger.valueOf(2).pow(128).subtract(BigInteger.valueOf(2).pow(104)));
+    assertEquals("floatValue for positive Float.MAX_VALUE", Float.floatToRawIntBits(Float.MAX_VALUE), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for positive Float.MAX_VALUE", Float.floatToRawIntBits(Float.MAX_VALUE), Float.floatToRawIntBits(f.floatValueExact()));
+    
+    f = bf(BigInteger.valueOf(2).pow(128).subtract(BigInteger.valueOf(2).pow(104)).negate());
+    assertEquals("floatValue for negative Float.MAX_VALUE", Float.floatToRawIntBits(-Float.MAX_VALUE), Float.floatToRawIntBits(f.floatValue()));
+    assertEquals("floatValueExact for negative Float.MAX_VALUE", Float.floatToRawIntBits(-Float.MAX_VALUE), Float.floatToRawIntBits(f.floatValueExact()));
   }
   
   @Test
