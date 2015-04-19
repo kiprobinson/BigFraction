@@ -655,6 +655,25 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testDoubleValue_Zero() {
+    //test behavior with +0.0 and -0.0. Since BigFraction does not have concept of negative zero, both should be equal to +0.0.
+    final double POSITIVE_ZERO = +0.0;
+    final double NEGATIVE_ZERO = -0.0;
+    
+    //confirm our test setup here, just to be sure...
+    assertEquals("Test setup issue: +0.0 doesn't have expected raw bits.", 0x0000000000000000L, Double.doubleToRawLongBits(POSITIVE_ZERO));
+    assertEquals("Test setup issue: -0.0 doesn't have expected raw bits.", 0x8000000000000000L, Double.doubleToRawLongBits(NEGATIVE_ZERO));
+    
+    BigFraction f = bf(POSITIVE_ZERO);
+    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValueExact()));
+    
+    f = bf(NEGATIVE_ZERO);
+    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValue()));
+    assertEquals(0L, Double.doubleToRawLongBits(f.doubleValueExact()));
+  }
+  
+  @Test
   public void testFloatValue() {
     //test strategy here: split up all possible float values into NUM_TESTS tests, roughly evenly
     //distributed. Then check that converting from float to BigFraction and back to float returns
@@ -691,6 +710,25 @@ public class BigFractionTest {
       if(i < MAX && i + DELTA > MAX)
         i = MAX - DELTA;
     }
+  }
+  
+  @Test
+  public void testFloatValue_Zero() {
+    //test behavior with +0.0 and -0.0. Since BigFraction does not have concept of negative zero, both should be equal to +0.0.
+    final float POSITIVE_ZERO = +0.0f;
+    final float NEGATIVE_ZERO = -0.0f;
+    
+    //confirm our test setup here, just to be sure...
+    assertEquals("Test setup issue: +0.0f doesn't have expected raw bits.", 0x00000000, Float.floatToRawIntBits(POSITIVE_ZERO));
+    assertEquals("Test setup issue: -0.0f doesn't have expected raw bits.", 0x80000000, Float.floatToRawIntBits(NEGATIVE_ZERO));
+    
+    BigFraction f = bf(POSITIVE_ZERO);
+    assertEquals(0, Float.floatToRawIntBits(f.floatValue()));
+    assertEquals(0, Float.floatToRawIntBits(f.floatValueExact()));
+    
+    f = bf(NEGATIVE_ZERO);
+    assertEquals(0, Float.floatToRawIntBits(f.floatValue()));
+    assertEquals(0, Float.floatToRawIntBits(f.floatValueExact()));
   }
   
   @Test
