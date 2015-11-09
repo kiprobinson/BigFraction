@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.kiprobinson.util.BigFraction;
+import com.github.kiprobinson.util.DivisionMode;
 
 import org.junit.Test;
 
@@ -169,6 +170,53 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testDivideAndRemainder() {
+    new DivideAndRemainderTest("0",  "999", "0", "0/1", "0", "0/1", "0", "0/1").test();
+    new DivideAndRemainderTest("0", "-999", "0", "0/1", "0", "0/1", "0", "0/1").test();
+    
+    new DivideAndRemainderTest( "4/3",  "4/3",  "1", "0/1",  "1", "0/1",  "1", "0/1").test();
+    new DivideAndRemainderTest( "4/3", "-4/3", "-1", "0/1", "-1", "0/1", "-1", "0/1").test();
+    new DivideAndRemainderTest("-4/3",  "4/3", "-1", "0/1", "-1", "0/1", "-1", "0/1").test();
+    new DivideAndRemainderTest("-4/3", "-4/3",  "1", "0/1",  "1", "0/1",  "1", "0/1").test();
+    
+    new DivideAndRemainderTest( "4/3",  "1/3",  "4", "0/1",  "4", "0/1",  "4", "0/1").test();
+    new DivideAndRemainderTest("-4/3",  "1/3", "-4", "0/1", "-4", "0/1", "-4", "0/1").test();
+    new DivideAndRemainderTest( "4/3", "-1/3", "-4", "0/1", "-4", "0/1", "-4", "0/1").test();
+    new DivideAndRemainderTest("-4/3", "-1/3",  "4", "0/1",  "4", "0/1",  "4", "0/1").test();
+    
+    new DivideAndRemainderTest( "5/4",  "1/2",  "2",  "1/4",  "2",  "1/4",  "2", "1/4").test();
+    new DivideAndRemainderTest("-5/4",  "1/2", "-2", "-1/4", "-3",  "1/4", "-3", "1/4").test();
+    new DivideAndRemainderTest( "5/4", "-1/2", "-2",  "1/4", "-3", "-1/4", "-2", "1/4").test();
+    new DivideAndRemainderTest("-5/4", "-1/2",  "2", "-1/4",  "2", "-1/4",  "3", "1/4").test();
+    
+    new DivideAndRemainderTest( "5/3",  "7/11",  "2",  "13/33",  "2",  "13/33",  "2", "13/33").test();
+    new DivideAndRemainderTest("-5/3",  "7/11", "-2", "-13/33", "-3",  "8/33", "-3", "8/33").test();
+    new DivideAndRemainderTest( "5/3", "-7/11", "-2",  "13/33", "-3", "-8/33", "-2", "13/33").test();
+    new DivideAndRemainderTest("-5/3", "-7/11",  "2", "-13/33",  "2", "-13/33",  "3", "8/33").test();
+    
+    new DivideAndRemainderTest( "7/11",  "13/5", "0",  "7/11",  "0",    "7/11",  "0",   "7/11").test();
+    new DivideAndRemainderTest("-7/11",  "13/5", "0", "-7/11", "-1",  "108/55", "-1", "108/55").test();
+    new DivideAndRemainderTest( "7/11", "-13/5", "0",  "7/11", "-1", "-108/55",  "0",   "7/11").test();
+    new DivideAndRemainderTest("-7/11", "-13/5", "0", "-7/11",  "0",   "-7/11",  "1", "108/55").test();
+    
+    new DivideAndRemainderTest( "16/9",  "4/3",  "1",  "4/9",  "1",  "4/9",  "1", "4/9").test();
+    new DivideAndRemainderTest("-16/9",  "4/3", "-1", "-4/9", "-2",  "8/9", "-2", "8/9").test();
+    new DivideAndRemainderTest( "16/9", "-4/3", "-1",  "4/9", "-2", "-8/9", "-1", "4/9").test();
+    new DivideAndRemainderTest("-16/9", "-4/3",  "1", "-4/9",  "1", "-4/9",  "2", "8/9").test();
+    
+    new DivideAndRemainderTest( "190/9",  "14/7",  "10",  "10/9",  "10",  "10/9",  "10", "10/9").test();
+    new DivideAndRemainderTest("-190/9",  "14/7", "-10", "-10/9", "-11",   "8/9", "-11",  "8/9").test();
+    new DivideAndRemainderTest( "190/9", "-14/7", "-10",  "10/9", "-11",  "-8/9", "-10", "10/9").test();
+    new DivideAndRemainderTest("-190/9", "-14/7",  "10", "-10/9",  "10", "-10/9",  "11",  "8/9").test();
+    
+    new DivideAndRemainderTest( "13/5",  "5/13",  "6",  "19/65",  "6",  "19/65",  "6", "19/65").test();
+    new DivideAndRemainderTest("-13/5",  "5/13", "-6", "-19/65", "-7",   "6/65", "-7",  "6/65").test();
+    new DivideAndRemainderTest( "13/5", "-5/13", "-6",  "19/65", "-7",  "-6/65", "-6", "19/65").test();
+    new DivideAndRemainderTest("-13/5", "-5/13",  "6", "-19/65",  "6", "-19/65",  "7",  "6/65").test();
+  }
+  
+  
+  @Test
   public void testDivideInto() {
     assertEquals("(4/3)/(1/3)", "4/1", bf("1/3").divideInto(bf("4/3")).toString());
     assertEquals("(5/16)/(-1/12)", "-15/4", bf("-1/12").divideInto(bf("5/16")).toString());
@@ -238,56 +286,23 @@ public class BigFractionTest {
     assertEquals("(9/16)^(1)", "9/16", bf(9,16).pow(1).toString());
   }
   
-  @Test
-  public void testGetIntegerPart() {
-    assertEquals("1", bf("4/3").getIntegerPart().toString());
-    assertEquals("-1", bf("-4/3").getIntegerPart().toString());
-    assertEquals("2", bf("6/3").getIntegerPart().toString());
-    assertEquals("-2", bf("6/-3").getIntegerPart().toString());
-    assertEquals("0", bf("2/3").getIntegerPart().toString());
-    assertEquals("0", bf("2/-3").getIntegerPart().toString());
-    assertEquals("0", bf("0/3").getIntegerPart().toString());
-    assertEquals("0", bf("0/-3").getIntegerPart().toString());
-  }
-  
-  @Test
-  public void testGetFractionPart() {
-    assertEquals("1/3", bf("4/3").getFractionPart().toString());
-    assertEquals("-1/3", bf("-4/3").getFractionPart().toString());
-    assertEquals("0/1", bf("6/3").getFractionPart().toString());
-    assertEquals("0/1", bf("6/-3").getFractionPart().toString());
-    assertEquals("2/3", bf("2/3").getFractionPart().toString());
-    assertEquals("-2/3", bf("2/-3").getFractionPart().toString());
-    assertEquals("0/1", bf("0/3").getFractionPart().toString());
-    assertEquals("0/1", bf("0/-3").getFractionPart().toString());
-  }
-  
   
   @Test
   public void testGetParts() {
-    assertEquals("1", bf("4/3").getParts()[0].toString());
-    assertEquals("-1", bf("-4/3").getParts()[0].toString());
-    assertEquals("2", bf("6/3").getParts()[0].toString());
-    assertEquals("-2", bf("6/-3").getParts()[0].toString());
-    assertEquals("0", bf("2/3").getParts()[0].toString());
-    assertEquals("0", bf("2/-3").getParts()[0].toString());
-    assertEquals("0", bf("0/3").getParts()[0].toString());
-    assertEquals("0", bf("0/-3").getParts()[0].toString());
-    
-    assertEquals("1/3", bf("4/3").getParts()[1].toString());
-    assertEquals("-1/3", bf("-4/3").getParts()[1].toString());
-    assertEquals("0/1", bf("6/3").getParts()[1].toString());
-    assertEquals("0/1", bf("6/-3").getParts()[1].toString());
-    assertEquals("2/3", bf("2/3").getParts()[1].toString());
-    assertEquals("-2/3", bf("2/-3").getParts()[1].toString());
-    assertEquals("0/1", bf("0/3").getParts()[1].toString());
-    assertEquals("0/1", bf("0/-3").getParts()[1].toString());
+    new GetPartsTest(  "4/3",  "1",  "1/3",  "1", "1/3",  "1", "1/3").test();
+    new GetPartsTest( "-4/3", "-1", "-1/3", "-2", "2/3", "-2", "2/3").test();
+    new GetPartsTest(  "2/1",  "2",  "0/1",  "2", "0/1",  "2", "0/1").test();
+    new GetPartsTest( "-2/1", "-2",  "0/1", "-2", "0/1", "-2", "0/1").test();
+    new GetPartsTest(  "2/3",  "0",  "2/3",  "0", "2/3",  "0", "2/3").test();
+    new GetPartsTest( "-2/3",  "0", "-2/3", "-1", "1/3", "-1", "1/3").test();
+    new GetPartsTest(  "0/1",  "0",  "0/1",  "0", "0/1",  "0", "0/1").test();
+    new GetPartsTest( "17/7",  "2",  "3/7",  "2", "3/7",  "2", "3/7").test();
+    new GetPartsTest("-17/7", "-2", "-3/7", "-3", "4/7", "-3", "4/7").test();
   }
   
   
   @Test
   public void testMediant() {
-    //assertTrue(false);
     assertEquals("mediant(1/1,1/2)", bf(1,2), bf(1,1).mediant(bf(1,3)));
     
     //ensure that we are always reducing to lowest terms
@@ -411,6 +426,29 @@ public class BigFractionTest {
     
   }
   
+  
+  @Test
+  public void testToString() {
+    assertEquals("1/1", bf("1").toString());
+    assertEquals("1/1", bf("1").toString(false));
+    assertEquals("1", bf("1").toString(true));
+    
+    assertEquals("0/1", bf("0").toString());
+    assertEquals("0/1", bf("0").toString(false));
+    assertEquals("0", bf("0").toString(true));
+    
+    assertEquals("-1/1", bf("-1").toString());
+    assertEquals("-1/1", bf("-1").toString(false));
+    assertEquals("-1", bf("-1").toString(true));
+    
+    assertEquals("1/10", bf(".1").toString());
+    assertEquals("1/10", bf(".1").toString(false));
+    assertEquals("1/10", bf(".1").toString(true));
+    
+    assertEquals("-10/3", bf("10/-3").toString());
+    assertEquals("-10/3", bf("10/-3").toString(false));
+    assertEquals("-10/3", bf("10/-3").toString(true));
+  }
   
   @Test
   public void testToMixedString() {
@@ -956,6 +994,36 @@ public class BigFractionTest {
   }
   
   @Test(expected=ArithmeticException.class)
+  public void testDivideToIntegralValueZero1() {
+    bf(1).divideToIntegralValue(bf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideToIntegralValueZero2() {
+    bf(0).divideToIntegralValue(-0.0);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testRemainderZero1() {
+    bf(1).remainder(bf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testRemainderZero2() {
+    bf(0).remainder(-0.0);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideAndRemainderZero1() {
+    bf(1).divideAndRemainder(bf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideAndRemainderZero2() {
+    bf(0).divideAndRemainder(-0.0);
+  }
+  
+  @Test(expected=ArithmeticException.class)
   public void testZeroReciprocal() {
     BigFraction.ZERO.reciprocal();
   }
@@ -1033,6 +1101,86 @@ public class BigFractionTest {
   @Test(expected=ArithmeticException.class)
   public void testByteValueExactFraction() {
     bf(bf(1,2)).byteValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactOverflowPositive() {
+    bf(Double.MAX_VALUE).add(1).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactOverflowNegative() {
+    bf(-Double.MAX_VALUE).subtract(1).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactUnderflowPositive() {
+    bf(Double.MIN_VALUE, 2).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactUnderflowNegative() {
+    bf(-Double.MIN_VALUE, 2).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactInvalid1() {
+    bf(1, 10).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactInvalid2() {
+    bf(1, 3).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactInvalid3() {
+    bf(10, 3).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDoubleValueExactInvalid4() {
+    bf(Long.MAX_VALUE).doubleValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactOverflowPositive() {
+    bf(Float.MAX_VALUE).add(1).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactOverflowNegative() {
+    bf(-Float.MAX_VALUE).subtract(1).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactUnderflowPositive() {
+    bf(Float.MIN_VALUE, 2).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactUnderflowNegative() {
+    bf(-Float.MIN_VALUE, 2).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactInvalid1() {
+    bf(1, 10).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactInvalid2() {
+    bf(1, 3).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactInvalid3() {
+    bf(10, 3).floatValueExact();
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testFloatValueExactInvalid4() {
+    bf(Integer.MAX_VALUE).floatValueExact();
   }
   
   /**
@@ -1172,6 +1320,119 @@ public class BigFractionTest {
       
       //test that default rounding mode is the same as HALF_UP
       assertEquals("round(" + input + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toDecimalString(digits).toString());
+    }
+  }
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for getParts. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for each division mode.
+   */
+  private static class GetPartsTest
+  {
+    private final String input;
+    private final BigFraction bf;
+    private final Map<DivisionMode, String> expectedIPart = new HashMap<DivisionMode, String>();
+    private final Map<DivisionMode, String> expectedFPart = new HashMap<DivisionMode, String>();
+    
+    public GetPartsTest(String input, String truncatedIPart, String truncatedFPart,
+            String flooredIPart, String flooredFPart, String euclideanIPart, String euclideanFPart)
+    {
+      this.input = input;
+      bf = bf(input);
+      expectedIPart.put(DivisionMode.TRUNCATED, truncatedIPart);
+      expectedFPart.put(DivisionMode.TRUNCATED, truncatedFPart);
+      expectedIPart.put(DivisionMode.FLOORED, flooredIPart);
+      expectedFPart.put(DivisionMode.FLOORED, flooredFPart);
+      expectedIPart.put(DivisionMode.EUCLIDEAN, euclideanIPart);
+      expectedFPart.put(DivisionMode.EUCLIDEAN, euclideanFPart);
+    }
+    
+    public void test()
+    {
+      String actual;
+      for(Map.Entry<DivisionMode, String> entry : expectedIPart.entrySet())
+      {
+        actual = bf.getIntegerPart(entry.getKey()).toString();
+        assertEquals("(" + input + ").getIntegerPart(" + entry.getKey() + ")", entry.getValue(), actual);
+        
+        actual = bf.getParts(entry.getKey())[0].toString();
+        assertEquals("(" + input + ").getParts(" + entry.getKey() + ")[0]", entry.getValue(), actual);
+      }
+      
+      for(Map.Entry<DivisionMode, String> entry : expectedFPart.entrySet())
+      {
+        actual = bf.getFractionPart(entry.getKey()).toString();
+        assertEquals("(" + input + ").getFractionPart(" + entry.getKey() + ")", entry.getValue(), actual);
+        
+        actual = bf.getParts(entry.getKey())[1].toString();
+        assertEquals("(" + input + ").getParts(" + entry.getKey() + ")[1]", entry.getValue(), actual);
+      }
+      
+      //make sure that calling with no arguments is equivalent to TRUNCATED mode
+      assertEquals("(" + input + ").getIntegerPart()",  expectedIPart.get(DivisionMode.TRUNCATED), bf.getIntegerPart().toString());
+      assertEquals("(" + input + ").getFractionPart()", expectedFPart.get(DivisionMode.TRUNCATED), bf.getFractionPart().toString());
+      assertEquals("(" + input + ").getParts()[0]", expectedIPart.get(DivisionMode.TRUNCATED), bf.getParts()[0].toString());
+      assertEquals("(" + input + ").getParts()[1]", expectedFPart.get(DivisionMode.TRUNCATED), bf.getParts()[1].toString());
+    }
+  }
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for divideAndRemainder. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for each division mode.
+   */
+  private static class DivideAndRemainderTest
+  {
+    private final String a;
+    private final String b;
+    private final BigFraction bfA;
+    private final BigFraction bfB;
+    private final Map<DivisionMode, String> expectedQ = new HashMap<DivisionMode, String>();
+    private final Map<DivisionMode, String> expectedR = new HashMap<DivisionMode, String>();
+    
+    public DivideAndRemainderTest(String a, String b, String truncatedQ, String truncatedR,
+        String flooredQ, String flooredR, String euclideanQ, String euclideanR)
+    {
+      this.a = a;
+      bfA = bf(a);
+      this.b = b;
+      bfB = bf(b);
+      expectedQ.put(DivisionMode.TRUNCATED, truncatedQ);
+      expectedR.put(DivisionMode.TRUNCATED, truncatedR);
+      expectedQ.put(DivisionMode.FLOORED, flooredQ);
+      expectedR.put(DivisionMode.FLOORED, flooredR);
+      expectedQ.put(DivisionMode.EUCLIDEAN, euclideanQ);
+      expectedR.put(DivisionMode.EUCLIDEAN, euclideanR);
+    }
+    
+    public void test()
+    {
+      String actual;
+      for(DivisionMode mode : DivisionMode.values())
+      {
+        actual = bfA.divideToIntegralValue(bfB, mode).toString();
+        assertEquals("(" + a + ").divideToIntegralValue((" + b + "), " + mode + ")", expectedQ.get(mode), actual);
+        
+        actual = bfA.remainder(bfB, mode).toString();
+        assertEquals("(" + a + ").remainder((" + b + "), " + mode + ")", expectedR.get(mode), actual);
+        
+        Number[] actuals = bfA.divideAndRemainder(bfB, mode);
+        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[0]", expectedQ.get(mode), actuals[0].toString());
+        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[1]", expectedR.get(mode), actuals[1].toString());
+        
+        //make sure that the math actually works out:  a/b = q + r/b
+        assertEquals("(" + a + ")/(" + b + ") = (" + actuals[0] + ") + (" + actuals[1] + ")/(" + b + ")", bf(bfA, bfB).toString(), bf(actuals[0]).add(bf(actuals[1], bfB)).toString());
+        
+        //just to be extra careful... check out math another way: a = bq + r
+        assertEquals("(" + a + ") = (" + b + ")(" + actuals[0] + ") + (" + actuals[1] + ")", bfA.toString(), bfB.multiply(actuals[0]).add(actuals[1]).toString());
+      }
+      
+      //make sure that calling with no division mode is equivalent to TRUNCATED mode
+      assertEquals("(" + a + ").divideToIntegralValue((" + b + "))",  expectedQ.get(DivisionMode.TRUNCATED), bfA.divideToIntegralValue(bfB).toString());
+      assertEquals("(" + a + ").remainder((" + b + "))", expectedR.get(DivisionMode.TRUNCATED), bfA.remainder(bfB).toString());
+      assertEquals("(" + a + ").divideAndRemainder((" + b + "))[0]", expectedQ.get(DivisionMode.TRUNCATED), bfA.divideAndRemainder(bfB)[0].toString());
+      assertEquals("(" + a + ").divideAndRemainder((" + b + "))[1]", expectedR.get(DivisionMode.TRUNCATED), bfA.divideAndRemainder(bfB)[1].toString());
     }
   }
   

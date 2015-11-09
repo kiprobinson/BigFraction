@@ -42,6 +42,45 @@ public final class BigFraction extends Number implements Comparable<Number>
   private static enum FareyMode { NEXT, PREV, CLOSEST };
   
   /**
+   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(Number n)}
+   * should be preferred for performance reasons.
+   * 
+   * @see #valueOf(Number n)
+   */
+  public BigFraction(Number n)
+  {
+    BigFraction bf = valueOf(n);
+    this.numerator = bf.numerator;
+    this.denominator = bf.denominator;
+  }
+  
+  /**
+   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(Number numerator, Number denominator)}
+   * should be preferred for performance reasons.
+   * 
+   * @see #valueOf(Number numerator, Number denominator)
+   */
+  public BigFraction(Number numerator, Number denominator)
+  {
+    BigFraction bf = valueOf(numerator, denominator);
+    this.numerator = bf.numerator;
+    this.denominator = bf.denominator;
+  }
+  
+  /**
+   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(String s)}
+   * should be preferred for performance reasons.
+   * 
+   * @see #valueOf(String s)
+   */
+  public BigFraction(String s)
+  {
+    BigFraction bf = valueOf(s);
+    this.numerator = bf.numerator;
+    this.denominator = bf.denominator;
+  }
+  
+  /**
    * Constructs a BigFraction from given number. If the number is not one of the
    * primitive types, BigInteger, BigDecimal, or BigFraction, then Number.doubleValue()
    * will be used for construction.
@@ -95,7 +134,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * NOTE: In many cases, BigFraction.valueOf(Double.toString(d)) may give a result
    * closer to what the user expects.
    * 
-   * @throws ArithemeticException if denominator == 0.
+   * @throws ArithmeticException if denominator == 0.
    */
   public static BigFraction valueOf(Number numerator, Number denominator)
   {
@@ -111,8 +150,12 @@ public final class BigFraction extends Number implements Comparable<Number>
       return valueOfHelper(numerator.doubleValue(), denominator.doubleValue());
     else if(numerator instanceof BigDecimal && denominator instanceof BigDecimal)
       return valueOfHelper((BigDecimal)numerator, (BigDecimal)denominator);
-    else
-      return valueOf(numerator).divide(valueOf(denominator));
+    
+    //else: convert numerator and denominator to fractions, and divide
+    //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
+    BigFraction f1 = valueOf(numerator);
+    BigFraction f2 = valueOf(denominator);
+    return new BigFraction(f1.numerator.multiply(f2.denominator), f1.denominator.multiply(f2.numerator), Reduced.NO);
   }
   
   /**
@@ -122,7 +165,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * <code>BigDecimal(String)</code> constructor.
    * 
    * @throws NumberFormatException  if the string cannot be properly parsed.
-   * @throws ArithemeticException if denominator == 0.
+   * @throws ArithmeticException if denominator == 0.
    */
   public static BigFraction valueOf(String s)
   {
@@ -256,40 +299,24 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns this / n.
    * 
-   * @throws ArithemeticException if n == 0.
+   * @throws ArithmeticException if n == 0.
    */
   public BigFraction divide(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
-    BigFraction f = valueOf(n);
-    
-    if(f.numerator.equals(BigInteger.ZERO))
-      throw new ArithmeticException("Divide by zero");
-    
-    //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
-    return new BigFraction(numerator.multiply(f.denominator), denominator.multiply(f.numerator), Reduced.NO);
+    //division is the same thing as constructing new fraction
+    return valueOf(this, n);
   }
   
   /**
    * Returns n / this. Sometimes this results in cleaner code than
    * rearranging the code to use divide().
    * 
-   * @throws ArithemeticException if this == 0.
+   * @throws ArithmeticException if this == 0.
    */
   public BigFraction divideInto(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
-    if(numerator.equals(BigInteger.ZERO))
-      throw new ArithmeticException("Divide by zero");
-    
-    BigFraction f = valueOf(n);
-    
-    //(n1/d1)/(n2/d2) = (n1*d2)/(d1*n2)
-    return new BigFraction(f.numerator.multiply(denominator), f.denominator.multiply(numerator), Reduced.NO);
+    //division is the same thing as constructing new fraction
+    return valueOf(n, this);
   }
   
   /**
@@ -302,13 +329,151 @@ public final class BigFraction extends Number implements Comparable<Number>
     return valueOf(a, b);
   }
   
+  
+  /**
+   * Divides to an integral value, using TRUNCATED division mode.
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   */
+  public BigInteger divideToIntegralValue(Number n)
+  {
+    return divideToIntegralValue(n, DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Divides to an integral value, using the specified division mode.
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   */
+  public BigInteger divideToIntegralValue(Number n, DivisionMode divisionMode)
+  {
+    //TODO: OPTIMIZE
+    return (BigInteger)(divideAndRemainder(n, divisionMode)[0]);
+  }
+  
+  /**
+   * Computes division remainder (modulus), using TRUNCATED division mode.
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   */
+  public BigFraction remainder(Number n)
+  {
+    return remainder(n, DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Computes division remainder (modulus), using the specified division mode.
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   */
+  public BigFraction remainder(Number n, DivisionMode divisionMode)
+  {
+    //TODO: OPTIMIZE
+    return (BigFraction)(divideAndRemainder(n, divisionMode)[1]);
+  }
+  
+  /**
+   * Returns integral quotient and fractional remainder of this/n. Uses TRUNCATION division mode.
+   * 
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   */
+  public Number[] divideAndRemainder(Number n)
+  {
+    return divideAndRemainder(n, DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Returns integral quotient and fractional remainder of this/n, using specified division mode. If the quotient
+   * and remainder are q and r, respectively, then the results satisfy the following equations:
+   * 
+   *   this/n = q + r/n
+   *   this = q*n + r
+   * 
+   * @param n  Number to divide {@code this} by.
+   * @param divisionMode Division mode to use when dividend or divisor is negative.
+   * 
+   * @return Two {@code Number} objects. Guaranteed to be two elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   * @see DivisionMode
+   */
+  public Number[] divideAndRemainder(Number n, DivisionMode divisionMode)
+  {
+    return divideAndRemainderImpl(this, valueOf(n), divisionMode);
+  }
+  
+  private static Number[] divideAndRemainderImpl(BigFraction a, BigFraction b, DivisionMode divisionMode)
+  {
+    if(b.numerator.equals(BigInteger.ZERO))
+      throw new ArithmeticException("Divide by zero.");
+    else if(a.numerator.equals(BigInteger.ZERO) || b.equals(BigFraction.ONE))
+      return new Number[]{a.numerator, BigFraction.ZERO};
+    
+    //First calculate true a/b value. We don't care about reducing to lowest terms
+    //yet, so calculate numerator and denominator separately:
+    //  a/b = (a.n/a.d)/(b.n/b.d) = (a.n/a.d)*(b.d/b.n) = (a.n*b.d)/(a.d*b.n)
+    //also worth noting: sign(a)==sign(num), sign(b)==sign(den)
+    BigInteger num = a.numerator.multiply(b.denominator);
+    BigInteger den = a.denominator.multiply(b.numerator);
+    
+    //BigInteger.divide() uses TRUNCATED division to give us values q,r such that:  num/den = q + r/den
+    //For other division modes, we may need to adjust q,r to new values q',r'.  If q'=q+x, then:
+    //  q + r/den = q' + r'/den
+    //  q + r/den = q + x + r'/den
+    //      r/den =     x + r'/den
+    //     r'/den = r/den - x
+    //         r' = r - x*den
+    BigInteger[] divmod = num.divideAndRemainder(den);
+    BigInteger q = divmod[0];
+    BigInteger r = divmod[1];
+    
+    if(r.equals(BigInteger.ZERO))
+      return new Number[]{q, BigFraction.ZERO};
+    
+    
+    if(divisionMode == DivisionMode.FLOORED && ((num.signum() < 0 || den.signum() < 0) && num.signum() != den.signum()))
+    {
+      //floor is equivalent to truncation for positive quotient, but for negative quotient we have to subtract one 
+      q = q.subtract(BigInteger.ONE);  //q' = q + (-1)
+      r = r.add(den);                  //r' = r - (-1)*den
+    }
+    else if(divisionMode == DivisionMode.EUCLIDEAN && num.signum() < 0)
+    {
+      //Euclidean division picks a quotient to ensure the remainder is always positive.
+      // *  b > 0: q = floor(a/b)
+      // *  b < 0: q = ciel(a/b)
+      
+      //For the four different combinations of signs of the operators, two are the same as truncation,
+      //and two require additional modification:
+      //   + / +: +  =>  floor(q) == trunc(q)
+      //   + / -: -  =>  ciel(q)  == trunc(q)
+      //   - / +: -  =>  floor(q) == trunc(q) - 1  **modification required
+      //   - / -: +  =>  ciel(q)  == trunc(q) + 1  **modification required
+      if(den.signum() > 0)
+      {
+        q = q.subtract(BigInteger.ONE);  //q' = q + (-1)
+        r = r.add(den);                  //r' = r - (-1)*den
+      }
+      else
+      {
+        q = q.add(BigInteger.ONE);  //q' = q + (1)
+        r = r.subtract(den);        //r' = r - (1)*den
+      }
+    }
+    
+    //At this point we have:
+    //  num/den = q + r/den
+    //We want to compute q", r", such that:  a/b = q" + r"/b
+    //We know that a/b = num/den, and q = q". So we are left with:
+    //  (r"/b)=(r/den)
+    //  r" = r * b / den = (r * b.n)/(b.d * den)
+    
+    BigFraction rFract = new BigFraction(r.multiply(b.numerator), b.denominator.multiply(den), Reduced.NO);
+    
+    return new Number[]{q, rFract};
+  }
+  
   /**
    * Returns this^exponent.
    * 
    * Note: 0^0 will return 1/1. This is consistent with Math.pow(),
    * BigInteger.pow(), and BigDecimal.pow().
    * 
-   * @throws ArithemeticException if this == 0 && exponent < 0.
+   * @throws ArithmeticException if {@code this == 0 && exponent < 0}.
    */
   public BigFraction pow(int exponent)
   {
@@ -328,7 +493,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns 1/this.
    * 
-   * @throws ArithemeticException if this == 0.
+   * @throws ArithmeticException if this == 0.
    */
   public BigFraction reciprocal()
   {
@@ -376,10 +541,34 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the integer part of this fraction; that is, the part that
    * would come before the decimal point if this were written as a decimal
    * number. Carries the same sign as this fraction.
+   * 
+   * Equivalent to {@code getIntegerPart(DivisionMode.TRUNCATED)}
+   * 
+   * @see #getParts(DivisionMode divisionMode)
    */
   public BigInteger getIntegerPart()
   {
-    return numerator.divide(denominator);
+    return getIntegerPart(DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Returns the integer part of this fraction; that is, the part that
+   * would come before the decimal point if this were written as a decimal
+   * number. Carries the same sign as this fraction.
+   * 
+   * @see #getParts(DivisionMode divisionMode)
+   */
+  public BigInteger getIntegerPart(DivisionMode divisionMode)
+  {
+    if(denominator.equals(BigInteger.ONE))
+      return numerator;
+    
+    BigInteger iPart = numerator.divide(denominator);
+    
+    if(numerator.signum() < 0 && divisionMode != DivisionMode.TRUNCATED)
+      iPart = iPart.subtract(BigInteger.ONE);
+    
+    return iPart;
   }
   
   /**
@@ -387,10 +576,34 @@ public final class BigFraction extends Number implements Comparable<Number>
    * represents the part that would come after the decimal point if this
    * were written as a decimal number. Carries the same sign as this
    * fraction, unless the fraction part is zero.
+   * 
+   * Equivalent to {@code getFractionPart(DivisionMode.TRUNCATED)}
+   * 
+   * @see #getParts(DivisionMode divisionMode)
    */
   public BigFraction getFractionPart()
   {
-    return new BigFraction(numerator.remainder(denominator), denominator, Reduced.YES);
+    return getFractionPart(DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Returns the fraction part of this fraction; that is, the remainder when
+   * the numerator is divided by the denominator when using the specified
+   * division mode.
+   * 
+   * @see #getParts(DivisionMode divisionMode)
+   */
+  public BigFraction getFractionPart(DivisionMode divisionMode)
+  {
+    if(denominator.equals(BigInteger.ONE))
+      return BigFraction.ZERO;
+    
+    BigInteger fPart = numerator.remainder(denominator);
+    
+    if(numerator.signum() < 0 && divisionMode != DivisionMode.TRUNCATED)
+      fPart = fPart.add(denominator);
+    
+    return new BigFraction(fPart, denominator, Reduced.YES);
   }
   
   /**
@@ -399,12 +612,57 @@ public final class BigFraction extends Number implements Comparable<Number>
    * to be a BigInteger, equivalent to the result of getIntegerPart().
    * The second element is guaranteed to be a BigFraction, equivalent to
    * the result of getFractionPart().
+   * 
+   * Equivalent to {@code getParts(DivisionMode.TRUNCATED)}
    */
   public Number[] getParts()
   {
+    return getParts(DivisionMode.TRUNCATED);
+  }
+  
+  /**
+   * Returns the integer and fraction parts of this fraction. The return
+   * array is guaranteed to have exactly two elements. The first is guaranteed
+   * to be a BigInteger, and the second is guaranteed to be a BigFraction.
+   * 
+   * The first element is the result of integer division of numerator by
+   * denominator, using the supplied division mode. The second element is
+   * the fraction given by numerator mod denominator, using the given
+   * division mode.
+   * 
+   * Note that the division mode only matters if this fraction is negative.
+   * Because the sign of a BigFraction is always carried by the numerator,
+   * the FLOOR and EUCLIDEAN division modes will always produce the same result.
+   * 
+   * Some examples:
+   * 
+   * <table>
+   *   <tr><th>Fraction</th><th>TRUNCATE</th><th>FLOOR</th><th>EUCLIDEAN</th></tr>
+   *   <tr><td> 4/1</td><td>[ 4,  0/1]</td><td>[ 4, 0/1]</td><td>[ 4, 0/1]</td></tr>
+   *   <tr><td> 4/3</td><td>[ 1,  1/3]</td><td>[ 1, 1/3]</td><td>[ 1, 1/3]</td></tr>
+   *   <tr><td> 2/7</td><td>[ 0,  2/7]</td><td>[ 0, 2/7]</td><td>[ 0, 2/7]</td></tr>
+   *   <tr><td>-2/7</td><td>[ 0, -2/7]</td><td>[-1, 5/7]</td><td>[-1, 5/7]</td></tr>
+   *   <tr><td>-4/3</td><td>[-1, -1/3]</td><td>[-2, 2/3]</td><td>[-2, 2/3]</td></tr>
+   *   <tr><td>-4/1</td><td>[-4,  0/1]</td><td>[-4, 0/1]</td><td>[-4, 0/1]</td></tr>
+   * </table>
+   * 
+   * @see DivisionMode
+   */
+  public Number[] getParts(DivisionMode divisionMode) {
+    if(denominator.equals(BigInteger.ONE))
+      return new Number[]{numerator, BigFraction.ZERO};
+    
     final BigInteger[] divmod = numerator.divideAndRemainder(denominator);
     
-    return new Number[]{divmod[0], new BigFraction(divmod[1], denominator, Reduced.YES)};
+    BigInteger iPart = divmod[0];
+    BigInteger fPart = divmod[1];
+    
+    if(numerator.signum() < 0 && divisionMode != DivisionMode.TRUNCATED) {
+      iPart = iPart.subtract(BigInteger.ONE);
+      fPart = fPart.add(denominator);
+    }
+    
+    return new Number[]{iPart, new BigFraction(fPart, denominator, Reduced.YES)};
   }
   
   /**
@@ -563,6 +821,21 @@ public final class BigFraction extends Number implements Comparable<Number>
   @Override
   public String toString()
   {
+    return toString(false);
+  }
+  
+  /**
+   * Returns a string representation of this, in the form of
+   * numerator/denominator. Optionally, "/denominator" part
+   * can be ommitted for whole numbers.
+   * 
+   * @param denominatorOptional If true, the denominator will be ommitted
+   *        when it is unnecessary. For example, "7" instead of "7/1".
+   */
+  public String toString(boolean denominatorOptional)
+  {
+    if(denominatorOptional && denominator.equals(BigInteger.ONE))
+      return numerator.toString();
     return numerator.toString() + "/" + denominator.toString();
   }
   
@@ -606,8 +879,6 @@ public final class BigFraction extends Number implements Comparable<Number>
    * 
    * @param numDecimalDigits Number of digits to be displayed after the decimal
    * @param roundingMode How to round the number if necessary
-   * 
-   * @return
    */
   public String toDecimalString(int numDecimalDigits, RoundingMode roundingMode)
   {
@@ -714,7 +985,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(denominator.equals(f.denominator))
       return numerator.compareTo(f.numerator);
     
-    //not an easy case, so first make the denominators equal then compare the numerators 
+    //not an easy case, so first make the denominators equal then compare the numerators
     return numerator.multiply(f.denominator).compareTo(denominator.multiply(f.numerator));
   }
   
@@ -843,7 +1114,9 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns the smaller of this and n.
+   * Returns the smaller of this and n. If they have equal value, this is returned.
+   * Worth noting: if n is smaller, the returned Number is n, <i>not</i> a BigFraction
+   * representing n.
    */
   public Number min(Number n)
   {
@@ -854,7 +1127,23 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns the maximum of this and n.
+   * Returns the smaller of a and b. If they have equal value, a is returned.
+   * Worth noting: the returned Number is always one of the two arguments, not
+   * necessarily a BigFraction.
+   */
+  public static Number min(Number a, Number b)
+  {
+    if(a == null || b == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    return (valueOf(a).compareTo(b) <= 0 ? a : b);
+  }
+  
+  
+  /**
+   * Returns the larger of this and n. If they have equal value, this is returned.
+   * Worth noting: if n is larger, the returned Number is n, <i>not</i> a BigFraction
+   * representing n.
    */
   public Number max(Number n)
   {
@@ -863,6 +1152,20 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     return (this.compareTo(n) >= 0 ? this : n);
   }
+  
+  /**
+   * Returns the larger of a and b. If they have equal value, a is returned.
+   * Worth noting: the returned Number is always one of the two arguments, not
+   * necessarily a BigFraction.
+   */
+  public static Number max(Number a, Number b)
+  {
+    if(a == null || b == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    return (valueOf(a).compareTo(b) >= 0 ? a : b);
+  }
+  
   
   /**
    * Returns the mediant of this and n. The mediant of a/b and c/d is
@@ -1252,7 +1555,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * NOTE: In many cases, BigFraction(Double.toString(numerator) + "/" + Double.toString(denominator))
    * may give a result closer to what the user expects.
    * 
-   * @throws ArithemeticException if denominator == 0.
+   * @throws ArithmeticException if denominator == 0.
    */
   private static BigFraction valueOfHelper(double numerator, double denominator)
   {
@@ -1353,7 +1656,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Constructs a new BigFraction from two BigDecimals.
    * 
-   * @throws ArithemeticException if denominator == 0.
+   * @throws ArithmeticException if denominator == 0.
    */
   private static BigFraction valueOfHelper(BigDecimal numerator, BigDecimal denominator)
   {
