@@ -636,7 +636,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * 
    * Some examples:
    * 
-   * <table>
+   * <table summary="Examples of rounding modes">
    *   <tr><th>Fraction</th><th>TRUNCATE</th><th>FLOOR</th><th>EUCLIDEAN</th></tr>
    *   <tr><td> 4/1</td><td>[ 4,  0/1]</td><td>[ 4, 0/1]</td><td>[ 4, 0/1]</td></tr>
    *   <tr><td> 4/3</td><td>[ 1,  1/3]</td><td>[ 1, 1/3]</td><td>[ 1, 1/3]</td></tr>

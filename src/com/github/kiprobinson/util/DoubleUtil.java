@@ -78,7 +78,7 @@ public final class DoubleUtil
   /**
    * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
    * 
-   * @returns array with four elements:
+   * @return array with four elements:
    *     return[0]: Equivalent to getSign(d)
    *     return[1]: Equivalent to getExponent(d)
    *     return[2]: Equivalent to getMantissa(d)
@@ -92,7 +92,7 @@ public final class DoubleUtil
   /**
    * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
    * 
-   * @returns array with four elements:
+   * @return array with four elements:
    *     return[0]: Equivalent to getSign(d)
    *     return[1]: Equivalent to (exponentAsBits ? getExponentBits(d) : getExponent(d))
    *     return[2]: Equivalent to getMantissa(d)
@@ -132,7 +132,7 @@ public final class DoubleUtil
    * @param exponentAsBits  If true, assumes that exponent parameter represents the actual exponent bits. If false,
    *                        IEEE exponent offset value will be added to the offset to get the bits.
    * 
-   * @return The double value represented by 
+   * @return The double value represented by the provided binary parts.
    */
   public static double getDouble(int sign, int exponent, long mantissa, boolean exponentAsBits)
   {
