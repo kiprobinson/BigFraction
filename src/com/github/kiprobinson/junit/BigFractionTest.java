@@ -1408,23 +1408,22 @@ public class BigFractionTest {
     
     public void test()
     {
-      String actual;
       for(DivisionMode mode : DivisionMode.values())
       {
-        actual = bfA.divideToIntegralValue(bfB, mode).toString();
-        assertEquals("(" + a + ").divideToIntegralValue((" + b + "), " + mode + ")", expectedQ.get(mode), actual);
+        assertEquals("(" + a + ").divideToIntegralValue((" + b + "), " + mode + ")", expectedQ.get(mode), bfA.divideToIntegralValue(bfB, mode).toString());
+        assertEquals("(" + a + ").remainder((" + b + "), " + mode + ")", expectedR.get(mode), bfA.remainder(bfB, mode).toString());
+        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[0]", expectedQ.get(mode), bfA.divideAndRemainder(bfB, mode)[0].toString());
+        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[1]", expectedR.get(mode), bfA.divideAndRemainder(bfB, mode)[1].toString());
         
-        actual = bfA.remainder(bfB, mode).toString();
-        assertEquals("(" + a + ").remainder((" + b + "), " + mode + ")", expectedR.get(mode), actual);
+        //check the static methods too
+        assertEquals("BigFraction.integralQuotient((" + a + "), (" + b + "), " + mode + ")", expectedQ.get(mode), BigFraction.integralQuotient(bfA, bfB, mode).toString());
+        assertEquals("BigFraction.remainder((" + a + "), (" + b + "), " + mode + ")", expectedR.get(mode), BigFraction.remainder(bfA, bfB, mode).toString());
+        assertEquals("BigFraction.quotientAndRemainder((" + a + "), (" + b + "), " + mode + ")[0]", expectedQ.get(mode), BigFraction.quotientAndRemainder(bfA, bfB, mode)[0].toString());
+        assertEquals("BigFraction.quotientAndRemainder((" + a + "), (" + b + "), " + mode + ")[1]", expectedR.get(mode), BigFraction.quotientAndRemainder(bfA, bfB, mode)[1].toString());
         
+        //make sure that the math actually works out:  a/b = q + r/b, and also a = bq + r
         Number[] actuals = bfA.divideAndRemainder(bfB, mode);
-        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[0]", expectedQ.get(mode), actuals[0].toString());
-        assertEquals("(" + a + ").divideAndRemainder((" + b + "), " + mode + ")[1]", expectedR.get(mode), actuals[1].toString());
-        
-        //make sure that the math actually works out:  a/b = q + r/b
         assertEquals("(" + a + ")/(" + b + ") = (" + actuals[0] + ") + (" + actuals[1] + ")/(" + b + ")", bf(bfA, bfB).toString(), bf(actuals[0]).add(bf(actuals[1], bfB)).toString());
-        
-        //just to be extra careful... check out math another way: a = bq + r
         assertEquals("(" + a + ") = (" + b + ")(" + actuals[0] + ") + (" + actuals[1] + ")", bfA.toString(), bfB.multiply(actuals[0]).add(actuals[1]).toString());
       }
       
@@ -1433,6 +1432,12 @@ public class BigFractionTest {
       assertEquals("(" + a + ").remainder((" + b + "))", expectedR.get(DivisionMode.TRUNCATED), bfA.remainder(bfB).toString());
       assertEquals("(" + a + ").divideAndRemainder((" + b + "))[0]", expectedQ.get(DivisionMode.TRUNCATED), bfA.divideAndRemainder(bfB)[0].toString());
       assertEquals("(" + a + ").divideAndRemainder((" + b + "))[1]", expectedR.get(DivisionMode.TRUNCATED), bfA.divideAndRemainder(bfB)[1].toString());
+      
+      //check the static methods too
+      assertEquals("BigFraction.integralQuotient((" + a + "), (" + b + "))",  expectedQ.get(DivisionMode.TRUNCATED), BigFraction.integralQuotient(bfA, bfB).toString());
+      assertEquals("BigFraction.remainder((" + a + "), (" + b + "))", expectedR.get(DivisionMode.TRUNCATED), BigFraction.remainder(bfA, bfB).toString());
+      assertEquals("BigFraction.quotientAndRemainder((" + a + "), (" + b + "))[0]", expectedQ.get(DivisionMode.TRUNCATED), BigFraction.quotientAndRemainder(bfA, bfB)[0].toString());
+      assertEquals("BigFraction.quotientAndRemainder((" + a + "), (" + b + "))[1]", expectedR.get(DivisionMode.TRUNCATED), BigFraction.quotientAndRemainder(bfA, bfB)[1].toString());
     }
   }
   

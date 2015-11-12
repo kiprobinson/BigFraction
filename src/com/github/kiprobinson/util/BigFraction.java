@@ -396,6 +396,95 @@ public final class BigFraction extends Number implements Comparable<Number>
     return divideAndRemainderImpl(this, valueOf(n), divisionMode);
   }
   
+  
+  
+  /**
+   * Returns result of integer division a / b, using truncated division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).divideToIntegralValue(b)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @see #divideToIntegralValue(Number n)
+   * @see DivisionMode
+   */
+  public static BigInteger integralQuotient(Number a, Number b)
+  {
+    return valueOf(a).divideToIntegralValue(b);
+  }
+  
+  /**
+   * Returns result of integer division a / b, using specified division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).divideToIntegralValue(b, divisionMode)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @see #divideToIntegralValue(Number n, DivisionMode divisionMode)
+   * @see DivisionMode
+   */
+  public static BigInteger integralQuotient(Number a, Number b, DivisionMode divisionMode)
+  {
+    return valueOf(a).divideToIntegralValue(b, divisionMode);
+  }
+  
+  
+  /**
+   * Returns fractional remainder of integer division a / b, using truncated division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).remainder(b)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @see #remainder(Number n)
+   * @see DivisionMode
+   */
+  public static BigFraction remainder(Number a, Number b)
+  {
+    return valueOf(a).remainder(b);
+  }
+  
+  /**
+   * Returns fractional remainder of integer division a / b, using specified division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).remainder(b, divisionMode)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @see #remainder(Number n, DivisionMode divisionMode)
+   * @see DivisionMode
+   */
+  public static BigFraction remainder(Number a, Number b, DivisionMode divisionMode)
+  {
+    return valueOf(a).remainder(b, divisionMode);
+  }
+  
+  /**
+   * Returns integral quotient and fractional remainder of integer division a / b, using truncated division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).divideAndRemainder(b)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @return Two Numbers: first is BigInteger, second is BigFraction.
+   * 
+   * @see #divideAndRemainder(Number n)
+   * @see DivisionMode
+   */
+  public static Number[] quotientAndRemainder(Number a, Number b)
+  {
+    return valueOf(a).divideAndRemainder(b);
+  }
+  
+  /**
+   * Returns integral quotient and fractional remainder of integer division a / b, using specified division mode.
+   * Equivalent to {@code BigFraction.valueOf(a).divideAndRemainder(b, divisionMode)}.
+   * Provided as static method to make code easier to write in some instances.
+   * 
+   * @return Two Numbers: first is BigInteger, second is BigFraction.
+   * 
+   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * @see DivisionMode
+   */
+  public static Number[] quotientAndRemainder(Number a, Number b, DivisionMode divisionMode)
+  {
+    return valueOf(a).divideAndRemainder(b, divisionMode);
+  }
+  
+  
+  /**
+   * Private method to do all the work of integer division.
+   */
   private static Number[] divideAndRemainderImpl(BigFraction a, BigFraction b, DivisionMode divisionMode)
   {
     if(b.numerator.equals(BigInteger.ZERO))
@@ -466,6 +555,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     return new Number[]{q, rFract};
   }
+  
   
   /**
    * Returns this^exponent.
