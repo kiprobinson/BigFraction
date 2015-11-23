@@ -249,6 +249,49 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testNegate() {
+    assertEquals("(2/7).negate()", "-2/7", bf(2,7).negate().toString());
+    assertEquals("(0/1).negate()", "0/1", bf(0).negate().toString());
+    assertEquals("(-2/7).negate()", "2/7", bf(-2,7).negate().toString());
+  }
+  
+  @Test
+  public void testAbs() {
+    assertEquals("(2/7).abs()", "2/7", bf(2,7).abs().toString());
+    assertEquals("(0/1).abs()", "0/1", bf(0).abs().toString());
+    assertEquals("(-2/7).abs()", "2/7", bf(-2,7).abs().toString());
+  }
+  
+  @Test
+  public void testWithSign() {
+    assertEquals("(2/7).withSign(-1)", "-2/7", bf(2,7).withSign(-1).toString());
+    assertEquals("(2/7).withSign(0)", "0/1", bf(2,7).withSign(0).toString());
+    assertEquals("(2/7).withSign(1)", "2/7", bf(2,7).withSign(1).toString());
+    
+    assertEquals("(-2/7).withSign(-1)", "-2/7", bf(-2,7).withSign(-1).toString());
+    assertEquals("(-2/7).withSign(0)", "0/1", bf(-2,7).withSign(0).toString());
+    assertEquals("(-2/7).withSign(1)", "2/7", bf(-2,7).withSign(1).toString());
+    
+    //make sure we don't get exception when we try to set 0 to some sign.
+    assertEquals("(0/7).withSign(-1)", "0/1", bf(0,7).withSign(-1).toString());
+    assertEquals("(0/7).withSign(0)", "0/1", bf(0,7).withSign(0).toString());
+    assertEquals("(0/7).withSign(1)", "0/1", bf(0,7).withSign(1).toString());
+    
+    //a signum value other than -1, 0, or 1 is ok too.
+    assertEquals("(2/7).withSign(-999)", "-2/7", bf(2,7).withSign(-999).toString());
+    assertEquals("(2/7).withSign(1048)", "2/7", bf(2,7).withSign(1048).toString());
+  }
+  
+  @Test
+  public void testSignum() {
+    assertEquals("(2/7).signum()", 1, bf(2,7).signum());
+    assertEquals("(0/1).signum()", 0, bf(0).signum());
+    assertEquals("(-2/7).signum()", -1, bf(-2,7).signum());
+  }
+  
+  
+  
+  @Test
   public void testSubnormals() {
     double minSubnormal = Double.longBitsToDouble(0x0000000000000001L);
     double arbSubnormal = Double.longBitsToDouble(0x000deadbeef01010L);

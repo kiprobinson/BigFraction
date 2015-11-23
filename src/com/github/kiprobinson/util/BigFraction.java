@@ -604,19 +604,43 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns -this.
+   * Returns -this. If this is zero, returns zero.
+   * @return equivalent of <code>this.multiply(-1)</code>
    */
   public BigFraction negate()
   {
-    return new BigFraction(numerator.negate(), denominator, Reduced.YES);
+    return withSign(-numerator.signum());
   }
   
   /**
    * Returns the absolute value of this.
+   * @return absolute value of this.
    */
   public BigFraction abs()
   {
-    return (signum() < 0 ? negate() : this);
+    return withSign(1);
+  }
+  
+  /**
+   * Returns this, with sign set to the sign of <code>sgn</sign> parameter.
+   * Another way of saying it: returns the equivalent of <code>this.abs().multiply(Math.signum(sgn))</code>.
+   * 
+   * Important Note: If this is zero, always returns zero. No exception thrown, even if we are trying
+   * to set the sign of 0 to positive or negative.
+   * 
+   * @param sgn an integer less than, equal to, or greater than 0, whose sign will be assigned to the returned fraction.
+   * @return equivalent of <code>this.abs().multiply(Math.signum(sgn))</code>.
+   */
+  public BigFraction withSign(int sgn)
+  {
+    if(sgn == 0 || numerator.equals(BigInteger.ZERO))
+      return BigFraction.ZERO;
+    
+    int thisSignum = numerator.signum();
+    if((thisSignum < 0 && sgn > 0) || (thisSignum > 0 && sgn < 0))
+      return new BigFraction(numerator.negate(), denominator, Reduced.YES);
+    
+    return this;
   }
   
   /**
