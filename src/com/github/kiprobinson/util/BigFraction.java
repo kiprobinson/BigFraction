@@ -1829,7 +1829,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(n instanceof BigFraction)
       return ((BigFraction)n).numerator;
     
-    if(n instanceof Double || n instanceof Float)
+    if(n instanceof Double || n instanceof Float || n instanceof DoubleAdder || n instanceof DoubleAccumulator)
     {
       final double d = n.doubleValue();
       
