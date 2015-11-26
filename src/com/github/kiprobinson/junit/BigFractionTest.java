@@ -174,9 +174,19 @@ public class BigFractionTest {
     new DivideAndRemainderTest("0",  "999", "0", "0/1", "0", "0/1", "0", "0/1").test();
     new DivideAndRemainderTest("0", "-999", "0", "0/1", "0", "0/1", "0", "0/1").test();
     
+    new DivideAndRemainderTest( "4/3",  "1",  "1",  "1/3",  "1",  "1/3",  "1", "1/3").test();
+    new DivideAndRemainderTest("-4/3",  "1", "-1", "-1/3", "-2",  "2/3", "-2", "2/3").test();
+    new DivideAndRemainderTest( "4/3", "-1", "-1",  "1/3", "-2", "-2/3", "-1", "1/3").test();
+    new DivideAndRemainderTest("-4/3", "-1",  "1", "-1/3",  "1", "-1/3",  "2", "2/3").test();
+    
+    new DivideAndRemainderTest( "8/3",  "1",  "2",  "2/3",  "2",  "2/3",  "2", "2/3").test();
+    new DivideAndRemainderTest("-8/3",  "1", "-2", "-2/3", "-3",  "1/3", "-3", "1/3").test();
+    new DivideAndRemainderTest( "8/3", "-1", "-2",  "2/3", "-3", "-1/3", "-2", "2/3").test();
+    new DivideAndRemainderTest("-8/3", "-1",  "2", "-2/3",  "2", "-2/3",  "3", "1/3").test();
+    
     new DivideAndRemainderTest( "4/3",  "4/3",  "1", "0/1",  "1", "0/1",  "1", "0/1").test();
-    new DivideAndRemainderTest( "4/3", "-4/3", "-1", "0/1", "-1", "0/1", "-1", "0/1").test();
     new DivideAndRemainderTest("-4/3",  "4/3", "-1", "0/1", "-1", "0/1", "-1", "0/1").test();
+    new DivideAndRemainderTest( "4/3", "-4/3", "-1", "0/1", "-1", "0/1", "-1", "0/1").test();
     new DivideAndRemainderTest("-4/3", "-4/3",  "1", "0/1",  "1", "0/1",  "1", "0/1").test();
     
     new DivideAndRemainderTest( "4/3",  "1/3",  "4", "0/1",  "4", "0/1",  "4", "0/1").test();
@@ -190,9 +200,9 @@ public class BigFractionTest {
     new DivideAndRemainderTest("-5/4", "-1/2",  "2", "-1/4",  "2", "-1/4",  "3", "1/4").test();
     
     new DivideAndRemainderTest( "5/3",  "7/11",  "2",  "13/33",  "2",  "13/33",  "2", "13/33").test();
-    new DivideAndRemainderTest("-5/3",  "7/11", "-2", "-13/33", "-3",  "8/33", "-3", "8/33").test();
-    new DivideAndRemainderTest( "5/3", "-7/11", "-2",  "13/33", "-3", "-8/33", "-2", "13/33").test();
-    new DivideAndRemainderTest("-5/3", "-7/11",  "2", "-13/33",  "2", "-13/33",  "3", "8/33").test();
+    new DivideAndRemainderTest("-5/3",  "7/11", "-2", "-13/33", "-3",   "8/33", "-3",  "8/33").test();
+    new DivideAndRemainderTest( "5/3", "-7/11", "-2",  "13/33", "-3",  "-8/33", "-2", "13/33").test();
+    new DivideAndRemainderTest("-5/3", "-7/11",  "2", "-13/33",  "2", "-13/33",  "3",  "8/33").test();
     
     new DivideAndRemainderTest( "7/11",  "13/5", "0",  "7/11",  "0",    "7/11",  "0",   "7/11").test();
     new DivideAndRemainderTest("-7/11",  "13/5", "0", "-7/11", "-1",  "108/55", "-1", "108/55").test();

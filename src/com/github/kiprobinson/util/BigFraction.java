@@ -489,8 +489,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   {
     if(b.numerator.equals(BigInteger.ZERO))
       throw new ArithmeticException("Divide by zero.");
-    else if(a.numerator.equals(BigInteger.ZERO) || b.equals(BigFraction.ONE))
-      return new Number[]{a.numerator, BigFraction.ZERO};
+    else if(a.numerator.equals(BigInteger.ZERO))
+      return new Number[]{BigInteger.ZERO, BigFraction.ZERO};
     
     //First calculate true a/b value. We don't care about reducing to lowest terms
     //yet, so calculate numerator and denominator separately:
