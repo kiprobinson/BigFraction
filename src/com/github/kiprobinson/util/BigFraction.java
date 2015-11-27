@@ -2,12 +2,7 @@ package com.github.kiprobinson.util;
 
 import java.math.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.DoubleAccumulator;
-import java.util.concurrent.atomic.DoubleAdder;
-import java.util.concurrent.atomic.LongAccumulator;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.*;
 
 /**
  * Arbitrary-precision fraction, utilizing BigIntegers for numerator and
@@ -40,6 +35,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   private static enum Reduced { YES, NO };
   private static enum FareyMode { NEXT, PREV, CLOSEST };
+  private static enum RemainderMode { QUOTIENT, REMAINDER, BOTH };
   
   /**
    * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(Number n)}
@@ -345,8 +341,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public BigInteger divideToIntegralValue(Number n, DivisionMode divisionMode)
   {
-    //TODO: OPTIMIZE
-    return (BigInteger)(divideAndRemainder(n, divisionMode)[0]);
+    return (BigInteger)(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.QUOTIENT));
   }
   
   /**
@@ -364,8 +359,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public BigFraction remainder(Number n, DivisionMode divisionMode)
   {
-    //TODO: OPTIMIZE
-    return (BigFraction)(divideAndRemainder(n, divisionMode)[1]);
+    return (BigFraction)(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.REMAINDER));
   }
   
   /**
@@ -393,7 +387,124 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public Number[] divideAndRemainder(Number n, DivisionMode divisionMode)
   {
-    return divideAndRemainderImpl(this, valueOf(n), divisionMode);
+    return (Number[])(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.BOTH));
+  }
+  
+  /**
+   * Private method to do all the work of integer division with fractional remainder.
+   * Code is optimized for speed moreso than readability, but I've tried to comment.
+   * Returns either just the quotient, just the remainder, or an array of both,
+   * depending on the remainder mode.
+   */
+  private static Object divideAndRemainderImpl(BigFraction a, BigFraction b, DivisionMode divisionMode, RemainderMode remainderMode)
+  {
+    if(b.numerator.equals(BigInteger.ZERO))
+      throw new ArithmeticException("Divide by zero.");
+    else if(a.numerator.equals(BigInteger.ZERO))
+      return divideAndRemainderReturner(BigInteger.ZERO, BigFraction.ZERO, remainderMode);
+    
+    //First calculate true a/b value. We don't care about reducing to lowest terms
+    //yet, so calculate numerator and denominator separately:
+    //  a/b = (a.n/a.d)/(b.n/b.d) = (a.n/a.d)*(b.d/b.n) = (a.n*b.d)/(a.d*b.n)
+    //also worth noting: sign(a)==sign(num), sign(b)==sign(den)
+    BigInteger num = a.numerator.multiply(b.denominator);
+    BigInteger den = a.denominator.multiply(b.numerator);
+    
+    //BigInteger.divideAndRemainder() uses TRUNCATED division to give us values q,r such that:  num/den = q + r/den
+    //For other division modes, we may need to adjust q,r to new values q',r'. If we adjust q by adjustment x, i.e. q'=q+x, then:
+    //  q + r/den = q' + r'/den
+    //  q + r/den = q + x + r'/den
+    //      r/den =     x + r'/den
+    //     r'/den = r/den - x
+    //         r' = r - x*den
+    //In actuality, x will either be -1, 0, or 1.
+    int adjustment = 0;
+    if(divisionMode == DivisionMode.FLOORED && ((num.signum() < 0 || den.signum() < 0) && num.signum() != den.signum()))
+    {
+      //floor is equivalent to truncation for positive quotient, but for negative quotient we have to subtract one
+      adjustment = -1;
+    }
+    else if(divisionMode == DivisionMode.EUCLIDEAN && num.signum() < 0)
+    {
+      //Euclidean division picks a quotient to ensure the remainder is always positive.
+      // *  b > 0: q = floor(a/b)
+      // *  b < 0: q = ciel(a/b)
+      
+      //For the four different combinations of signs of the operators, two are the same as truncation,
+      //and two require additional modification:
+      //   + / +: +  =>  floor(q) == trunc(q)
+      //   + / -: -  =>  ciel(q)  == trunc(q)
+      //   - / +: -  =>  floor(q) == trunc(q) - 1  **modification required
+      //   - / -: +  =>  ciel(q)  == trunc(q) + 1  **modification required
+      if(den.signum() > 0)
+        adjustment = -1;
+      else
+        adjustment = 1;
+    }
+    
+    
+    //we may only need one or the other of q,r. Only compute the ones that we need.
+    BigInteger q=null, r=null;
+    if(remainderMode == RemainderMode.REMAINDER)
+    {
+      //if we are in remainder mode, we never care about the quotient
+      r = num.remainder(den);
+    }
+    else if(adjustment == 0 && remainderMode == RemainderMode.QUOTIENT)
+    {
+      //in quotient mode, if we have an adjustment we have to get both quotient and remainder, because we cancel the adjustment if the
+      //remainder is 0. But if adjustment is already 0, we can get only the quotient.
+      q = num.divide(den);
+    }
+    else
+    {
+      BigInteger[] divmod = num.divideAndRemainder(den);
+      q = divmod[0];
+      r = divmod[1];
+    }
+    
+    //if the remainder is 0, we don't do any adjustments
+    if(r != null && r.equals(BigInteger.ZERO))
+      return divideAndRemainderReturner(q, BigFraction.ZERO, remainderMode); //or could do: adjustment=0
+    
+    //avoid doing unnecessary math...
+    if(r != null && remainderMode == RemainderMode.QUOTIENT)
+      r = null;
+    
+    if(adjustment == -1)
+    {
+      q = (q == null ? null : q.subtract(BigInteger.ONE));  //q' = q + (-1)
+      r = (r == null ? null : r.add(den));                  //r' = r - (-1)*den
+    }
+    else if(adjustment == 1)
+    {
+      q = (q == null ? null : q.add(BigInteger.ONE));  //q' = q + (1)
+      r = (r == null ? null : r.subtract(den));        //r' = r - (1)*den
+    }
+    
+    //At this point we have:
+    //  num/den = q + r/den
+    //We want to compute q", r", such that:  a/b = q" + r"/b
+    //We know that a/b = num/den, and q = q". So we are left with:
+    //  (r"/b)=(r/den)
+    //  r" = r * b / den = (r * b.n)/(b.d * den)
+    
+    BigFraction rFract = (r == null ? null : new BigFraction(r.multiply(b.numerator), b.denominator.multiply(den), Reduced.NO));
+    
+    return divideAndRemainderReturner(q, rFract, remainderMode);
+  }
+  
+  /**
+   * Helper method to handle return value for divideAndRemainderImpl.
+   */
+  private static Object divideAndRemainderReturner(BigInteger q, BigFraction r, RemainderMode remainderMode)
+  {
+    if(remainderMode == RemainderMode.QUOTIENT)
+      return q;
+    if(remainderMode == RemainderMode.REMAINDER)
+      return r;
+    else
+      return new Number[]{q, r};
   }
   
   
@@ -481,80 +592,6 @@ public final class BigFraction extends Number implements Comparable<Number>
     return valueOf(a).divideAndRemainder(b, divisionMode);
   }
   
-  
-  /**
-   * Private method to do all the work of integer division.
-   */
-  private static Number[] divideAndRemainderImpl(BigFraction a, BigFraction b, DivisionMode divisionMode)
-  {
-    if(b.numerator.equals(BigInteger.ZERO))
-      throw new ArithmeticException("Divide by zero.");
-    else if(a.numerator.equals(BigInteger.ZERO))
-      return new Number[]{BigInteger.ZERO, BigFraction.ZERO};
-    
-    //First calculate true a/b value. We don't care about reducing to lowest terms
-    //yet, so calculate numerator and denominator separately:
-    //  a/b = (a.n/a.d)/(b.n/b.d) = (a.n/a.d)*(b.d/b.n) = (a.n*b.d)/(a.d*b.n)
-    //also worth noting: sign(a)==sign(num), sign(b)==sign(den)
-    BigInteger num = a.numerator.multiply(b.denominator);
-    BigInteger den = a.denominator.multiply(b.numerator);
-    
-    //BigInteger.divide() uses TRUNCATED division to give us values q,r such that:  num/den = q + r/den
-    //For other division modes, we may need to adjust q,r to new values q',r'.  If q'=q+x, then:
-    //  q + r/den = q' + r'/den
-    //  q + r/den = q + x + r'/den
-    //      r/den =     x + r'/den
-    //     r'/den = r/den - x
-    //         r' = r - x*den
-    BigInteger[] divmod = num.divideAndRemainder(den);
-    BigInteger q = divmod[0];
-    BigInteger r = divmod[1];
-    
-    if(r.equals(BigInteger.ZERO))
-      return new Number[]{q, BigFraction.ZERO};
-    
-    
-    if(divisionMode == DivisionMode.FLOORED && ((num.signum() < 0 || den.signum() < 0) && num.signum() != den.signum()))
-    {
-      //floor is equivalent to truncation for positive quotient, but for negative quotient we have to subtract one 
-      q = q.subtract(BigInteger.ONE);  //q' = q + (-1)
-      r = r.add(den);                  //r' = r - (-1)*den
-    }
-    else if(divisionMode == DivisionMode.EUCLIDEAN && num.signum() < 0)
-    {
-      //Euclidean division picks a quotient to ensure the remainder is always positive.
-      // *  b > 0: q = floor(a/b)
-      // *  b < 0: q = ciel(a/b)
-      
-      //For the four different combinations of signs of the operators, two are the same as truncation,
-      //and two require additional modification:
-      //   + / +: +  =>  floor(q) == trunc(q)
-      //   + / -: -  =>  ciel(q)  == trunc(q)
-      //   - / +: -  =>  floor(q) == trunc(q) - 1  **modification required
-      //   - / -: +  =>  ciel(q)  == trunc(q) + 1  **modification required
-      if(den.signum() > 0)
-      {
-        q = q.subtract(BigInteger.ONE);  //q' = q + (-1)
-        r = r.add(den);                  //r' = r - (-1)*den
-      }
-      else
-      {
-        q = q.add(BigInteger.ONE);  //q' = q + (1)
-        r = r.subtract(den);        //r' = r - (1)*den
-      }
-    }
-    
-    //At this point we have:
-    //  num/den = q + r/den
-    //We want to compute q", r", such that:  a/b = q" + r"/b
-    //We know that a/b = num/den, and q = q". So we are left with:
-    //  (r"/b)=(r/den)
-    //  r" = r * b / den = (r * b.n)/(b.d * den)
-    
-    BigFraction rFract = new BigFraction(r.multiply(b.numerator), b.denominator.multiply(den), Reduced.NO);
-    
-    return new Number[]{q, rFract};
-  }
   
   
   /**
