@@ -2,8 +2,7 @@ package com.github.kiprobinson.util;
 
 import java.math.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.*;
 
 /**
  * Arbitrary-precision fraction, utilizing BigIntegers for numerator and
