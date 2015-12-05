@@ -2,9 +2,11 @@ package com.github.kiprobinson.util;
 
 /**
  * Additional utilities for working with double values. Useful to prevent hard-coding IEEE 754 constants in code.
- * Consider this a complement to the methods provided in java.lang.Double.
+ * Consider this a complement to the methods provided in {@link Double}.
  * 
- * @author Kip Robinson, https://github.com/kiprobinson
+ * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
+ * 
+ * @see <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">Wikipedia overview of IEEE 754 double-precision floating point specifications</a>
  */
 public final class DoubleUtil
 {
@@ -31,13 +33,19 @@ public final class DoubleUtil
   /**
    * Returns true if d is finite--not infinite and not NaN. (Equivalent to
    * Double.isFinite() available from Java 8.)
+   * 
+   * @param d a double value
+   * @return whether this value is finite.
    */
   public static boolean isFinite(double d) {
     return !Double.isInfinite(d) && !Double.isNaN(d);
   }
   
   /**
-   * Returns the sign bit. 0=positive, 1=negative. This is returned even for NaN values.
+   * Returns the sign bit (bit 63). 0=positive, 1=negative. This is returned even for NaN values.
+   * 
+   * @param d a double value
+   * @return the sign bit
    */
   public static int getSign(double d)
   {
@@ -45,12 +53,21 @@ public final class DoubleUtil
   }
   
   /**
-   * Returns the exponent, after adding the exponent offset to the exponent bits.
+   * Returns the exponent, after adding the exponent offset to the exponent bits. In other words, the value
+   * in bits 62-52, plus 0x3ff.<br>
+   * <br>
+   * Examples:<ul>
+   *   <li>{@code getExponent(0.5) == -1} because {@code 1.0 == 1.0 * 2^-1}</li>
+   *   <li>{@code getExponent(1.0) ==  0} because {@code 1.0 == 1.0 * 2^0}</li>
+   *   <li>{@code getExponent(2.0) ==  1} because {@code 2.0 == 1.0 * 2^1}</li>
+   *   <li>Subnormal values: Always returns -1023.</li>
+   *   <li>Zero: Always returns -1023.</li>
+   *   <li>Infinity: Always returns 1024.</li>
+   *   <li>NaN: Always returns 1024.</li>
+   *   </ul>
    * 
-   * Examples:
-   *   getExponent(0.5) == -1    because 1.0 == 1.0 * 2^-1
-   *   getExponent(1.0) ==  0    because 1.0 == 1.0 * 2^0
-   *   getExponent(2.0) ==  1    because 2.0 == 1.0 * 2^1
+   * @param d any double value
+   * @return adjusted exponent
    */
   public static int getExponent(double d)
   {
@@ -58,7 +75,21 @@ public final class DoubleUtil
   }
   
   /**
-   * Returns the raw exponent bits, without adjusting for the offset.
+   * Returns the raw exponent bits, without adjusting for the offset. In other words, the value
+   * in bits 62-52.<br>
+   * <br>
+   * Examples:<ul>
+   *   <li>{@code getExponentBits(0.5) == 0x3fe}</li>
+   *   <li>{@code getExponentBits(1.0) == 0x3ff}</li>
+   *   <li>{@code getExponentBits(2.0) == 0x400}</li>
+   *   <li>Subnormal values: Always returns 0x000.</li>
+   *   <li>Zero: Always returns 0x000.</li>
+   *   <li>Infinity: Always returns 0x7ff.</li>
+   *   <li>NaN: Always returns 0x7ff.</li>
+   * </ul>
+   * 
+   * @param d a double value
+   * @return raw exponent bits
    */
   public static int getExponentBits(double d)
   {
@@ -66,7 +97,9 @@ public final class DoubleUtil
   }
   
   /**
-   * Returns the mantissa bits.
+   * Returns the mantissa bits (bits 51-0). Returned even for NaN values.
+   * @param d a double value
+   * @return mantissa bits
    */
   public static long getMantissa(double d)
   {
@@ -75,6 +108,8 @@ public final class DoubleUtil
   
   /**
    * Returns whether or not this double is a subnormal value.
+   * @param d a double value
+   * @return whether or not this double is a subnormal value
    */
   public static boolean isSubnormal(double d)
   {
@@ -86,11 +121,13 @@ public final class DoubleUtil
   /**
    * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
    * 
-   * @return array with four elements:
-   *     return[0]: Equivalent to getSign(d)
-   *     return[1]: Equivalent to getExponent(d)
-   *     return[2]: Equivalent to getMantissa(d)
-   *     return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.
+   * @param d a double value
+   * @return array with four elements:<ul>
+   *     <li>return[0]: Equivalent to getSign(d)</li>
+   *     <li>return[1]: Equivalent to getExponent(d)</li>
+   *     <li>return[2]: Equivalent to getMantissa(d)</li>
+   *     <li>return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.</li>
+   * </ul>
    */
   public static long[] getAllParts(double d)
   {
@@ -100,11 +137,14 @@ public final class DoubleUtil
   /**
    * Returns an array containing the parts of the double. Avoids the overhead of four separate function calls.
    * 
-   * @return array with four elements:
-   *     return[0]: Equivalent to getSign(d)
-   *     return[1]: Equivalent to (exponentAsBits ? getExponentBits(d) : getExponent(d))
-   *     return[2]: Equivalent to getMantissa(d)
-   *     return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.
+   * @param d a double value
+   * @param exponentAsBits whether to return exponent as raw bits rather than adjusted value
+   * @return array with four elements:<ul>
+   *     <li>return[0]: Equivalent to getSign(d)</li>
+   *     <li>return[1]: Equivalent to (exponentAsBits ? getExponentBits(d) : getExponent(d))</li>
+   *     <li>return[2]: Equivalent to getMantissa(d)</li>
+   *     <li>return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.</li>
+   * </ul>
    */
   public static long[] getAllParts(double d, boolean exponentAsBits)
   {
@@ -116,7 +156,6 @@ public final class DoubleUtil
     segments[2] = bits & MANTISSA_MASK;
     segments[3] = (segments[1] == 0L && segments[2] != 0L ? 1L : 0L);
     
-    
     if(!exponentAsBits)
       segments[1] -= EXPONENT_OFFSET;
     
@@ -125,6 +164,14 @@ public final class DoubleUtil
   
   /**
    * Creates a new double primitive using the provided component bits. Assumes the exponent parameter is signed.
+   * 
+   * @param sign sign bit
+   * @param exponent adjusted exponent
+   * @param mantissa mantissa bits
+   * 
+   * @return The double value represented by the provided binary parts.
+   * 
+   * @throws IllegalArgumentException if any of the parts contain invalid bits.
    */
   public static double getDouble(int sign, int exponent, long mantissa)
   {
@@ -134,13 +181,15 @@ public final class DoubleUtil
   /**
    * Creates a new double primitive using the provided component bits.
    * 
-   * @param sign
-   * @param exponent
-   * @param mantissa
+   * @param sign            sign bit
+   * @param exponent        exponent (either raw bits or adjusted value)
+   * @param mantissa        mantissa bits
    * @param exponentAsBits  If true, assumes that exponent parameter represents the actual exponent bits. If false,
    *                        IEEE exponent offset value will be added to the offset to get the bits.
    * 
    * @return The double value represented by the provided binary parts.
+   * 
+   * @throws IllegalArgumentException if any of the parts contain invalid bits.
    */
   public static double getDouble(int sign, int exponent, long mantissa, boolean exponentAsBits)
   {
@@ -152,7 +201,7 @@ public final class DoubleUtil
     
     int offsetExponent = (exponentAsBits ? exponent : exponent + EXPONENT_OFFSET);
     
-    if(offsetExponent < 0 || offsetExponent > MAX_EXPONENT)
+    if(0 != (offsetExponent & ~MAX_EXPONENT))
       throw new IllegalArgumentException("Illegal exponent: " + exponent);
     
     return Double.longBitsToDouble((((long)sign) << SIGN_POS) | (((long)offsetExponent) << EXPONENT_POS) | mantissa);

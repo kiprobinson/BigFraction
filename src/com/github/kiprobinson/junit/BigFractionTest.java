@@ -20,7 +20,7 @@ import org.junit.Test;
 /**
  * JUnit tests for BigFraction class.
  * 
- * @author Kip Robinson, https://github.com/kiprobinson
+ * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  */
 public class BigFractionTest {
   
@@ -290,6 +290,18 @@ public class BigFractionTest {
     //a signum value other than -1, 0, or 1 is ok too.
     assertEquals("(2/7).withSign(-999)", "-2/7", bf(2,7).withSign(-999).toString());
     assertEquals("(2/7).withSign(1048)", "2/7", bf(2,7).withSign(1048).toString());
+    assertEquals("(-2/7).withSign(-999)", "-2/7", bf(-2,7).withSign(-999).toString());
+    assertEquals("(-2/7).withSign(1048)", "2/7", bf(-2,7).withSign(1048).toString());
+    assertEquals("(0).withSign(-999)", "0/1", bf(0.0).withSign(-999).toString());
+    assertEquals("(0).withSign(1048)", "0/1", bf(0.0).withSign(1048).toString());
+    
+    //test with extreme values just to be safe
+    assertEquals("(2/7).withSign(Integer.MIN_VALUE)", "-2/7", bf(2,7).withSign(Integer.MIN_VALUE).toString());
+    assertEquals("(2/7).withSign(Integer.MAX_VALUE)", "2/7", bf(2,7).withSign(Integer.MAX_VALUE).toString());
+    assertEquals("(-2/7).withSign(Integer.MIN_VALUE)", "-2/7", bf(-2,7).withSign(Integer.MIN_VALUE).toString());
+    assertEquals("(-2/7).withSign(Integer.MAX_VALUE)", "2/7", bf(-2,7).withSign(Integer.MAX_VALUE).toString());
+    assertEquals("(0).withSign(Integer.MIN_VALUE)", "0/1", bf(0.0).withSign(Integer.MIN_VALUE).toString());
+    assertEquals("(0).withSign(Integer.MAX_VALUE)", "0/1", bf(0.0).withSign(Integer.MAX_VALUE).toString());
   }
   
   @Test
@@ -1264,16 +1276,16 @@ public class BigFractionTest {
     
     public void test()
     {
-      for(Map.Entry<RoundingMode, String> entry : expected.entrySet())
+      for(RoundingMode mode : RoundingMode.values())
       {
         String actual;
         try {
-          actual = bf.round(entry.getKey()).toString();
+          actual = bf.round(mode).toString();
         }
         catch(Exception e) {
           actual = e.getClass().getSimpleName();
         }
-        assertEquals("round(" + input + ", " + entry.getKey() + ")", entry.getValue(), actual);
+        assertEquals("round(" + input + ", " + mode + ")", expected.get(mode), actual);
       }
       
       //test that default rounding mode is the same as HALF_UP
@@ -1312,16 +1324,16 @@ public class BigFractionTest {
     
     public void test()
     {
-      for(Map.Entry<RoundingMode, String> entry : expected.entrySet())
+      for(RoundingMode mode : RoundingMode.values())
       {
         String actual;
         try {
-          actual = bf.roundToDenominator(denominator, entry.getKey()).toString();
+          actual = bf.roundToDenominator(denominator, mode).toString();
         }
         catch(Exception e) {
           actual = e.getClass().getSimpleName();
         }
-        assertEquals("roundToDenominator(" + input + ", " + denominator + ", " + entry.getKey() + ")", entry.getValue(), actual);
+        assertEquals("roundToDenominator(" + input + ", " + denominator + ", " + mode + ")", expected.get(mode), actual);
       }
       
       //test that default rounding mode is the same as HALF_UP
@@ -1359,16 +1371,16 @@ public class BigFractionTest {
     
     public void test()
     {
-      for(Map.Entry<RoundingMode, String> entry : expected.entrySet())
+      for(RoundingMode mode : RoundingMode.values())
       {
         String actual;
         try {
-          actual = bf.toDecimalString(digits, entry.getKey()).toString();
+          actual = bf.toDecimalString(digits, mode).toString();
         }
         catch(Exception e) {
           actual = e.getClass().getSimpleName();
         }
-        assertEquals("toDecimalString(" + input + ", " + digits + ", " + entry.getKey() + ")", entry.getValue(), actual);
+        assertEquals("toDecimalString(" + input + ", " + digits + ", " + mode + ")", expected.get(mode), actual);
       }
       
       //test that default rounding mode is the same as HALF_UP
