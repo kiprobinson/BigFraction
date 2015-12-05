@@ -8,7 +8,7 @@ import com.github.kiprobinson.util.BigFraction;
 /**
  * Class with public static void main(). Allows easy demo..
  * 
- * @author Kip Robinson, https://github.com/kiprobinson
+ * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  */
 public final class BigFractionMain
 {

@@ -10,7 +10,7 @@ import org.junit.Test;
 /**
  * JUnit tests for BigFraction class.
  * 
- * @author Kip Robinson, https://github.com/kiprobinson
+ * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  */
 public class DoubleUtilTest {
   

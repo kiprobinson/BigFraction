@@ -6,12 +6,12 @@ import java.util.concurrent.atomic.*;
 
 /**
  * Arbitrary-precision fraction, utilizing BigIntegers for numerator and
- * denominator.  Fraction is always kept in lowest terms.  Fraction is
+ * denominator. Fraction is always kept in lowest terms. Fraction is
  * immutable, and guaranteed not to have a null numerator or denominator.
  * Denominator will always be positive (so sign is carried by numerator,
  * and a zero-denominator is impossible).
  * 
- * @author Kip Robinson, https://github.com/kiprobinson
+ * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  */
 public final class BigFraction extends Number implements Comparable<Number>
 {
@@ -19,29 +19,31 @@ public final class BigFraction extends Number implements Comparable<Number>
   private final BigInteger numerator;
   private final BigInteger denominator;
   
-  public final BigInteger getNumerator() { return numerator; }
-  public final BigInteger getDenominator() { return denominator; }
+  //some constants used
+  private final static BigInteger BIGINT_TWO = BigInteger.valueOf(2);
+  private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
   
   /** The value 0/1. */
   public final static BigFraction ZERO = new BigFraction(BigInteger.ZERO, BigInteger.ONE, Reduced.YES);
   /** The value 1/1. */
   public final static BigFraction ONE = new BigFraction(BigInteger.ONE, BigInteger.ONE, Reduced.YES);
+  /** The value 1/2. */
+  public final static BigFraction ONE_HALF = new BigFraction(BigInteger.ONE, BIGINT_TWO, Reduced.YES);
+  /** The value 1/10. */
+  public final static BigFraction ONE_TENTH = new BigFraction(BigInteger.ONE, BigInteger.TEN, Reduced.YES);
   /** The value 10/1. */
   public final static BigFraction TEN = new BigFraction(BigInteger.TEN, BigInteger.ONE, Reduced.YES);
-  
-  //some constants used
-  private final static BigInteger BIGINT_TWO = BigInteger.valueOf(2);
-  private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
   
   private static enum Reduced { YES, NO };
   private static enum FareyMode { NEXT, PREV, CLOSEST };
   private static enum RemainderMode { QUOTIENT, REMAINDER, BOTH };
   
   /**
-   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(Number n)}
-   * should be preferred for performance reasons.
+   * <strong>Note:</strong> {@link #valueOf(Number)} should be preferred for performance reasons.
+   * This constructor is provided for convenience.
    * 
-   * @see #valueOf(Number n)
+   * @param n Number to convert to BigFraction.
+   * @see #valueOf(Number)
    */
   public BigFraction(Number n)
   {
@@ -51,10 +53,12 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(Number numerator, Number denominator)}
-   * should be preferred for performance reasons.
+   * <strong>Note:</strong> {@link #valueOf(Number, Number)} should be preferred for performance reasons.
+   * This constructor is provided for convenience.
    * 
-   * @see #valueOf(Number numerator, Number denominator)
+   * @param numerator numerator of new BigFraction
+   * @param denominator denominator of new BigFraction
+   * @see #valueOf(Number, Number)
    */
   public BigFraction(Number numerator, Number denominator)
   {
@@ -64,10 +68,11 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * <strong>Note:</strong> This constructor is provided for convenience, but {@link #valueOf(String s)}
-   * should be preferred for performance reasons.
+   * <strong>Note:</strong> {@link #valueOf(String)} should be preferred for performance reasons.
+   * This constructor is provided for convenience.
    * 
-   * @see #valueOf(String s)
+   * @param s String to convert to parse as BigFraction
+   * @see #valueOf(String)
    */
   public BigFraction(String s)
   {
@@ -78,22 +83,27 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Constructs a BigFraction from given number. If the number is not one of the
-   * primitive types, BigInteger, BigDecimal, or BigFraction, then Number.doubleValue()
-   * will be used for construction.
-   * 
+   * known implementations of Number class, then {@link Number#doubleValue()}
+   * will be used for construction.<br>
+   * <br>
    * Warning: when using floating point numbers, round-off error can result
-   * in answers that are unexpected.  For example, 
-   *     System.out.println(BigFraction.valueOf(1.1))
-   * will print:
-   *     2476979795053773/2251799813685248
-   * 
-   * This is because 1.1 cannot be expressed exactly in binary form.  The
+   * in answers that are unexpected. For example:<br> 
+   * {@code     System.out.println(BigFraction.valueOf(1.1))}<br>
+   * will print:<br>
+   * {@code     2476979795053773/2251799813685248}<br>
+   * <br>
+   * This is because 1.1 cannot be expressed exactly in binary form. The
    * computed fraction is exactly equal to the internal representation of
-   * the double-precision floating-point number.  (Which, for 1.1, is:
-   * (-1)^0 * 2^0 * (1 + 0x199999999999aL / 0x10000000000000L).)
+   * the double-precision floating-point number. (Which, for {@code 1.1}, is:
+   * {@code (-1)^0 * 2^0 * (1 + 0x199999999999aL / 0x10000000000000L)}.)<br>
+   * <br>
+   * In many cases, {@code BigFraction.valueOf(Double.toString(d))} may give the result
+   * the user expects.
    * 
-   * NOTE: In many cases, BigFraction.valueOf(Double.toString(d)) may give a result
-   * closer to what the user expects.
+   * @param n Any Number to be converted to a BigFraction
+   * @return a fully reduced fraction equivalent to {@code n}. Guaranteed to be non-null.
+   * 
+   * @throws IllegalArgumentException if n is null.
    */
   public static BigFraction valueOf(Number n)
   {
@@ -111,26 +121,31 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Constructs a BigFraction with given numerator and denominator.  Fraction
-   * will be reduced to lowest terms.  If fraction is negative, negative sign will
-   * be carried on numerator, regardless of how the values were passed in.
-   * 
-   * 
+   * Constructs a BigFraction with given numerator and denominator. Fraction
+   * will be reduced to lowest terms. If fraction is negative, negative sign will
+   * be carried on numerator, regardless of how the values were passed in. The numerator
+   * and denominator can both be non-integers.<br>
+   * <br>
+   * Example: {@code BigFraction.valueOf(8.5, -6.25); //-34/25}<br>
+   * <br>
    * Warning: when using floating point numbers, round-off error can result
-   * in answers that are unexpected.  For example, 
-   *     System.out.println(BigFraction.valueOf(1.1))
-   * will print:
-   *     2476979795053773/2251799813685248
-   * 
-   * This is because 1.1 cannot be expressed exactly in binary form.  The
+   * in answers that are unexpected. For example,<br>
+   * {@code     System.out.println(BigFraction.valueOf(1.1))}<br>
+   * <br>
+   * This is because 1.1 cannot be expressed exactly in binary form. The
    * computed fraction is exactly equal to the internal representation of
-   * the double-precision floating-point number.  (Which, for 1.1, is:
-   * (-1)^0 * 2^0 * (1 + 0x199999999999aL / 0x10000000000000L).)
+   * the double-precision floating-point number. (Which, for {@code 1.1}, is:
+   * {@code (-1)^0 * 2^0 * (1 + 0x199999999999aL / 0x10000000000000L)}.)<br>
+   * <br>
+   * In many cases, {@code BigFraction.valueOf(Double.toString(d))} may give the result
+   * the user expects.
    * 
-   * NOTE: In many cases, BigFraction.valueOf(Double.toString(d)) may give a result
-   * closer to what the user expects.
+   * @param numerator any Number to be used as the numerator. This does not need to be an integer.
+   * @param denominator any Number to be used as the denominator. This does not need to be an integer.
+   * @return a fully reduced fraction equivalent to {@code numerator/denominator}. Guaranteed to be non-null.
    * 
    * @throws ArithmeticException if denominator == 0.
+   * @throws IllegalArgumentException if numerator or denominator is null.
    */
   public static BigFraction valueOf(Number numerator, Number denominator)
   {
@@ -155,16 +170,30 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Constructs a BigFraction from a String.  Expected format is numerator/denominator,
-   * but /denominator part is optional.  Either numerator or denominator may be a floating-
-   * point decimal number, which is in the same format as a parameter to the
-   * <code>BigDecimal(String)</code> constructor.
+   * Constructs a BigFraction from a String. Expected format is numerator/denominator,
+   * but /denominator part is optional. Either numerator or denominator may be a floating-point
+   * decimal number, which is in the same format as a parameter to the
+   * {@link BigDecimal#BigDecimal(String)} constructor.<br>
+   * <br>
+   * Examples:<br>
+   * {@code BigFraction.valueOf("11"); //11/1}<br>
+   * {@code BigFraction.valueOf("22/34"); //11/17}<br>
+   * {@code BigFraction.valueOf("2e4/-0.64"); //-174375/4}
+   * 
+   * @param s a string representation of a number or fraction
+   * @return a fully reduced fraction equivalent to the specified string. Guaranteed to be non-null.
    * 
    * @throws NumberFormatException  if the string cannot be properly parsed.
    * @throws ArithmeticException if denominator == 0.
+   * @throws IllegalArgumentException if s is null.
+   * 
+   * @see BigDecimal#BigDecimal(String)
    */
   public static BigFraction valueOf(String s)
   {
+    if(s == null)
+      throw new IllegalArgumentException("Null argument.");
+    
     int slashPos = s.indexOf('/');
     if(slashPos < 0)
     {
@@ -179,7 +208,27 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Returns the numerator of this fraction.
+   * @return numerator of this fraction.
+   */
+  public final BigInteger getNumerator()
+  {
+    return numerator;
+  }
+  
+  /**
+   * Returns the denominator of this fraction.
+   * @return denominator of this fraction.
+   */
+  public final BigInteger getDenominator() {
+    return denominator;
+  }
+  
+  /**
    * Returns this + n.
+   * @param n number to be added to this
+   * @return this + n
+   * @throws IllegalArgumentException if n is null.
    */
   public BigFraction add(Number n)
   {
@@ -203,8 +252,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a + b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).add(b).
+   * Returns a + b, represented as a BigFraction. Equivalent to {@code BigFraction.valueOf(a).add(b)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number to be added
+   * @param b number to be added
+   * @return a + b
+   * @throws IllegalArgumentException if a or b is null.
    */
   public static BigFraction sum(Number a, Number b)
   {
@@ -213,6 +267,9 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns this - n.
+   * @param n number to be subtracted from this
+   * @return this - n
+   * @throws IllegalArgumentException if n is null.
    */
   public BigFraction subtract(Number n)
   {
@@ -238,6 +295,10 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns n - this. Sometimes this results in cleaner code than
    * rearranging the code to use subtract().
+   * 
+   * @param n number to subtract this from
+   * @return n - this
+   * @throws IllegalArgumentException if n is null.
    */
   public BigFraction subtractFrom(Number n)
   {
@@ -261,8 +322,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a - b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).subtract(b).
+   * Returns a - b, represented as a BigFraction. Equivalent to {@code BigFraction.valueOf(a).subtract(b)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number to subtract from (minuend)
+   * @param b number to be subtracted from a (subtrahend)
+   * @return a - b
+   * @throws IllegalArgumentException if a or b is null.
    */
   public static BigFraction difference(Number a, Number b)
   {
@@ -271,6 +337,9 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns this * n.
+   * @param n number to be multiplied by this
+   * @return this * n
+   * @throws IllegalArgumentException if n is null.
    */
   public BigFraction multiply(Number n)
   {
@@ -284,8 +353,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a * b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).multiply(b).
+   * Returns a * b, represented as a BigFraction. Equivalent to {@code BigFraction.valueOf(a).multiply(b)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number to be multiplied
+   * @param b number to be multiplied
+   * @return a * b
+   * @throws IllegalArgumentException if a or b is null.
    */
   public static BigFraction product(Number a, Number b)
   {
@@ -295,6 +369,9 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns this / n.
    * 
+   * @param n number to divide this by (divisor)
+   * @return this / n
+   * @throws IllegalArgumentException if n is null.
    * @throws ArithmeticException if n == 0.
    */
   public BigFraction divide(Number n)
@@ -307,6 +384,9 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns n / this. Sometimes this results in cleaner code than
    * rearranging the code to use divide().
    * 
+   * @param n number to be divided by this (dividend)
+   * @return n / this
+   * @throws IllegalArgumentException if n is null.
    * @throws ArithmeticException if this == 0.
    */
   public BigFraction divideInto(Number n)
@@ -316,8 +396,15 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a / b, represented as a BigFraction. Equivalent to BigFraction.valueOf(a).divide(b).
+   * Returns a / b, represented as a BigFraction. Equivalent to {@code BigFraction.valueOf(a).divide(b)}.
+   * Also equivalent to {@code BigFraction.valueOf(a, b)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number to be divided (dividend)
+   * @param b number by which to divide (divisor)
+   * @return a / b
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
    */
   public static BigFraction quotient(Number a, Number b)
   {
@@ -327,8 +414,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   
   /**
-   * Divides to an integral value, using TRUNCATED division mode.
-   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * Divides to an integral value, using {@link DivisionMode#TRUNCATED} division mode.
+   * 
+   * @param n number to divide this by (dividend)
+   * @return integral quotient of this / n, using truncated division
+   * 
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
+   * @see #divideAndRemainder(Number, DivisionMode)
+   * @see DivisionMode
    */
   public BigInteger divideToIntegralValue(Number n)
   {
@@ -337,7 +432,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Divides to an integral value, using the specified division mode.
-   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * 
+   * @param n number to divide this by (dividend)
+   * @param divisionMode division mode to use if dividend or divisor is negative.
+   * @return integral quotient of this / n, using specified division mode.
+   * 
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
+   * @see #divideAndRemainder(Number, DivisionMode)
+   * @see DivisionMode
    */
   public BigInteger divideToIntegralValue(Number n, DivisionMode divisionMode)
   {
@@ -345,8 +449,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Computes division remainder (modulus), using TRUNCATED division mode.
-   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * Computes division remainder (modulus), using {@link DivisionMode#TRUNCATED} division mode.
+   * 
+   * @param n number to divide this by (dividend)
+   * @return division remainder (modulus) of this / n, using truncated division.
+   * 
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
+   * @see #divideAndRemainder(Number, DivisionMode)
+   * @see DivisionMode
    */
   public BigFraction remainder(Number n)
   {
@@ -355,7 +467,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Computes division remainder (modulus), using the specified division mode.
-   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * 
+   * @param n number to divide this by (dividend)
+   * @param divisionMode division mode to use if dividend or divisor is negative.
+   * @return division remainder (modulus) of this / n, using specified division mode.
+   * 
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
+   * @see #divideAndRemainder(Number, DivisionMode)
+   * @see DivisionMode
    */
   public BigFraction remainder(Number n, DivisionMode divisionMode)
   {
@@ -363,9 +484,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns integral quotient and fractional remainder of this/n. Uses TRUNCATION division mode.
+   * Returns integral quotient and fractional remainder of this/n. Uses {@link DivisionMode#TRUNCATED} division mode.
    * 
-   * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
+   * @param n number to divide this by (dividend)
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   * 
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
+   * @see #divideAndRemainder(Number, DivisionMode)
+   * @see DivisionMode
    */
   public Number[] divideAndRemainder(Number n)
   {
@@ -374,15 +502,18 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns integral quotient and fractional remainder of this/n, using specified division mode. If the quotient
-   * and remainder are q and r, respectively, then the results satisfy the following equations:
-   * 
-   *   this/n = q + r/n
-   *   this = q*n + r
+   * and remainder are q and r, respectively, then the results satisfy the following equations:<br>
+   * <br>
+   * {@code     this/n = q + r/n}<br>
+   * {@code     this = q*n + r}<br>
    * 
    * @param n  Number to divide {@code this} by.
-   * @param divisionMode Division mode to use when dividend or divisor is negative.
+   * @param divisionMode Division mode to use if dividend or divisor is negative.
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
    * 
-   * @return Two {@code Number} objects. Guaranteed to be two elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   * @throws IllegalArgumentException if n is null.
+   * @throws ArithmeticException if n == 0.
+   * 
    * @see DivisionMode
    */
   public Number[] divideAndRemainder(Number n, DivisionMode divisionMode)
@@ -463,11 +594,12 @@ public final class BigFraction extends Number implements Comparable<Number>
       r = divmod[1];
     }
     
-    //if the remainder is 0, we don't do any adjustments
+    //if the remainder is 0, we don't do any adjustments, and we already know the remainder will
+    //be zero, so go ahead and return this.
     if(r != null && r.equals(BigInteger.ZERO))
       return divideAndRemainderReturner(q, BigFraction.ZERO, remainderMode); //or could do: adjustment=0
     
-    //avoid doing unnecessary math...
+    //avoid doing unnecessary math... at this point if we got both q and r, but only need q, we can drop r.
     if(r != null && remainderMode == RemainderMode.QUOTIENT)
       r = null;
     
@@ -514,6 +646,13 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Equivalent to {@code BigFraction.valueOf(a).divideToIntegralValue(b)}.
    * Provided as static method to make code easier to write in some instances.
    * 
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @return integral quotient of a / b, using TRUNCATED division mode
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
+   * 
    * @see #divideToIntegralValue(Number n)
    * @see DivisionMode
    */
@@ -526,6 +665,14 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns result of integer division a / b, using specified division mode.
    * Equivalent to {@code BigFraction.valueOf(a).divideToIntegralValue(b, divisionMode)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @param divisionMode division mode to use when dividend or divisor is negative.
+   * @return integral quotient of a / b, using specified division mode
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
    * 
    * @see #divideToIntegralValue(Number n, DivisionMode divisionMode)
    * @see DivisionMode
@@ -541,6 +688,13 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Equivalent to {@code BigFraction.valueOf(a).remainder(b)}.
    * Provided as static method to make code easier to write in some instances.
    * 
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @return division remainder (modulus) of a / b, using TRUNCATED division mode
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
+   * 
    * @see #remainder(Number n)
    * @see DivisionMode
    */
@@ -553,6 +707,14 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns fractional remainder of integer division a / b, using specified division mode.
    * Equivalent to {@code BigFraction.valueOf(a).remainder(b, divisionMode)}.
    * Provided as static method to make code easier to write in some instances.
+   * 
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @param divisionMode division mode to use when dividend or divisor is negative.
+   * @return division remainder (modulus) of a / b, using specified division mode
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
    * 
    * @see #remainder(Number n, DivisionMode divisionMode)
    * @see DivisionMode
@@ -567,7 +729,12 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Equivalent to {@code BigFraction.valueOf(a).divideAndRemainder(b)}.
    * Provided as static method to make code easier to write in some instances.
    * 
-   * @return Two Numbers: first is BigInteger, second is BigFraction.
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
    * 
    * @see #divideAndRemainder(Number n)
    * @see DivisionMode
@@ -582,7 +749,13 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Equivalent to {@code BigFraction.valueOf(a).divideAndRemainder(b, divisionMode)}.
    * Provided as static method to make code easier to write in some instances.
    * 
-   * @return Two Numbers: first is BigInteger, second is BigFraction.
+   * @param a number be divided (dividend)
+   * @param b number to divide by (divisor)
+   * @param divisionMode division mode to use when dividend or divisor is negative.
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   * 
+   * @throws IllegalArgumentException if a or b is null.
+   * @throws ArithmeticException if b == 0.
    * 
    * @see #divideAndRemainder(Number n, DivisionMode divisionMode)
    * @see DivisionMode
@@ -593,12 +766,14 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   
-  
   /**
-   * Returns this^exponent.
+   * Returns this^exponent.<br>
+   * <br>
+   * Note: 0^0 will return 1/1. This is consistent with {@link Math#pow(double, double)},
+   * {@link BigInteger#pow(int)}, and {@link BigDecimal#pow(int)}.
    * 
-   * Note: 0^0 will return 1/1. This is consistent with Math.pow(),
-   * BigInteger.pow(), and BigDecimal.pow().
+   * @param exponent power to raise this fraction to.
+   * @return this^exponent
    * 
    * @throws ArithmeticException if {@code this == 0 && exponent < 0}.
    */
@@ -620,6 +795,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns 1/this.
    * 
+   * @return 1/this
+   * 
    * @throws ArithmeticException if this == 0.
    */
   public BigFraction reciprocal()
@@ -633,6 +810,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns the complement of this fraction, which is equal to 1 - this.
    * Useful for probabilities/statistics.
+   * 
+   * @return 1-this
    */
   public BigFraction complement()
   {
@@ -642,7 +821,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns -this. If this is zero, returns zero.
-   * @return equivalent of <code>this.multiply(-1)</code>
+   * @return equivalent of {@code this.multiply(-1)}
    */
   public BigFraction negate()
   {
@@ -659,14 +838,14 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns this, with sign set to the sign of <code>sgn</sign> parameter.
-   * Another way of saying it: returns the equivalent of <code>this.abs().multiply(Math.signum(sgn))</code>.
-   * 
+   * Returns this, with sign set to the sign of {@code sgn} parameter.
+   * Another way of saying it: returns the equivalent of {@code this.abs().multiply(Math.signum(sgn))}.<br>
+   * <br>
    * Important Note: If this is zero, always returns zero. No exception thrown, even if we are trying
    * to set the sign of 0 to positive or negative.
    * 
    * @param sgn an integer less than, equal to, or greater than 0, whose sign will be assigned to the returned fraction.
-   * @return equivalent of <code>this.abs().multiply(Math.signum(sgn))</code>.
+   * @return equivalent of {@code this.abs().multiply(Math.signum(sgn))}.
    */
   public BigFraction withSign(int sgn)
   {
@@ -682,6 +861,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns -1, 0, or 1, representing the sign of this fraction.
+   * @return -1, 0, or 1, representing the sign of this fraction.
    */
   public int signum()
   {
@@ -691,9 +871,11 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns the integer part of this fraction; that is, the part that
    * would come before the decimal point if this were written as a decimal
-   * number. Carries the same sign as this fraction.
-   * 
+   * number. Carries the same sign as this fraction.<br>
+   * <br>
    * Equivalent to {@code getIntegerPart(DivisionMode.TRUNCATED)}
+   * 
+   * @return integer part of this fraction (numerator/denominator), using TRUCATED division mode.
    * 
    * @see #getParts(DivisionMode divisionMode)
    */
@@ -706,6 +888,9 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the integer part of this fraction; that is, the part that
    * would come before the decimal point if this were written as a decimal
    * number. Carries the same sign as this fraction.
+   * 
+   * @param divisionMode Division mode to use when computing quotient. Only relevant if this is negative.
+   * @return integer part of this fraction (numerator/denominator), using specified division mode.
    * 
    * @see #getParts(DivisionMode divisionMode)
    */
@@ -726,9 +911,11 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the fraction part of this fraction; that is, the fraction that
    * represents the part that would come after the decimal point if this
    * were written as a decimal number. Carries the same sign as this
-   * fraction, unless the fraction part is zero.
-   * 
+   * fraction, unless the fraction part is zero.<br>
+   * <br>
    * Equivalent to {@code getFractionPart(DivisionMode.TRUNCATED)}
+   * 
+   * @return fractional part of this fraction (i.e. {@code (numerator%denominator)/denominator)}), using TRUNCATED division mode.
    * 
    * @see #getParts(DivisionMode divisionMode)
    */
@@ -741,6 +928,9 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the fraction part of this fraction; that is, the remainder when
    * the numerator is divided by the denominator when using the specified
    * division mode.
+   * 
+   * @param divisionMode Division mode to use when computing remainder. Only relevant if this is negative.
+   * @return fractional part of this fraction (i.e. {@code (numerator%denominator)/denominator)}), using specified division mode.
    * 
    * @see #getParts(DivisionMode divisionMode)
    */
@@ -762,9 +952,15 @@ public final class BigFraction extends Number implements Comparable<Number>
    * array is guaranteed to have exactly two elements. The first is guaranteed
    * to be a BigInteger, equivalent to the result of getIntegerPart().
    * The second element is guaranteed to be a BigFraction, equivalent to
-   * the result of getFractionPart().
-   * 
+   * the result of getFractionPart().<br>
+   * <br>
    * Equivalent to {@code getParts(DivisionMode.TRUNCATED)}
+   * 
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   *         These represent the part that would be written before the decimal, and the part that would be after the decimal, if this fraction
+   *         were written in decimal format.
+   * 
+   * @see #getParts(DivisionMode divisionMode)
    */
   public Number[] getParts()
   {
@@ -774,20 +970,20 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns the integer and fraction parts of this fraction. The return
    * array is guaranteed to have exactly two elements. The first is guaranteed
-   * to be a BigInteger, and the second is guaranteed to be a BigFraction.
-   * 
+   * to be a BigInteger, and the second is guaranteed to be a BigFraction.<br>
+   * <br>
    * The first element is the result of integer division of numerator by
    * denominator, using the supplied division mode. The second element is
    * the fraction given by numerator mod denominator, using the given
-   * division mode.
-   * 
+   * division mode.<br>
+   * <br>
    * Note that the division mode only matters if this fraction is negative.
    * Because the sign of a BigFraction is always carried by the numerator,
-   * the FLOOR and EUCLIDEAN division modes will always produce the same result.
-   * 
-   * Some examples:
-   * 
-   * <table summary="Examples of rounding modes">
+   * the FLOOR and EUCLIDEAN division modes will always produce the same result.<br>
+   * <br>
+   * Some examples:<br>
+   * <br>
+   * <table summary="Examples of rounding modes" border="1" cellpadding="4">
    *   <tr><th>Fraction</th><th>TRUNCATE</th><th>FLOOR</th><th>EUCLIDEAN</th></tr>
    *   <tr><td> 4/1</td><td>[ 4,  0/1]</td><td>[ 4, 0/1]</td><td>[ 4, 0/1]</td></tr>
    *   <tr><td> 4/3</td><td>[ 1,  1/3]</td><td>[ 1, 1/3]</td><td>[ 1, 1/3]</td></tr>
@@ -796,6 +992,11 @@ public final class BigFraction extends Number implements Comparable<Number>
    *   <tr><td>-4/3</td><td>[-1, -1/3]</td><td>[-2, 2/3]</td><td>[-2, 2/3]</td></tr>
    *   <tr><td>-4/1</td><td>[-4,  0/1]</td><td>[-4, 0/1]</td><td>[-4, 0/1]</td></tr>
    * </table>
+   * 
+   * @param divisionMode Division mode to use when computing parts. Only relevant if this is negative.
+   * @return Two {@code Number} objects. Guaranteed to be two non-null elements. First is a {@code BigInteger}, second is a {@code BigFraction}.
+   *         These represent the part that would be written before the decimal, and the part that would be after the decimal, if this fraction
+   *         were written in decimal format.
    * 
    * @see DivisionMode
    */
@@ -819,6 +1020,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns this rounded to the nearest whole number, using
    * RoundingMode.HALF_UP as the default rounding mode.
+   * 
+   * @return this fraction rounded to nearest whole number, using RoundingMode.HALF_UP.
    */
   public BigInteger round()
   {
@@ -826,8 +1029,11 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns this fraction rounded to the nearest whole number, using
+   * Returns this fraction rounded to a whole number, using
    * the given rounding mode.
+   * 
+   * @param roundingMode rounding mode to use
+   * @return this fraction rounded to a whole number, using the given rounding mode.
    * 
    * @throws ArithmeticException if RoundingMode.UNNECESSARY is used but
    *         this fraction does not exactly represent an integer.
@@ -849,7 +1055,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     BigInteger remainder = null;
     
     //Note:  The remainder is only needed if we are using HALF_X rounding mode, and the
-    //       remainder is not one-half.  Since computing the remainder can be a bit
+    //       remainder is not one-half. Since computing the remainder can be a bit
     //       expensive, only compute it if necessary.
     if(ROUND_HALF_MODES.contains(roundingMode) && !denominator.equals(BIGINT_TWO))
     {
@@ -928,15 +1134,16 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Rounds the given fraction to the nearest fraction having the given denominator,
-   * using HALF_UP rouding method, and returns the numerator of that fraction. For
-   * example, given the fraction 7/15, if you wanted to know the nearest fraction
-   * with denominator 6, it would be 2.8/6, which rounds to 3/6. This function would
-   * return 3. NOTE that this is not reduced--3/6 is equivalent to 1/2, but this
-   * function would still return 3. If newDenominator is 1, this method is equivalent
-   * to round(). If this object is negative, the returned numerator will also be
-   * negative.
+   * using HALF_UP rounding method, and returns the numerator of that fraction.
+   * 
+   * @param newDenominator denominator of fraction to round to.
    * 
    * @return numerator of rounded fraction (unreduced)
+   * 
+   * @throws IllegalArgumentException If newDenominator is null.
+   * @throws ArithmeticException If newDenominator is zero or negative.
+   * 
+   * @see #roundToDenominator(BigInteger, RoundingMode)
    */
   public BigInteger roundToDenominator(BigInteger newDenominator)
   {
@@ -945,13 +1152,27 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Rounds the given fraction to the nearest fraction having the given denominator,
-   * using the given rounding method, and returns the numerator of that fraction.
+   * using the given rounding method, and returns the numerator of that fraction.<br>
+   * <br>
+   * For example, given the fraction 7/15, if you wanted to know the nearest fraction
+   * with denominator 6, it would be 2.8/6, which rounds to 3/6. This function would
+   * return 3.<br>
+   * <br>
+   * Note: this is not reduced--3/6 is equivalent to 1/2, but this
+   * function would still return 3. If newDenominator is 1, this method is equivalent
+   * to round(). If this object is negative, the returned numerator will also be
+   * negative.
+   * 
+   * @param newDenominator denominator of fraction to round to.
+   * @param roundingMode rounding mode to use if the answer must be rounded.
    * 
    * @return numerator of rounded fraction (unreduced)
    * 
+   * @throws IllegalArgumentException If newDenominator is null.
+   * @throws ArithmeticException If newDenominator is zero or negative.
    * @throws ArithmeticException if RoundingMode.UNNECESSARY is used but
-   *         this fraction does not exactly represent an integer. Also thrown
-   *         if newDenominator is zero or negative.
+   *         this fraction cannot be represented exactly as a fraction with the
+   *         given denominator.
    */
   public BigInteger roundToDenominator(BigInteger newDenominator, RoundingMode roundingMode)
   {
@@ -967,7 +1188,10 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns a string representation of this, in the form
-   * numerator/denominator.
+   * numerator/denominator. Note that the denominator will
+   * always be included, even if it is 1.
+   * 
+   * @return This fraction, represented as a string in the format {@code numerator/denominator}.
    */
   @Override
   public String toString()
@@ -982,6 +1206,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * 
    * @param denominatorOptional If true, the denominator will be ommitted
    *        when it is unnecessary. For example, "7" instead of "7/1".
+   * @return This fraction, represented as a string in the format {@code numerator/denominator}.
    */
   public String toString(boolean denominatorOptional)
   {
@@ -998,6 +1223,8 @@ public final class BigFraction extends Number implements Comparable<Number>
    * fractions that are equal to whole numbers, only the whole number will
    * be displayed. For fractions which have absolute value less than 1,
    * this will be equivalent to toString().
+   * 
+   * @return String representation of this fraction as a mixed fraction.
    */
   public String toMixedString()
   {
@@ -1015,7 +1242,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns decimal string representation of the fraction with the given number
-   * of decimal digits using roundingMode ROUND_HALF_UP
+   * of decimal digits using roundingMode ROUND_HALF_UP.
+   * 
+   * @param numDecimalDigits number of digits to be displayed after the decimal
+   * @return decimal string representation of this fraction.
+   * 
+   * @throws IllegalArgumentException if numDecimalDigits is negative
+   * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
   public String toDecimalString(int numDecimalDigits)
   {
@@ -1028,8 +1261,12 @@ public final class BigFraction extends Number implements Comparable<Number>
    * If numDecimalDigits is 0, this method is equivalent to round().toString().
    * Will append trailing 0s as needed: (1/2).toDecimalString(3) is 0.500.
    * 
-   * @param numDecimalDigits Number of digits to be displayed after the decimal
-   * @param roundingMode How to round the number if necessary
+   * @param numDecimalDigits number of digits to be displayed after the decimal
+   * @param roundingMode how to round the number if necessary
+   * @return decimal string representation of this fraction.
+   * 
+   * @throws IllegalArgumentException if numDecimalDigits is negative
+   * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
   public String toDecimalString(int numDecimalDigits, RoundingMode roundingMode)
   {
@@ -1083,6 +1320,11 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns if this object is equal to another object. In order to maintain symmetry,
    * this will *only* return true if the other object is a BigFraction. For looser
    * comparison to other Number objects, use the equalsNumber(Number) method.
+   * 
+   * @param o Object to compare to this
+   * @return true if {@code o instanceof BigFraction} and is equal to this.
+   * 
+   * @see #equalsNumber(Number)
    */
   @Override
   public boolean equals(Object o)
@@ -1099,15 +1341,21 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns if this object is equal to another Number object. Equivalent
-   * to: <code>this.equals(BigFraction.valueOf(n))</code>
+   * to: {@code this.equals(BigFraction.valueOf(n))}
+   * 
+   * @param n number to compare this to
+   * @return true if this is equivalent to {@code valueof(n)}
    */
   public boolean equalsNumber(Number n)
   {
+    if(n == null)
+      return false;
     return equals(valueOf(n));
   }
   
   /**
    * Returns a hash code for this object.
+   * @return hash code for this object.
    */
   @Override
   public int hashCode()
@@ -1119,6 +1367,10 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns a negative, zero, or positive number, indicating if this object
    * is less than, equal to, or greater than n, respectively.
+   * 
+   * @param n number to compare this to
+   * @return integer indicating how this compares to given number
+   * @throws IllegalArgumentException if n is null
    */
   @Override
   public int compareTo(Number n)
@@ -1147,11 +1399,15 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Algorithm is O(maxDenominator), and not optimized for generating entire
    * sequence by sequentially calling this function.
    * 
+   * @param maxDenominator maximum denominator to use for computing next value
+   *        in Farey sequence.
+   * @return the smallest fraction that is larger than this, with a denominator less
+   *         than or equal to maxDenominator.
    * @throws IllegalArgumentException if maxDenominator is non-positive.
    */
   public BigFraction fareyNext(int maxDenominator)
   {
-    return fareySequence(maxDenominator, FareyMode.NEXT);
+    return fareyImpl(maxDenominator, FareyMode.NEXT);
   }
   
   /**
@@ -1161,22 +1417,30 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Algorithm is O(maxDenominator), and not optimized for generating entire
    * sequence by sequentially calling this function.
    * 
+   * @param maxDenominator maximum denominator to use for computing previous value
+   *        in Farey sequence.
+   * @return the largest fraction that is smaller than this, with a denominator less
+   *         than or equal to maxDenominator.
    * @throws IllegalArgumentException if maxDenominator is non-positive.
    */
   public BigFraction fareyPrev(int maxDenominator)
   {
-    return fareySequence(maxDenominator, FareyMode.PREV);
+    return fareyImpl(maxDenominator, FareyMode.PREV);
   }
   
   /**
    * Returns the closest fraction with denominator less than or equal to
    * the given denominator. Algorithm is O(maxDenominator).
    * 
+   * @param maxDenominator maximum denominator to use for computing closest value
+   *        in Farey sequence.
+   * @return the closest fraction that to this, with a denominator less
+   *         than or equal to maxDenominator.
    * @throws IllegalArgumentException if maxDenominator is non-positive.
    */
   public BigFraction fareyClosest(int maxDenominator)
   {
-    return fareySequence(maxDenominator, FareyMode.CLOSEST);
+    return fareyImpl(maxDenominator, FareyMode.CLOSEST);
   }
   
   /**
@@ -1184,7 +1448,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * 
    * @throws IllegalArgumentException if maxDenominator is non-positive.
    */
-  private BigFraction fareySequence(int maxDenominator, FareyMode fareyMode)
+  private BigFraction fareyImpl(int maxDenominator, FareyMode fareyMode)
   {
     if(maxDenominator <= 0)
       throw new IllegalArgumentException("maxDenominator must be positive");
@@ -1209,11 +1473,11 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(numerator.signum() < 0)
     {
       if(fareyMode == FareyMode.NEXT)
-        return this.negate().fareySequence(maxDenominator, FareyMode.PREV).negate();
+        return this.negate().fareyImpl(maxDenominator, FareyMode.PREV).negate();
       else if(fareyMode == FareyMode.PREV)
-        return this.negate().fareySequence(maxDenominator, FareyMode.NEXT).negate();
+        return this.negate().fareyImpl(maxDenominator, FareyMode.NEXT).negate();
       else
-        return this.negate().fareySequence(maxDenominator, fareyMode).negate();
+        return this.negate().fareyImpl(maxDenominator, fareyMode).negate();
     }
     
     //The algorithm needs a number between 0 and 1. If this is an improper fraction, get the sequence value for
@@ -1222,7 +1486,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     {
       BigInteger[] divmod = numerator.divideAndRemainder(denominator);
       
-      BigFraction fPartSeq = new BigFraction(divmod[1], denominator, Reduced.YES).fareySequence(maxDenominator, fareyMode);
+      BigFraction fPartSeq = new BigFraction(divmod[1], denominator, Reduced.YES).fareyImpl(maxDenominator, fareyMode);
       
       // n + a/b = nb/b + a/b = (nb + a)/b
       return new BigFraction(divmod[0].multiply(fPartSeq.denominator).add(fPartSeq.numerator), fPartSeq.denominator, Reduced.YES);
@@ -1268,6 +1532,10 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the smaller of this and n. If they have equal value, this is returned.
    * Worth noting: if n is smaller, the returned Number is n, <i>not</i> a BigFraction
    * representing n.
+   * 
+   * @param n number to compare to this
+   * @return smaller of this and n
+   * @throws IllegalArgumentException if n is null
    */
   public Number min(Number n)
   {
@@ -1281,6 +1549,11 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the smaller of a and b. If they have equal value, a is returned.
    * Worth noting: the returned Number is always one of the two arguments, not
    * necessarily a BigFraction.
+   * 
+   * @param a one number to compare
+   * @param b another number to compare
+   * @return smaller of a and b
+   * @throws IllegalArgumentException if a or b is null
    */
   public static Number min(Number a, Number b)
   {
@@ -1295,6 +1568,10 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the larger of this and n. If they have equal value, this is returned.
    * Worth noting: if n is larger, the returned Number is n, <i>not</i> a BigFraction
    * representing n.
+   * 
+   * @param n number to compare to this
+   * @return larger of this and n
+   * @throws IllegalArgumentException if n is null
    */
   public Number max(Number n)
   {
@@ -1308,6 +1585,11 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the larger of a and b. If they have equal value, a is returned.
    * Worth noting: the returned Number is always one of the two arguments, not
    * necessarily a BigFraction.
+   * 
+   * @param a one number to compare
+   * @param b another number to compare
+   * @return larger of a and b
+   * @throws IllegalArgumentException if a or b is null
    */
   public static Number max(Number a, Number b)
   {
@@ -1322,9 +1604,18 @@ public final class BigFraction extends Number implements Comparable<Number>
    * Returns the mediant of this and n. The mediant of a/b and c/d is
    * (a+c)/(b+d). It is guaranteed to be between a/b and c/d. Not to
    * be confused with the median!
+   * 
+   * @param n other number to use to compute mediant
+   * @return mediant of this and n
+   * @throws IllegalArgumentException if n is null
    */
-  public BigFraction mediant(BigFraction f)
+  public BigFraction mediant(Number n)
   {
+    if(n == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    BigFraction f = valueOf(n);
+    
     //if the two fractions are equal, we can avoid the math
     if(this.equals(f))
       return this;
@@ -1333,20 +1624,37 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a BigDecimal representation of this fraction.  If possible, the
-   * returned value will be exactly equal to the fraction.  If not, the BigDecimal
-   * will have a scale large enough to hold the same number of significant figures
-   * as both numerator and denominator, or the equivalent of a double-precision
-   * number, whichever is more.
+   * Returns the mediant of a and b. Provided as static method for convenience.
+   * 
+   * @param a one number to use to compute mediant
+   * @param b other number to use to compute mediant
+   * @return mediant of a and b
+   * @throws IllegalArgumentException if a or b is null
+   * @see #mediant(Number)
+   */
+  public static BigFraction mediant(Number a, Number b)
+  {
+    return valueOf(a).mediant(b);
+  }
+  
+  /**
+   * Returns a BigDecimal representation of this fraction.<br>
+   * <br>
+   * If possible, the returned value will be exactly equal to the fraction. If not,
+   * the BigDecimal will have a scale large enough to hold the same number of
+   * significant figures as both numerator and denominator, or the equivalent of a
+   * double-precision number, whichever is more.
+   * 
+   * @return This fraction represented as a BigDecimal (exactly, if possible).
    */
   public BigDecimal toBigDecimal()
   {
     //Implementation note:  A fraction can be represented exactly in base-10 iff its
     //denominator is of the form 2^a * 5^b, where a and b are nonnegative integers.
     //(In other words, if there are no prime factors of the denominator except for
-    //2 and 5, or if the denominator is 1).  So to determine if this denominator is
+    //2 and 5, or if the denominator is 1). So to determine if this denominator is
     //of this form, continually divide by 2 to get the number of 2's, and then
-    //continually divide by 5 to get the number of 5's.  Afterward, if the denominator
+    //continually divide by 5 to get the number of 5's. Afterward, if the denominator
     //is 1 then there are no other prime factors.
     
     //Note: number of 2's is given by the number of trailing 0 bits in the number
@@ -1363,14 +1671,14 @@ public final class BigFraction extends Number implements Comparable<Number>
       fives++;
     }
     
-    if(BigInteger.ONE.equals(tmpDen))
+    if(tmpDen.equals(BigInteger.ONE))
     {
       //This fraction will terminate in base 10, so it can be represented exactly as
-      //a BigDecimal.  We would now like to make the fraction of the form
-      //unscaled / 10^scale.  We know that 2^x * 5^x = 10^x, and our denominator is
-      //in the form 2^twos * 5^fives.  So use max(twos, fives) as the scale, and
+      //a BigDecimal. We would now like to make the fraction of the form
+      //unscaled / 10^scale. We know that 2^x * 5^x = 10^x, and our denominator is
+      //in the form 2^twos * 5^fives. So use max(twos, fives) as the scale, and
       //multiply the numerator and deminator by the appropriate number of 2's or 5's
-      //such that the denominator is of the form 2^scale * 5^scale.  (Of course, we
+      //such that the denominator is of the form 2^scale * 5^scale. (Of course, we
       //only have to actually multiply the numerator, since all we need for the
       //BigDecimal constructor is the scale.)
       BigInteger unscaled = numerator;
@@ -1384,18 +1692,18 @@ public final class BigFraction extends Number implements Comparable<Number>
       return new BigDecimal(unscaled, scale);
     }
     
-    //else: this number will repeat infinitely in base-10.  So try to figure out
-    //a good number of significant digits.  Start with the number of digits required
+    //else: this number will repeat infinitely in base-10. So try to figure out
+    //a good number of significant digits. Start with the number of digits required
     //to represent the numerator and denominator in base-10, which is given by
-    //bitLength / log[2](10).  (bitLenth is the number of digits in base-2).
+    //bitLength / log[2](10). (bitLenth is the number of digits in base-2).
     final double LG10 = 3.321928094887362; //Precomputed ln(10)/ln(2), a.k.a. log[2](10)
     int precision = Math.max(numerator.bitLength(), denominator.bitLength());
     precision = (int)Math.ceil(precision / LG10);
     
     //If the precision is less than that of a double, use double-precision so
-    //that the result will be at least as accurate as a cast to a double.  For
+    //that the result will be at least as accurate as a cast to a double. For
     //example, with the fraction 1/3, precision will be 1, giving a result of
-    //0.3.  This is quite a bit different from what a user would expect.
+    //0.3. This is quite a bit different from what a user would expect.
     if(precision < MathContext.DECIMAL64.getPrecision() + 2)
       precision = MathContext.DECIMAL64.getPrecision() + 2;
     
@@ -1405,6 +1713,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns a BigDecimal representation of this fraction, with a given precision.
    * @param precision  the number of significant figures to be used in the result.
+   * @return BigDecimal representation of this fraction, to the given precision.
    */
   public BigDecimal toBigDecimal(int precision)
   {
@@ -1415,11 +1724,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   //  IMPLEMENTATION OF NUMBER INTERFACE
   //--------------------------------------------------------------------------
   /**
-   * Returns a long representation of this fraction.  This value is
-   * obtained by integer division of numerator by denominator.  If
-   * the value is greater than Long.MAX_VALUE, Long.MAX_VALUE will be
-   * returned.  Similarly, if the value is below Long.MIN_VALUE,
-   * Long.MIN_VALUE will be returned.
+   * Returns a long representation of this fraction. This value is
+   * obtained by integer division of numerator by denominator. If
+   * the value is greater than {@link Long#MAX_VALUE}, {@link Long#MAX_VALUE} will be
+   * returned. Similarly, if the value is below {@link Long#MIN_VALUE},
+   * {@link Long#MIN_VALUE} will be returned.
+   * 
+   * @return long representation of this fraction
    */
   @Override
   public long longValue()
@@ -1434,6 +1745,8 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact long representation of this fraction.
    * 
+   * 
+   * @return exact long representation of this fraction
    * @throws ArithmeticException if this has a nonzero fractional
    *                             part, or will not fit in a long.
    */
@@ -1446,11 +1759,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns an int representation of this fraction.  This value is
-   * obtained by integer division of numerator by denominator.  If
-   * the value is greater than Integer.MAX_VALUE, Integer.MAX_VALUE will be
-   * returned.  Similarly, if the value is below Integer.MIN_VALUE,
-   * Integer.MIN_VALUE will be returned.
+   * Returns an int representation of this fraction. This value is
+   * obtained by integer division of numerator by denominator. If
+   * the value is greater than {@link Integer#MAX_VALUE}, {@link Integer#MAX_VALUE} will be
+   * returned. Similarly, if the value is below {@link Integer#MIN_VALUE},
+   * {@link Integer#MIN_VALUE} will be returned.
+   * 
+   * @return int representation of this fraction
    */
   @Override
   public int intValue()
@@ -1461,8 +1776,9 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact int representation of this fraction.
    * 
+   * @return exact int representation of this fraction
    * @throws ArithmeticException if this has a nonzero fractional
-   *                             part, or will not fit in a int.
+   *                             part, or will not fit in an int.
    */
   public int intValueExact()
   {
@@ -1473,11 +1789,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a short representation of this fraction.  This value is
-   * obtained by integer division of numerator by denominator.  If
-   * the value is greater than Short.MAX_VALUE, Short.MAX_VALUE will be
-   * returned.  Similarly, if the value is below Short.MIN_VALUE,
-   * Short.MIN_VALUE will be returned.
+   * Returns a short representation of this fraction. This value is
+   * obtained by integer division of numerator by denominator. If
+   * the value is greater than {@link Short#MAX_VALUE}, {@link Short#MAX_VALUE} will be
+   * returned. Similarly, if the value is below {@link Short#MIN_VALUE},
+   * {@link Short#MIN_VALUE} will be returned.
+   * 
+   * @return short representation of this fraction
    */
   @Override
   public short shortValue()
@@ -1488,6 +1806,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact short representation of this fraction.
    * 
+   * @return exact short representation of this fraction
    * @throws ArithmeticException if this has a nonzero fractional
    *                             part, or will not fit in a short.
    */
@@ -1500,11 +1819,13 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns a byte representation of this fraction.  This value is
-   * obtained by integer division of numerator by denominator.  If
-   * the value is greater than Byte.MAX_VALUE, Byte.MAX_VALUE will be
-   * returned.  Similarly, if the value is below Byte.MIN_VALUE,
-   * Byte.MIN_VALUE will be returned.
+   * Returns a byte representation of this fraction. This value is
+   * obtained by integer division of numerator by denominator. If
+   * the value is greater than {@link Byte#MAX_VALUE}, {@link Byte#MAX_VALUE} will be
+   * returned. Similarly, if the value is below {@link Byte#MIN_VALUE},
+   * {@link Byte#MIN_VALUE} will be returned.
+   * 
+   * @return byte representation of this fraction
    */
   @Override
   public byte byteValue()
@@ -1515,6 +1836,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact byte representation of this fraction.
    * 
+   * @return exact byte representation of this fraction
    * @throws ArithmeticException if this has a nonzero fractional
    *                             part, or will not fit in a byte.
    */
@@ -1527,9 +1849,11 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns the value of this fraction.  If this value is beyond the
-   * range of a double, Double.INFINITY or Double.NEGATIVE_INFINITY will
+   * Returns the value of this fraction. If this value is beyond the
+   * range of a double, {@link Double#POSITIVE_INFINITY} or {@link Double#NEGATIVE_INFINITY} will
    * be returned.
+   * 
+   * @return double representation of this fraction
    */
   @Override
   public double doubleValue()
@@ -1544,6 +1868,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact double representation of this fraction.
    * 
+   * @return exact double representation of this fraction
    * @throws ArithmeticException if this cannot be represented exactly as a double.
    */
   public double doubleValueExact()
@@ -1563,9 +1888,11 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns the value of this fraction.  If this value is beyond the
-   * range of a float, Float.INFINITY or Float.NEGATIVE_INFINITY will
+   * Returns the value of this fraction. If this value is beyond the
+   * range of a float, {@link Float#POSITIVE_INFINITY} or {@link Float#NEGATIVE_INFINITY} will
    * be returned.
+   * 
+   * @return float representation of this fraction
    */
   @Override
   public float floatValue()
@@ -1580,6 +1907,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns an exact float representation of this fraction.
    * 
+   * @return exact float representation of this fraction
    * @throws ArithmeticException if this cannot be represented exactly as a float.
    */
   public float floatValueExact()
@@ -1662,9 +1990,9 @@ public final class BigFraction extends Number implements Comparable<Number>
       if(!isSubnormal)
       {
         //The gcd of (2^52 + mantissa) / 2^(52 - exponent)  must be of the form 2^y,
-        //since the only prime factors of the denominator are 2.  In base-2, it is
+        //since the only prime factors of the denominator are 2. In base-2, it is
         //easy to determine how many factors of 2 a number has--it is the number of
-        //trailing "0" bits at the end of the number.  (This is the same as the number
+        //trailing "0" bits at the end of the number. (This is the same as the number
         //of trailing 0's of a base-10 number indicating the number of factors of 10
         //the number has).
         int y = Math.min(tmpNumerator.getLowestSetBit(), 52 - exponent);
@@ -1697,12 +2025,12 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Constructs a BigFraction from two floating-point numbers.
-   * 
+   * Constructs a BigFraction from two floating-point numbers.<br>
+   * <br>
    * Warning: round-off error in IEEE floating point numbers can result
-   * in answers that are unexpected.  See BigFraction(double) for more
-   * information.
-   * 
+   * in answers that are unexpected. See {@link #valueOf(Number)} for more
+   * information.<br>
+   * <br>
    * NOTE: In many cases, BigFraction(Double.toString(numerator) + "/" + Double.toString(denominator))
    * may give a result closer to what the user expects.
    * 
@@ -1723,7 +2051,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     BigFraction denFract = valueOfHelper(denominator);
     
     //We can avoid the check for gcd here because we know that a fraction created from
-    //a double will be of the form n/2^x, where x >= 0.  So we have:
+    //a double will be of the form n/2^x, where x >= 0. So we have:
     //     (n1/2^x1)/(n2/2^x2)
     //   = (n1/n2) * (2^x2 / 2^x1).
     //
@@ -1841,7 +2169,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Private constructor, used when you can be certain that the fraction is already in
-   * lowest terms.  No check is done to reduce numerator/denominator.  A check is still
+   * lowest terms. No check is done to reduce numerator/denominator. A check is still
    * done to maintain a positive denominator.
    * 
    * @param isReduced  Indicates whether or not the fraction is already known to be
@@ -1921,12 +2249,12 @@ public final class BigFraction extends Number implements Comparable<Number>
   /**
    * Returns true if the given type can be converted to a BigInteger without loss
    * of precision. Returns true for the primitive integer types (Long, Integer, Short,
-   * Byte, AtomicInteger, AtomicLong, LongAdder, LongAccumulator, or BigInteger).
-   * 
-   * For BigFraction, returns true if denominator is 1.
-   * 
-   * For double, float, DoubleAdder, DoubleAccumulator, and BigDecimal, analyzes the data. Otherwise returns false.
-   * 
+   * Byte, AtomicInteger, AtomicLong, LongAdder, LongAccumulator, or BigInteger).<br>
+   * <br>
+   * For BigFraction, returns true if denominator is 1.<br>
+   * <br>
+   * For double, float, DoubleAdder, DoubleAccumulator, and BigDecimal, analyzes the data. Otherwise returns false.<br>
+   * <br>
    * Used to determine if a Number is appropriate to be passed into toBigInteger() method.
    */
   private static boolean isInt(Number n)
