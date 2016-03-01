@@ -353,6 +353,64 @@ public class BigFractionTest {
   
   
   @Test
+  public void testGcdAndLcm() {
+    final int MAX_VAL = 20;
+    
+    //Create a set of all positive fractions with numerator and denominator <= MAX_VAL.
+    //There will be a lot of repetition but reducing to lowest terms should make HashSet
+    //see them as equivalent
+    Set<BigFraction> fracSet = new HashSet<BigFraction>();
+    for(long d = 1; d <= MAX_VAL; d++) {
+      for(long n = 1; n <= MAX_VAL; n++) {
+        fracSet.add(bf(n, d));
+      }
+    }
+    
+    List<BigFraction> fracList = new ArrayList<BigFraction>(fracSet.size());
+    fracList.addAll(fracSet);
+    fracSet = null;
+    
+    for(int i = 0; i < fracList.size(); i++) {
+      BigFraction a = fracList.get(i);
+      for(int j = i; j < fracList.size(); j++) {
+        BigFraction b = fracList.get(j);
+        
+        BigFraction exp_gcd = naiveGCD(a,b);
+        BigFraction act_gcd = a.gcd(b);
+        assertEquals("gcd(" + a + "," + b + ")", exp_gcd, act_gcd);
+        
+        BigFraction exp_lcm = naiveLCM(a,b);
+        BigFraction act_lcm = a.lcm(b);
+        assertEquals("lcm(" + a + "," + b + ")", exp_lcm, act_lcm);
+        
+        //make sure basic properties of gcd/lcm hold up
+        assertTrue("(" + a + ")/(" + exp_gcd + ") is not an integer!", a.divide(act_gcd).getDenominator().equals(BigInteger.ONE));
+        assertTrue("(" + b + ")/(" + exp_gcd + ") is not an integer!", a.divide(act_gcd).getDenominator().equals(BigInteger.ONE));
+        assertTrue("(" + exp_lcm + ")/(" + a + ") is not an integer!", exp_lcm.divide(a).getDenominator().equals(BigInteger.ONE));
+        assertTrue("(" + exp_lcm + ")/(" + b + ") is not an integer!", exp_lcm.divide(b).getDenominator().equals(BigInteger.ONE));
+        assertEquals("|(" + a + ")*(" + b + ")| != (" + exp_lcm + ")*(" + exp_gcd + ")", a.multiply(b), exp_gcd.multiply(exp_lcm));
+        
+        assertEquals("gcd(" + a + "," + b + ") != gcd(" + b + "," + a + ")", act_gcd, b.gcd(a));
+        assertEquals("gcd(" + a + "," + b + ") != gcd(-" + a + "," + b + ")", act_gcd, a.negate().gcd(b));
+        assertEquals("gcd(" + a + "," + b + ") != gcd(" + a + ",-" + b + ")", act_gcd, a.gcd(b.negate()));
+        assertEquals("gcd(" + a + "," + b + ") != gcd(-" + a + ",-" + b + ")", act_gcd, a.negate().gcd(b.negate()));
+        
+        assertEquals("lcm(" + a + "," + b + ") != lcm(" + b + "," + a + ")", act_lcm, b.lcm(a));
+        assertEquals("lcm(" + a + "," + b + ") != lcm(-" + a + "," + b + ")", act_lcm, a.negate().lcm(b));
+        assertEquals("lcm(" + a + "," + b + ") != lcm(" + a + ",-" + b + ")", act_lcm, a.lcm(b.negate()));
+        assertEquals("lcm(" + a + "," + b + ") != lcm(-" + a + ",-" + b + ")", act_lcm, a.negate().lcm(b.negate()));
+        
+        //if we have integers, compare to known algorithm
+        if(a.getDenominator().equals(BigInteger.ONE) && b.getDenominator().equals(BigInteger.ONE)) {
+          assertEquals("gcd of two integers is not an integer!", bf(a.getNumerator().gcd(b.getNumerator())), act_gcd);
+          //no lcm() in BigInteger, so using lcm(a,b)=|a*b|/gcd(a,b)
+          assertEquals("lcm of two integers is not an integer!", bf(a.getNumerator().multiply(b.getNumerator()).divide(a.getNumerator().gcd(b.getNumerator()))), act_lcm);
+        }
+      }
+    }
+  }
+  
+  @Test
   public void testGetParts() {
     new GetPartsTest(  "4/3",  "1",  "1/3",  "1", "1/3",  "1", "1/3").test();
     new GetPartsTest( "-4/3", "-1", "-1/3", "-2", "2/3", "-2", "2/3").test();
@@ -1528,6 +1586,86 @@ public class BigFractionTest {
     @Override
     public double doubleValue() { return doubleVal; }
     
+  }
+  
+  /**
+   * Implements gcd() in a naive fashion, computing it as you might in grade school. This is to check against the optimized version.
+   */
+  private final static BigFraction naiveGCD(BigFraction f1, BigFraction f2) {
+    Set<BigFraction> divisors = new HashSet<BigFraction>();
+    
+    f1 = f1.abs();
+    f2 = f2.abs();
+    
+    if(f1.equals(f2))
+      return f1;
+    
+    long d1 = 1;
+    long d2 = 1;
+    
+    BigFraction lastDivisor1 = f1;
+    BigFraction lastDivisor2 = f2;
+    divisors.add(lastDivisor1);
+    divisors.add(lastDivisor2);
+    for(int i = 0; i < 10000; i++) {
+      if(lastDivisor1.compareTo(lastDivisor2) > 0) {
+        lastDivisor1 = f1.divide(++d1);
+        if(divisors.contains(lastDivisor1))
+          return lastDivisor1;
+        else
+          divisors.add(lastDivisor1);
+      }
+      else {
+        lastDivisor2 = f2.divide(++d2);
+        if(divisors.contains(lastDivisor2))
+          return lastDivisor2;
+        else
+          divisors.add(lastDivisor2);
+      }
+    }
+    
+    //surely we will have a result after 10000 divisors...
+    return null;
+  }
+  
+  /**
+   * Implements lcm() in a naive fashion, computing it as you might in grade school. This is to check against the optimized version.
+   */
+  private final static BigFraction naiveLCM(BigFraction f1, BigFraction f2) {
+    Set<BigFraction> multiples = new HashSet<BigFraction>();
+    
+    f1 = f1.abs();
+    f2 = f2.abs();
+    
+    if(f1.equals(f2))
+      return f1;
+    
+    long m1 = 1;
+    long m2 = 1;
+    
+    BigFraction lastMultiple1 = f1;
+    BigFraction lastMultiple2 = f2;
+    multiples.add(lastMultiple1);
+    multiples.add(lastMultiple2);
+    for(int i = 0; i < 10000; i++) {
+      if(lastMultiple1.compareTo(lastMultiple2) < 0) {
+        lastMultiple1 = f1.multiply(++m1);
+        if(multiples.contains(lastMultiple1))
+          return lastMultiple1;
+        else
+          multiples.add(lastMultiple1);
+      }
+      else {
+        lastMultiple2 = f2.multiply(++m2);
+        if(multiples.contains(lastMultiple2))
+          return lastMultiple2;
+        else
+          multiples.add(lastMultiple2);
+      }
+    }
+    
+    //surely we will have a result after 10000 divisors...
+    return null;
   }
   
   //helper functions to save typing...

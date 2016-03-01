@@ -765,6 +765,66 @@ public final class BigFraction extends Number implements Comparable<Number>
     return valueOf(a).divideAndRemainder(b, divisionMode);
   }
   
+  /**
+   * Returns the greatest common divisor (also called greatest common factor) of
+   * {@code this} and {@code n}.<br>
+   * <br>
+   * If {@code this} and {@code n} are both zero, returns {@code 0/1}.<br>
+   * <br>
+   * Note: The result will always be nonnegative, regardless of the signs of the inputs.<br>
+   * <br>
+   * When dealing with fractions, the divisors of a/b are: (a/b)/1, (a/b)/2, (a/b)/3, ... (a/b)/n.
+   * Thus gcd(n1/d1, n2/d2) gives the largest fraction n3/d3, such that (n1/d1)/(n3/d3) is an integer,
+   * and (n2/d2)/(n3/d3) is an integer.
+   * 
+   * @param n other value to compute gcd from.
+   * @return greatest common divisor of {@code this} and {@code n}.
+   */
+  public BigFraction gcd(Number n) {
+    BigFraction f = valueOf(n);
+    
+    if(this.numerator.equals(BigInteger.ZERO))
+      return f.abs();
+    if(f.numerator.equals(BigInteger.ZERO))
+      return this.abs();
+    
+    //gcd((a/b),(c/d)) = gcd(a,c) / lcm(b,d)
+    //                 = gcd(a,c) / (|b*d|/gcd(b,d))
+    //                 = gcd(a,c) * gcd(b,d) / (|b*d|)
+    BigInteger num = this.numerator.gcd(f.numerator).multiply(this.denominator.gcd(f.denominator));
+    BigInteger den = this.denominator.multiply(f.denominator).abs();
+    
+    return new BigFraction(num, den, Reduced.NO);
+  }
+  
+  /**
+   * Returns least common multiple of {@code this} and {@code n}.<br>
+   * <br>
+   * If {@code this} or {@code n} is zero, returns {@code 0/1}.<br>
+   * <br>
+   * Note: The result will always be nonnegative, regardless of the signs of the inputs.<br>
+   * <br>
+   * When dealing with fractions, the multiples of a/b are: (a/b)*1, (a/b)*2, (a/b)*3, ... (a/b)*n.
+   * Thus lcm(n1/d1, n2/d2) gives the smallest fraction n3/d3, such that (n3/d3)/(n1/d1) is an integer,
+   * and (n3/d3)/(n2/d2) is an integer.
+   * 
+   * @param n other value to compute lcm from.
+   * @return least common multiple of {@code this} and {@code n}
+   */
+  public BigFraction lcm(Number n) {
+    BigFraction f = valueOf(n);
+    
+    if(this.numerator.equals(BigInteger.ZERO) || f.numerator.equals(BigInteger.ZERO))
+      return BigFraction.ZERO;
+    
+    //lcm((a/b),(c/d)) = lcm(a,c) / gcd(b,d)
+    //                 = (|a*c| / gcd(a,c)) / gcd(b,d)
+    //                 = |a*c| / (gcd(a,c) * gcd(b,d))
+    BigInteger num = this.numerator.multiply(f.numerator).abs();
+    BigInteger den = this.numerator.gcd(f.numerator).multiply(this.denominator.gcd(f.denominator));
+    
+    return new BigFraction(num, den, Reduced.NO);
+  }
   
   /**
    * Returns this^exponent.<br>
