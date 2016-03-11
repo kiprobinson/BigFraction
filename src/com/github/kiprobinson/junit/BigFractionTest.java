@@ -36,6 +36,7 @@ public class BigFractionTest {
     assertEquals("valueOf(\"-1.0E2/-0.007E3\")", "100/7", BigFraction.valueOf("-1.0E2/-0.007E3").toString());
     assertEquals("valueOf(\"+9.02E-10\")", "451/500000000000", BigFraction.valueOf("+9.02E-10").toString());
     assertEquals("valueOf(\"-0.000000E+500\")", "0/1", BigFraction.valueOf("-0.000000E+500").toString());
+    assertEquals("valueOf(0,19)", "0/1", BigFraction.valueOf(0,19).toString());
     
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(10), 0)).toString());
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(1), -1)).toString());
@@ -354,6 +355,14 @@ public class BigFractionTest {
   
   @Test
   public void testGcdAndLcm() {
+    //first let's test the edge cases around zero
+    assertEquals("11/17", bf(0).gcd(bf(11,17)).toString());
+    assertEquals("19/81", bf(19,81).gcd(bf(0)).toString());
+    assertEquals("0/1", bf(0).gcd(bf(0)).toString());
+    assertEquals("0/1", bf(0).lcm(bf(11,17)).toString());
+    assertEquals("0/1", bf(19,81).lcm(bf(0)).toString());
+    assertEquals("0/1", bf(0).lcm(bf(0)).toString());
+    
     final int MAX_VAL = 20;
     
     //Create a set of all positive fractions with numerator and denominator <= MAX_VAL.
