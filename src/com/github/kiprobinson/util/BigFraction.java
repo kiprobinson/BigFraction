@@ -790,11 +790,13 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //gcd((a/b),(c/d)) = gcd(a,c) / lcm(b,d)
     //                 = gcd(a,c) / (|b*d|/gcd(b,d))
-    //                 = gcd(a,c) * gcd(b,d) / (|b*d|)
-    BigInteger num = this.numerator.gcd(f.numerator).multiply(this.denominator.gcd(f.denominator));
-    BigInteger den = this.denominator.multiply(f.denominator).abs();
+    //Note: this result is guaranteed to be a reduced fraction.
+    //If you try to further simplify this to: (gcd(a,c) * gcd(b,d)) / (|b*d|), then the
+    //result will not be reduced, and the operation actually takes about 60% longer.
+    BigInteger num = this.numerator.gcd(f.numerator);
+    BigInteger den = this.denominator.multiply(f.denominator).abs().divide(this.denominator.gcd(f.denominator));
     
-    return new BigFraction(num, den, Reduced.NO);
+    return new BigFraction(num, den, Reduced.YES);
   }
   
   /**
@@ -819,11 +821,13 @@ public final class BigFraction extends Number implements Comparable<Number>
     
     //lcm((a/b),(c/d)) = lcm(a,c) / gcd(b,d)
     //                 = (|a*c| / gcd(a,c)) / gcd(b,d)
-    //                 = |a*c| / (gcd(a,c) * gcd(b,d))
-    BigInteger num = this.numerator.multiply(f.numerator).abs();
-    BigInteger den = this.numerator.gcd(f.numerator).multiply(this.denominator.gcd(f.denominator));
+    //Note: this result is guaranteed to be a reduced fraction.
+    //If you try to further simplify this to: |a*c| / (gcd(a,c) * gcd(b,d)), then the
+    //result will not be reduced, and the operation actually takes about 60% longer.
+    BigInteger num = this.numerator.multiply(f.numerator).abs().divide(this.numerator.gcd(f.numerator));
+    BigInteger den = this.denominator.gcd(f.denominator);
     
-    return new BigFraction(num, den, Reduced.NO);
+    return new BigFraction(num, den, Reduced.YES);
   }
   
   /**
@@ -2244,6 +2248,13 @@ public final class BigFraction extends Number implements Comparable<Number>
     if(denominator.equals(BigInteger.ZERO))
       throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
     
+    //if numerator is zero, we don't care about the denominator. force it to 1.
+    if(numerator.equals(BigInteger.ZERO))
+    {
+      denominator = BigInteger.ONE;
+      reduced = Reduced.YES;
+    }
+    
     //only numerator should be negative.
     if(denominator.signum() < 0)
     {
@@ -2255,8 +2266,11 @@ public final class BigFraction extends Number implements Comparable<Number>
     {
       //create a reduced fraction
       BigInteger gcd = numerator.gcd(denominator);
-      numerator = numerator.divide(gcd);
-      denominator = denominator.divide(gcd);
+      if(!gcd.equals(BigInteger.ONE))
+      {
+        numerator = numerator.divide(gcd);
+        denominator = denominator.divide(gcd);
+      }
     }
     
     this.numerator = numerator;
