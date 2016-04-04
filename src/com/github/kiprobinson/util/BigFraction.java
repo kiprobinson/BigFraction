@@ -1252,7 +1252,7 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns a string representation of this, in the form
-   * numerator/denominator. Note that the denominator will
+   * numerator/denominator. The denominator will
    * always be included, even if it is 1.
    * 
    * @return This fraction, represented as a string in the format {@code numerator/denominator}.
@@ -1260,7 +1260,22 @@ public final class BigFraction extends Number implements Comparable<Number>
   @Override
   public String toString()
   {
-    return toString(false);
+    return toString(10, false);
+  }
+  
+  /**
+   * Returns string representation of this, in the form of numerator/denominator, with numerator
+   * and denominator represented in the given radix. If the radix is outside the range from
+   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * {@link Character#forDigit} is used.
+   * 
+   * @param radix radix of the String representation
+   * @return This fraction, represented as a string in the format {@code numerator/denominator}.
+   */
+  public String toString(int radix)
+  {
+    return toString(radix, false);
   }
   
   /**
@@ -1274,9 +1289,28 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public String toString(boolean denominatorOptional)
   {
+    return toString(10, denominatorOptional);
+  }
+  
+  /**
+   * Returns string representation of this, in the form of numerator/denominator, with numerator
+   * and denominator represented in the given radix. If the radix is outside the range from
+   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * {@link Character#forDigit} is used.<br>
+   * <br>
+   * Optionally, "/denominator" part can be ommitted for whole numbers.
+   * 
+   * @param radix radix of the String representation
+   * @param denominatorOptional If true, the denominator will be ommitted
+   *        when it is unnecessary. For example, "7" instead of "7/1".
+   * @return This fraction, represented as a string in the format {@code numerator/denominator}.
+   */
+  public String toString(int radix, boolean denominatorOptional)
+  {
     if(denominatorOptional && denominator.equals(BigInteger.ONE))
-      return numerator.toString();
-    return numerator.toString() + "/" + denominator.toString();
+      return numerator.toString(radix);
+    return numerator.toString(radix) + "/" + denominator.toString(radix);
   }
   
   /**
@@ -1286,21 +1320,44 @@ public final class BigFraction extends Number implements Comparable<Number>
    * across the whole value. For example, -4/3 would be "-1 1/3". For
    * fractions that are equal to whole numbers, only the whole number will
    * be displayed. For fractions which have absolute value less than 1,
-   * this will be equivalent to toString().
+   * this will be equivalent to {@link #toString}.
    * 
    * @return String representation of this fraction as a mixed fraction.
    */
   public String toMixedString()
   {
+    return toMixedString(10);
+  }
+  
+  
+  /**
+   * Returns string representation of this object as a mixed fraction.
+   * For example, 4/3 would be "1 1/3". For negative fractions, the
+   * sign is carried only by the whole number and assumed to be distributed
+   * across the whole value. For example, -4/3 would be "-1 1/3". For
+   * fractions that are equal to whole numbers, only the whole number will
+   * be displayed. For fractions which have absolute value less than 1,
+   * this will be equivalent to {@link #toString(int radix)}.<br>
+   * <br>
+   * The numbers are repesented in the given radix. If the radix is outside the range from
+   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * {@link Character#forDigit} is used.
+   * 
+   * @param radix radix of the String representation
+   * @return String representation of this fraction as a mixed fraction.
+   */
+  public String toMixedString(int radix)
+  {
     if(denominator.equals(BigInteger.ONE))
       return numerator.toString();
     
     if(numerator.abs().compareTo(denominator) < 0)
-      return toString();
+      return toString(radix);
     
     BigInteger[] divmod = numerator.divideAndRemainder(denominator);
     
-    return divmod[0] + " " + divmod[1].abs() + "/" + denominator;
+    return divmod[0].toString(radix) + " " + divmod[1].abs().toString(radix) + "/" + denominator.toString(radix);
   }
   
   
