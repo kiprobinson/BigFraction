@@ -583,6 +583,23 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testToString_radix() {
+    assertEquals("10/1", bf("16").toString(16));
+    assertEquals("-ff/ac", bf("255/-172").toString(16));
+    assertEquals("101/101010101", bf("5/341").toString(2));
+    assertEquals("zyx/d", bf("46617/13").toString(36));
+    
+    assertEquals("zyx/1", bf("46617").toString(36, false));
+    assertEquals("zyx", bf("46617").toString(36, true));
+    
+    //radix must be in range 2-36
+    assertEquals("46617/13", bf("46617/13").toString(37));
+    assertEquals("46617/13", bf("46617/13").toString(0));
+    assertEquals("46617/13", bf("46617/13").toString(1));
+    assertEquals("46617/13", bf("46617/13").toString(-7));
+  }
+  
+  @Test
   public void testToMixedString() {
     assertEquals("4/3 == 1 1/3", "1 1/3", bf("4/3").toMixedString());
     assertEquals("-4/3 == -1 1/3", "-1 1/3", bf("-4/3").toMixedString());
