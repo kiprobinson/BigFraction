@@ -37,6 +37,8 @@ public class BigFractionTest {
     assertEquals("valueOf(\"+9.02E-10\")", "451/500000000000", BigFraction.valueOf("+9.02E-10").toString());
     assertEquals("valueOf(\"-0.000000E+500\")", "0/1", BigFraction.valueOf("-0.000000E+500").toString());
     assertEquals("valueOf(0,19)", "0/1", BigFraction.valueOf(0,19).toString());
+    assertEquals("valueOf(\"dead/BEEF\", 16)", "57005/48879", BigFraction.valueOf("dead/BEEF", 16).toString());
+    assertEquals("valueOf(\"lAzY.fOx\", 36)", "15459161339/15552", BigFraction.valueOf("lAzY.fOx", 36).toString());
     
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(10), 0)).toString());
     assertEquals("10/1", BigFraction.valueOf(new BigDecimal(BigInteger.valueOf(1), -1)).toString());
@@ -666,37 +668,127 @@ public class BigFractionTest {
   
   @Test
   public void testToDecimalString() {
-    new ToDecimalStringTest("55/10", 1, "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5").test();
-    new ToDecimalStringTest("555/100", 1, "5.6", "5.5", "5.6", "5.5", "5.6", "5.5", "5.6", "ArithmeticException").test();
-    new ToDecimalStringTest("545/100", 1, "5.5", "5.4", "5.5", "5.4", "5.5", "5.4", "5.4", "ArithmeticException").test();
-    new ToDecimalStringTest("55/10", 4, "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000").test();
+    new ToRadixedStringTest("55/10", 1, "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5").test();
+    new ToRadixedStringTest("555/100", 1, "5.6", "5.5", "5.6", "5.5", "5.6", "5.5", "5.6", "ArithmeticException").test();
+    new ToRadixedStringTest("545/100", 1, "5.5", "5.4", "5.5", "5.4", "5.5", "5.4", "5.4", "ArithmeticException").test();
+    new ToRadixedStringTest("55/10", 4, "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000", "5.5000").test();
     
-    new ToDecimalStringTest("-55/10", 1, "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5").test();
-    new ToDecimalStringTest("-555/100", 1, "-5.6", "-5.5", "-5.5", "-5.6", "-5.6", "-5.5", "-5.6", "ArithmeticException").test();
-    new ToDecimalStringTest("-545/100", 1, "-5.5", "-5.4", "-5.4", "-5.5", "-5.5", "-5.4", "-5.4", "ArithmeticException").test();
-    new ToDecimalStringTest("-55/10", 4, "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000").test();
+    new ToRadixedStringTest("-55/10", 1, "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5", "-5.5").test();
+    new ToRadixedStringTest("-555/100", 1, "-5.6", "-5.5", "-5.5", "-5.6", "-5.6", "-5.5", "-5.6", "ArithmeticException").test();
+    new ToRadixedStringTest("-545/100", 1, "-5.5", "-5.4", "-5.4", "-5.5", "-5.5", "-5.4", "-5.4", "ArithmeticException").test();
+    new ToRadixedStringTest("-55/10", 4, "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000", "-5.5000").test();
     
     //3/7 = 0.428571 428571 428571 ...
-    new ToDecimalStringTest("3/7", 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
-    new ToDecimalStringTest("3/7", 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
-    new ToDecimalStringTest("3/7", 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
     
-    new ToDecimalStringTest("-3/7", 3, "-0.429", "-0.428", "-0.428", "-0.429", "-0.429", "-0.429", "-0.429", "ArithmeticException").test();
-    new ToDecimalStringTest("-3/7", 5, "-0.42858", "-0.42857", "-0.42857", "-0.42858", "-0.42857", "-0.42857", "-0.42857", "ArithmeticException").test();
-    new ToDecimalStringTest("-3/7", 9, "-0.428571429", "-0.428571428", "-0.428571428", "-0.428571429", "-0.428571429", "-0.428571429", "-0.428571429", "ArithmeticException").test();
+    new ToRadixedStringTest("-3/7", 3, "-0.429", "-0.428", "-0.428", "-0.429", "-0.429", "-0.429", "-0.429", "ArithmeticException").test();
+    new ToRadixedStringTest("-3/7", 5, "-0.42858", "-0.42857", "-0.42857", "-0.42858", "-0.42857", "-0.42857", "-0.42857", "ArithmeticException").test();
+    new ToRadixedStringTest("-3/7", 9, "-0.428571429", "-0.428571428", "-0.428571428", "-0.428571429", "-0.428571429", "-0.428571429", "-0.428571429", "ArithmeticException").test();
     
     //test scenarios where the rounding causes an additional digit before the decimal
-    new ToDecimalStringTest("99/10", 1, "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9").test();
-    new ToDecimalStringTest("995/100", 1, "10.0", "9.9", "10.0", "9.9", "10.0", "9.9", "10.0", "ArithmeticException").test();
+    new ToRadixedStringTest("99/10", 1, "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9", "9.9").test();
+    new ToRadixedStringTest("995/100", 1, "10.0", "9.9", "10.0", "9.9", "10.0", "9.9", "10.0", "ArithmeticException").test();
     
-    new ToDecimalStringTest("-99/10", 1, "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9").test();
-    new ToDecimalStringTest("-995/100", 1, "-10.0", "-9.9", "-9.9", "-10.0", "-10.0", "-9.9", "-10.0", "ArithmeticException").test();
+    new ToRadixedStringTest("-99/10", 1, "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9", "-9.9").test();
+    new ToRadixedStringTest("-995/100", 1, "-10.0", "-9.9", "-9.9", "-10.0", "-10.0", "-9.9", "-10.0", "ArithmeticException").test();
     
     //test leading zeros scenario
-    new ToDecimalStringTest("5/10000", 3, "0.001", "0.000", "0.001", "0.000", "0.001", "0.000", "0.000", "ArithmeticException").test();
-    new ToDecimalStringTest("0/10000", 3, "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000").test();
-    new ToDecimalStringTest("-5/10000", 3, "-0.001", "0.000", "0.000", "-0.001", "-0.001", "0.000", "0.000", "ArithmeticException").test();
+    new ToRadixedStringTest("5/10000", 3, "0.001", "0.000", "0.001", "0.000", "0.001", "0.000", "0.000", "ArithmeticException").test();
+    new ToRadixedStringTest("0/10000", 3, "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000", "0.000").test();
+    new ToRadixedStringTest("-5/10000", 3, "-0.001", "0.000", "0.000", "-0.001", "-0.001", "0.000", "0.000", "ArithmeticException").test();
     
+    //test half_X rounding modes - 0.5 rounded to 0 decimal digits
+    new ToRadixedStringTest( "1/2", 0,  "1",  "0",  "1",  "0",  "1",  "0",  "0", "ArithmeticException").test();
+    new ToRadixedStringTest("-1/2", 0, "-1",  "0",  "0", "-1", "-1",  "0",  "0", "ArithmeticException").test();
+    new ToRadixedStringTest( "3/2", 0,  "2",  "1",  "2",  "1",  "2",  "1",  "2", "ArithmeticException").test();
+    new ToRadixedStringTest("-3/2", 0, "-2", "-1", "-1", "-2", "-2", "-1", "-2", "ArithmeticException").test();
+    new ToRadixedStringTest( "5/2", 0,  "3",  "2",  "3",  "2",  "3",  "2",  "2", "ArithmeticException").test();
+    new ToRadixedStringTest("-5/2", 0, "-3", "-2", "-2", "-3", "-3", "-2", "-2", "ArithmeticException").test();
+    new ToRadixedStringTest( "7/2", 0,  "4",  "3",  "4",  "3",  "4",  "3",  "4", "ArithmeticException").test();
+    new ToRadixedStringTest("-7/2", 0, "-4", "-3", "-3", "-4", "-4", "-3", "-4", "ArithmeticException").test();
+    
+    //test half_X rounding modes - 0.005 rounded to 2 digits
+    new ToRadixedStringTest( "1/200", 2,  "0.01",  "0.00",  "0.01",  "0.00",  "0.01",  "0.00",  "0.00", "ArithmeticException").test();
+    new ToRadixedStringTest("-1/200", 2, "-0.01",  "0.00",  "0.00", "-0.01", "-0.01",  "0.00",  "0.00", "ArithmeticException").test();
+    new ToRadixedStringTest( "3/200", 2,  "0.02",  "0.01",  "0.02",  "0.01",  "0.02",  "0.01",  "0.02", "ArithmeticException").test();
+    new ToRadixedStringTest("-3/200", 2, "-0.02", "-0.01", "-0.01", "-0.02", "-0.02", "-0.01", "-0.02", "ArithmeticException").test();
+    new ToRadixedStringTest( "5/200", 2,  "0.03",  "0.02",  "0.03",  "0.02",  "0.03",  "0.02",  "0.02", "ArithmeticException").test();
+    new ToRadixedStringTest("-5/200", 2, "-0.03", "-0.02", "-0.02", "-0.03", "-0.03", "-0.02", "-0.02", "ArithmeticException").test();
+    new ToRadixedStringTest( "7/200", 2,  "0.04",  "0.03",  "0.04",  "0.03",  "0.04",  "0.03",  "0.04", "ArithmeticException").test();
+    new ToRadixedStringTest("-7/200", 2, "-0.04", "-0.03", "-0.03", "-0.04", "-0.04", "-0.03", "-0.04", "ArithmeticException").test();
+  }
+  
+  @Test
+  public void testToRadixedString() {
+    new ToRadixedStringTest("5/2", 2, 1, "10.1", "10.1", "10.1", "10.1", "10.1", "10.1", "10.1", "10.1").test();
+    new ToRadixedStringTest("-5/2", 2, 1, "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1").test();
+    
+    // 1/3 has an exact representation in base 3
+    new ToRadixedStringTest("1/3", 3, 1, "0.1", "0.1", "0.1", "0.1", "0.1", "0.1", "0.1", "0.1").test();
+    new ToRadixedStringTest("-1/3", 3, 1, "-0.1", "-0.1", "-0.1", "-0.1", "-0.1", "-0.1", "-0.1", "-0.1").test();
+    
+    new ToRadixedStringTest("16", 16, 3, "10.000", "10.000", "10.000", "10.000", "10.000", "10.000", "10.000", "10.000").test();
+    new ToRadixedStringTest("-16", 16, 3, "-10.000", "-10.000", "-10.000", "-10.000", "-10.000", "-10.000", "-10.000", "-10.000").test();
+    
+    //dead.beef in base 16
+    new ToRadixedStringTest("3735928559/65536",  16, 4,  "dead.beef",  "dead.beef",  "dead.beef",  "dead.beef",  "dead.beef",  "dead.beef",  "dead.beef",  "dead.beef").test();
+    new ToRadixedStringTest("-3735928559/65536", 16, 4, "-dead.beef", "-dead.beef", "-dead.beef", "-dead.beef", "-dead.beef", "-dead.beef", "-dead.beef", "-dead.beef").test();
+    new ToRadixedStringTest("3735928559/65536",  16, 2,  "dead.bf",    "dead.be",    "dead.bf",    "dead.be",    "dead.bf",    "dead.bf",    "dead.bf",    "ArithmeticException").test();
+    new ToRadixedStringTest("-3735928559/65536", 16, 2, "-dead.bf",   "-dead.be",   "-dead.be",   "-dead.bf",   "-dead.bf",   "-dead.bf",   "-dead.bf",    "ArithmeticException").test();
+    
+    //lazy.fox in base 36
+    new ToRadixedStringTest( "46377484017/46656", 36, 3,  "lazy.fox",  "lazy.fox",  "lazy.fox",  "lazy.fox",  "lazy.fox",  "lazy.fox",  "lazy.fox",  "lazy.fox").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, 3, "-lazy.fox", "-lazy.fox", "-lazy.fox", "-lazy.fox", "-lazy.fox", "-lazy.fox", "-lazy.fox", "-lazy.fox").test();
+    new ToRadixedStringTest( "46377484017/46656", 36, 0,  "lazz",      "lazy",      "lazz",      "lazy",      "lazy",      "lazy",      "lazy",      "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, 0, "-lazz",     "-lazy",     "-lazy",     "-lazz",     "-lazy",     "-lazy",     "-lazy",      "ArithmeticException").test();
+    
+    //20102.10201 in base 3
+    new ToRadixedStringTest("42139/243",  3, 5,  "20102.10201",  "20102.10201",  "20102.10201",  "20102.10201",  "20102.10201",  "20102.10201",  "20102.10201",  "20102.10201").test();
+    new ToRadixedStringTest("-42139/243", 3, 5, "-20102.10201", "-20102.10201", "-20102.10201", "-20102.10201", "-20102.10201", "-20102.10201", "-20102.10201", "-20102.10201").test();
+    new ToRadixedStringTest("42139/243",  3, 4,  "20102.1021",   "20102.1020",   "20102.1021",   "20102.1020",   "20102.1020",    "20102.1020",   "20102.1020",  "ArithmeticException").test();
+    new ToRadixedStringTest("-42139/243", 3, 4, "-20102.1021",  "-20102.1020",  "-20102.1020",  "-20102.1021",  "-20102.1020",   "-20102.1020",  "-20102.1020",  "ArithmeticException").test();
+    new ToRadixedStringTest("42139/243",  3, 3,  "20102.110",    "20102.102",    "20102.110",    "20102.102",    "20102.102",     "20102.102",    "20102.102",   "ArithmeticException").test();
+    new ToRadixedStringTest("-42139/243", 3, 3, "-20102.110",   "-20102.102",   "-20102.102",   "-20102.110",   "-20102.102",    "-20102.102",   "-20102.102",   "ArithmeticException").test();
+    new ToRadixedStringTest("42139/243",  3, 2,  "20102.11",     "20102.10",     "20102.11",     "20102.10",     "20102.11",      "20102.11",     "20102.11",    "ArithmeticException").test();
+    new ToRadixedStringTest("-42139/243", 3, 2, "-20102.11",    "-20102.10",    "-20102.10",    "-20102.11",    "-20102.11",     "-20102.11",    "-20102.11",    "ArithmeticException").test();
+    new ToRadixedStringTest("42139/243",  3, 1,  "20102.2",      "20102.1",      "20102.2",      "20102.1",      "20102.1",       "20102.1",      "20102.1",     "ArithmeticException").test();
+    new ToRadixedStringTest("-42139/243", 3, 1, "-20102.2",     "-20102.1",     "-20102.1",     "-20102.2",     "-20102.1",      "-20102.1",     "-20102.1",     "ArithmeticException").test();
+    new ToRadixedStringTest("42139/243",  3, 0,  "20110",        "20102",        "20110",        "20102",        "20102",         "20102",        "20102",       "ArithmeticException").test();
+    new ToRadixedStringTest("-42139/243", 3, 0, "-20110",       "-20102",       "-20102",       "-20110",       "-20102",        "-20102",       "-20102",       "ArithmeticException").test();
+    
+    //yy.yyy in base 35
+    new ToRadixedStringTest( "52521874/42875", 35, 4,   "yy.yyy0",  "yy.yyy0",  "yy.yyy0",  "yy.yyy0",  "yy.yyy0",  "yy.yyy0",  "yy.yyy0",  "yy.yyy0").test();
+    new ToRadixedStringTest("-52521874/42875", 35, 4,  "-yy.yyy0", "-yy.yyy0", "-yy.yyy0", "-yy.yyy0", "-yy.yyy0", "-yy.yyy0", "-yy.yyy0", "-yy.yyy0").test();
+    new ToRadixedStringTest( "52521874/42875", 35, 3,   "yy.yyy",   "yy.yyy",   "yy.yyy",   "yy.yyy",   "yy.yyy",   "yy.yyy",   "yy.yyy",   "yy.yyy").test();
+    new ToRadixedStringTest("-52521874/42875", 35, 3,  "-yy.yyy",  "-yy.yyy",  "-yy.yyy",  "-yy.yyy",  "-yy.yyy",  "-yy.yyy",  "-yy.yyy",  "-yy.yyy").test();
+    new ToRadixedStringTest( "52521874/42875", 35, 2,  "100.00",    "yy.yy",   "100.00",    "yy.yy",   "100.00",   "100.00",   "100.00",    "ArithmeticException").test();
+    new ToRadixedStringTest("-52521874/42875", 35, 2, "-100.00",   "-yy.yy",   "-yy.yy",  "-100.00",  "-100.00",  "-100.00",  "-100.00",    "ArithmeticException").test();
+    new ToRadixedStringTest( "52521874/42875", 35, 1,  "100.0",     "yy.y",    "100.0",     "yy.y",    "100.0",    "100.0",    "100.0",     "ArithmeticException").test();
+    new ToRadixedStringTest("-52521874/42875", 35, 1, "-100.0",    "-yy.y",    "-yy.y",   "-100.0",   "-100.0",   "-100.0",   "-100.0",     "ArithmeticException").test();
+    new ToRadixedStringTest( "52521874/42875", 35, 0,  "100",       "yy",      "100",       "yy",      "100",      "100",      "100",       "ArithmeticException").test();
+    new ToRadixedStringTest("-52521874/42875", 35, 0, "-100",      "-yy",      "-yy",     "-100",     "-100",     "-100",     "-100",       "ArithmeticException").test();
+    
+    //test half_X rounding modes - 0.2 in base-4 (equal to decimal 1/2) rounded to 0 base-4 digits
+    new ToRadixedStringTest(  "2/4", 4, 0,   "1",  "0",   "1",   "0",   "1",  "0",   "0", "ArithmeticException").test();
+    new ToRadixedStringTest( "-2/4", 4, 0,  "-1",  "0",   "0",  "-1",  "-1",  "0",   "0", "ArithmeticException").test();
+    new ToRadixedStringTest(  "6/4", 4, 0,   "2",  "1",   "2",   "1",   "2",  "1",   "2", "ArithmeticException").test();
+    new ToRadixedStringTest( "-6/4", 4, 0,  "-2", "-1",  "-1",  "-2",  "-2", "-1",  "-2", "ArithmeticException").test();
+    new ToRadixedStringTest( "10/4", 4, 0,   "3",  "2",   "3",   "2",   "3",  "2",   "2", "ArithmeticException").test();
+    new ToRadixedStringTest("-10/4", 4, 0,  "-3", "-2",  "-2",  "-3",  "-3", "-2",  "-2", "ArithmeticException").test();
+    new ToRadixedStringTest( "14/4", 4, 0,  "10",  "3",  "10",   "3",  "10",  "3",  "10", "ArithmeticException").test();
+    new ToRadixedStringTest("-14/4", 4, 0, "-10", "-3",  "-3", "-10", "-10", "-3", "-10", "ArithmeticException").test();
+    
+    //test half_X rounding modes - 0.002 in base-4 rounded to 2 octal digits
+    new ToRadixedStringTest(  "2/64", 4, 2,  "0.01",  "0.00",  "0.01",  "0.00",  "0.01",  "0.00",  "0.00", "ArithmeticException").test();
+    new ToRadixedStringTest( "-2/64", 4, 2, "-0.01",  "0.00",  "0.00", "-0.01", "-0.01",  "0.00",  "0.00", "ArithmeticException").test();
+    new ToRadixedStringTest(  "6/64", 4, 2,  "0.02",  "0.01",  "0.02",  "0.01",  "0.02",  "0.01",  "0.02", "ArithmeticException").test();
+    new ToRadixedStringTest( "-6/64", 4, 2, "-0.02", "-0.01", "-0.01", "-0.02", "-0.02", "-0.01", "-0.02", "ArithmeticException").test();
+    new ToRadixedStringTest( "10/64", 4, 2,  "0.03",  "0.02",  "0.03",  "0.02",  "0.03",  "0.02",  "0.02", "ArithmeticException").test();
+    new ToRadixedStringTest("-10/64", 4, 2, "-0.03", "-0.02", "-0.02", "-0.03", "-0.03", "-0.02", "-0.02", "ArithmeticException").test();
+    new ToRadixedStringTest( "14/64", 4, 2,  "0.10",  "0.03",  "0.10",  "0.03",  "0.10",  "0.03",  "0.10", "ArithmeticException").test();
+    new ToRadixedStringTest("-14/64", 4, 2, "-0.10", "-0.03", "-0.03", "-0.10", "-0.10", "-0.03", "-0.10", "ArithmeticException").test();
   }
   
   @Test
@@ -1426,22 +1518,30 @@ public class BigFractionTest {
   }
   
   /**
-   * Helper class to reduce repetitive typing of tests for toDecimalString. Basically, you
+   * Helper class to reduce repetitive typing of tests for toRadixedString. Basically, you
    * call the constructor with the input value (as a String), and the expected output
    * for that rounding method.
    */
-  private static class ToDecimalStringTest
+  private static class ToRadixedStringTest
   {
     private final String input;
     private final BigFraction bf;
+    private final int radix;
     private final int digits;
     private final Map<RoundingMode, String> expected = new HashMap<RoundingMode, String>();
     
-    public ToDecimalStringTest(String input, int digits, String up, String down, String ceiling, String floor,
+    public ToRadixedStringTest(String input, int digits, String up, String down, String ceiling, String floor,
+        String halfUp, String halfDown, String halfEven, String unnecessary)
+    {
+      this(input, 10, digits, up, down, ceiling, floor, halfUp, halfDown, halfEven, unnecessary);
+    }
+    
+    public ToRadixedStringTest(String input, int radix, int digits, String up, String down, String ceiling, String floor,
             String halfUp, String halfDown, String halfEven, String unnecessary)
     {
       this.input = input;
       bf = bf(input);
+      this.radix = radix;
       this.digits = digits;
       expected.put(RoundingMode.UP, up);
       expected.put(RoundingMode.DOWN, down);
@@ -1459,16 +1559,16 @@ public class BigFractionTest {
       {
         String actual;
         try {
-          actual = bf.toDecimalString(digits, mode).toString();
+          actual = bf.toRadixedString(radix, digits, mode).toString();
         }
         catch(Exception e) {
           actual = e.getClass().getSimpleName();
         }
-        assertEquals("toDecimalString(" + input + ", " + digits + ", " + mode + ")", expected.get(mode), actual);
+        assertEquals("(" + input + ").toRadixedString(" + radix + ", " + digits + ", " + mode + ")", expected.get(mode), actual);
       }
       
       //test that default rounding mode is the same as HALF_UP
-      assertEquals("round(" + input + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toDecimalString(digits).toString());
+      assertEquals("(" + input + ").toRadixedString(" + radix + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), bf.toRadixedString(radix, digits));
     }
   }
   
