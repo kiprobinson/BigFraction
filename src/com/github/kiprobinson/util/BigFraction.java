@@ -82,6 +82,23 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * <strong>Note:</strong> {@link #valueOf(String, int)} should be preferred for performance reasons.
+   * This constructor is provided for convenience.
+   * 
+   * @param s String to convert to parse as BigFraction
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @see #valueOf(String, int)
+   */
+  public BigFraction(String s, int radix)
+  {
+    BigFraction bf = valueOf(s, radix);
+    this.numerator = bf.numerator;
+    this.denominator = bf.denominator;
+  }
+  
+  /**
    * Constructs a BigFraction from given number. If the number is not one of the
    * known implementations of Number class, then {@link Number#doubleValue()}
    * will be used for construction.<br>
@@ -169,9 +186,10 @@ public final class BigFraction extends Number implements Comparable<Number>
     return new BigFraction(f1.numerator.multiply(f2.denominator), f1.denominator.multiply(f2.numerator), Reduced.NO);
   }
   
+  
   /**
-   * Constructs a BigFraction from a String. Expected format is numerator/denominator,
-   * but /denominator part is optional. Either numerator or denominator may be a floating-point
+   * Constructs a BigFraction from a String. Expected format is {@code numerator/denominator},
+   * but "{@code /denominator}" part is optional. Either numerator or denominator may be a floating-point
    * decimal number, which is in the same format as a parameter to the
    * {@link BigDecimal#BigDecimal(String)} constructor.<br>
    * <br>
@@ -191,19 +209,79 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public static BigFraction valueOf(String s)
   {
+    return valueOf(s, 10);
+  }
+  
+  /**
+   * Constructs a BigFraction from a String. Expected format is {@code numerator/denominator},
+   * but "{@code /denominator}" part is optional.<br>
+   * <br>
+   * If {@code radix == 10}: either numerator or denominator may be a floating-point
+   * decimal number, which is in the same format as a parameter to the
+   * {@link BigDecimal#BigDecimal(String)} constructor.<br>
+   * <br>
+   * If {@code radix != 10}: the numerator and denominator may be a radixed string
+   * string in that base, but <b>cannot</b> contain a scientific notation exponent.
+   * The numerator and denominator must be in a format that, with the radix point removed,
+   * can be parsed by the {@link BigInteger#BigInteger(String, int)} constructor.<br>
+   * <br>
+   * Examples:<br>
+   * {@code BigFraction.valueOf("11", 10); //11/1}<br>
+   * {@code BigFraction.valueOf("22/34", 10); //11/17}<br>
+   * {@code BigFraction.valueOf("2e4/-0.64", 10); //-174375/4}<br>
+   * {@code BigFraction.valueOf("dead/beef", 16); //???????}<br>
+   * {@code BigFraction.valueOf("lazy.fox", 36); //???????}<br>
+   * 
+   * 
+   * @param s a string representation of a number or fraction
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @return a fully reduced fraction equivalent to the specified string. Guaranteed to be non-null.
+   * 
+   * @throws NumberFormatException  if the string cannot be properly parsed.
+   * @throws ArithmeticException if denominator == 0.
+   * @throws IllegalArgumentException if s is null.
+   * 
+   * @see BigDecimal#BigDecimal(String)
+   */
+  public static BigFraction valueOf(String s, int radix)
+  {
     if(s == null)
       throw new IllegalArgumentException("Null argument.");
+    
+    if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+      radix = 10;
+    
+    String num = null;
+    String den = null;
     
     int slashPos = s.indexOf('/');
     if(slashPos < 0)
     {
-      return valueOfHelper(new BigDecimal(s));
+      num = s;
     }
     else
     {
-      BigDecimal num = new BigDecimal(s.substring(0, slashPos));
-      BigDecimal den = new BigDecimal(s.substring(slashPos+1, s.length()));
-      return valueOfHelper(num, den);
+      num = s.substring(0, slashPos);
+      den = s.substring(slashPos+1, s.length());
+    }
+    
+    if(radix == 10)
+    {
+      //if radix is 10, we piggy-back on BigDecimal
+      if(den == null)
+        return valueOfHelper(new BigDecimal(num));
+      else
+        return valueOfHelper(new BigDecimal(num), new BigDecimal(den));
+    }
+    else
+    {
+      //otherwise we use the helper method to parse each part.
+      if(den == null)
+        return valueOfHelper(num, radix);
+      else
+        return valueOfHelper(num, radix).divide(valueOfHelper(den, radix));
     }
   }
   
@@ -1265,12 +1343,12 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns string representation of this, in the form of numerator/denominator, with numerator
-   * and denominator represented in the given radix. If the radix is outside the range from
-   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
-   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * and denominator represented in the given radix. The digit-to-character mapping provided by
    * {@link Character#forDigit} is used.
    * 
-   * @param radix radix of the String representation
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
    * @return This fraction, represented as a string in the format {@code numerator/denominator}.
    */
   public String toString(int radix)
@@ -1294,14 +1372,14 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Returns string representation of this, in the form of numerator/denominator, with numerator
-   * and denominator represented in the given radix. If the radix is outside the range from
-   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
-   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * and denominator represented in the given radix. The digit-to-character mapping provided by
    * {@link Character#forDigit} is used.<br>
    * <br>
    * Optionally, "/denominator" part can be ommitted for whole numbers.
    * 
-   * @param radix radix of the String representation
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
    * @param denominatorOptional If true, the denominator will be ommitted
    *        when it is unnecessary. For example, "7" instead of "7/1".
    * @return This fraction, represented as a string in the format {@code numerator/denominator}.
@@ -1339,12 +1417,12 @@ public final class BigFraction extends Number implements Comparable<Number>
    * be displayed. For fractions which have absolute value less than 1,
    * this will be equivalent to {@link #toString(int radix)}.<br>
    * <br>
-   * The numbers are repesented in the given radix. If the radix is outside the range from
-   * {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
-   * (as is the case for Integer.toString). The digit-to-character mapping provided by
+   * The numbers are represented in the given radix. The digit-to-character mapping provided by
    * {@link Character#forDigit} is used.
    * 
-   * @param radix radix of the String representation
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
    * @return String representation of this fraction as a mixed fraction.
    */
   public String toMixedString(int radix)
@@ -1373,7 +1451,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public String toDecimalString(int numDecimalDigits)
   {
-    return toDecimalString(numDecimalDigits, RoundingMode.HALF_UP);
+    return toRadixedString(10, numDecimalDigits, RoundingMode.HALF_UP);
   }
   
   /**
@@ -1391,48 +1469,97 @@ public final class BigFraction extends Number implements Comparable<Number>
    */
   public String toDecimalString(int numDecimalDigits, RoundingMode roundingMode)
   {
-    if(numDecimalDigits < 0)
-      throw new IllegalArgumentException("numDecimalDigits must be nonnegative");
+    return toRadixedString(10, numDecimalDigits, roundingMode);
+  }
+  
+  /**
+   * Converts the fraction to a radixed string with the given number of fraction digits
+   * after the radix point. Rounds using HALF_UP rounding mode. The digit-to-character mapping provided by
+   * {@link Character#forDigit} is used.
+   * 
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @param numFractionalDigits number of digits to be displayed after the radix point.
+   * @return radixed string representation of this fraction.
+   * 
+   * @throws IllegalArgumentException if numFractionDigits is negative
+   */
+  public String toRadixedString(int radix, int numFractionalDigits)
+  {
+    return toRadixedString(radix, numFractionalDigits, RoundingMode.HALF_UP);
+  }
+  
+  
+  /**
+   * Converts the fraction to a radixed string with the given number of fraction digits
+   * after the radix point.<br>
+   * <br>
+   * For example, 1/8 in base 10 is 0.125. In base 2 it is 0.001.<br>
+   * <br>
+   * Will append trailing 0s as needed: (1/2).toRadixedString(3,2) is 0.100.<br>
+   * <br>
+   * The digit-to-character mapping provided by {@link Character#forDigit} is used.
+   * 
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @param numFractionalDigits number of digits to be displayed after the decimal
+   * @param roundingMode how to round the number if necessary
+   * @return radixed string representation of this fraction.
+   * 
+   * @throws IllegalArgumentException if numFractionDigits is negative
+   * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
+   */
+  public String toRadixedString(int radix, int numFractionalDigits, RoundingMode roundingMode)
+  {
+    if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+      radix = 10;
     
-    //shortcut - if we don't want any decimal digits, this is equivalent to round()
-    if(numDecimalDigits == 0)
-      return this.round(roundingMode).toString();
+    if(numFractionalDigits < 0)
+      throw new IllegalArgumentException("numFractionDigits must be nonnegative");
     
-    //multiply by 10^(digits), then round to integer
-    BigInteger rounded = this.multiply(BigInteger.TEN.pow(numDecimalDigits)).round(roundingMode);
+    //shortcut - if we don't want any fractional digits, this is equivalent to round()
+    if(numFractionalDigits == 0)
+      return this.round(roundingMode).toString(radix);
+    
+    //multiply by (radix)^(digits), then round to integer
+    BigInteger rounded = this.multiply(BigInteger.valueOf(radix).pow(numFractionalDigits)).round(roundingMode);
     
     //get the actual digits (ignoring the sign bit)
-    String digits = rounded.abs().toString();
+    String digits = rounded.abs().toString(radix);
     
-    String beforeDecimal = "0";
-    String afterDecimal = digits;
+    String beforeRadixPoint = "0";
+    String afterRadixPoint = digits;
     int padLen = 0; //number of zeros we need to pad afterDecimal with with
     
-    if(digits.length() > numDecimalDigits)
+    if(digits.length() > numFractionalDigits)
     {
       //we got too many digits... need to split into before/after decimal parts
-      beforeDecimal = digits.substring(0, digits.length() - numDecimalDigits);
-      afterDecimal = digits.substring(digits.length() - numDecimalDigits);
+      beforeRadixPoint = digits.substring(0, digits.length() - numFractionalDigits);
+      afterRadixPoint = digits.substring(digits.length() - numFractionalDigits);
     }
-    else if (digits.length() < numDecimalDigits)
+    else if (digits.length() < numFractionalDigits)
     {
       //we don't have enough digits. We will have to pad with zeros
-      padLen = numDecimalDigits - digits.length();
+      padLen = numFractionalDigits - digits.length();
     }
     //else: we got exactly the right number of digits. nothing to do!
     
-    //create string builder to hold result. init buffer to max possible size: lenth of parts plus length of padding plus space for . and -
-    StringBuilder sb = new StringBuilder(beforeDecimal.length() + afterDecimal.length() + padLen + 2);
+    //create string builder to hold result. init buffer to max possible size: length of parts plus length of padding plus space for . and -
+    StringBuilder sb = new StringBuilder(beforeRadixPoint.length() + afterRadixPoint.length() + padLen + 2);
     
+    //Note: need to use sign of rounded, not sign of this, because if we round a small negative number to
+    //zero the sign will be lost.
     if(rounded.signum() < 0)
       sb.append('-');
     
-    sb.append(beforeDecimal).append('.');
+    sb.append(beforeRadixPoint).append('.');
     
     for(int i = 0; i < padLen; i++)
       sb.append('0');
     
-    sb.append(afterDecimal);
+    sb.append(afterRadixPoint);
     
     return sb.toString();
   }
@@ -2286,6 +2413,33 @@ public final class BigFraction extends Number implements Comparable<Number>
     }
     
     return new BigFraction(tmpNumerator, tmpDenominator, Reduced.YES);
+  }
+  
+  /**
+   * Converts a radixed string to a BigFraction.
+   * 
+   * @throws ArithmeticException if denominator == 0.
+   */
+  private static BigFraction valueOfHelper(String s, int radix)
+  {
+    int radixPos = s.indexOf('.');
+    
+    //if no radix point (decimal), this is just a BigInteger
+    if(radixPos < 0)
+      return new BigFraction(new BigInteger(s, radix), BigInteger.ONE, Reduced.YES);
+    
+    //otherwise, we have a radix to deal with. Just take the radix point out of the string, and parse it as
+    //a BigInteger. Then the denominator is radix^(numFractionDigits).
+    //Example in base 10:  123.45 = 12345 / 10^2
+    //Same holds true for other bases.
+    
+    String iPart = s.substring(0, radixPos);
+    String fPart = s.substring(radixPos+1, s.length());
+    
+    BigInteger num = new BigInteger(iPart + fPart, radix);
+    BigInteger den = BigInteger.valueOf(radix).pow(fPart.length());
+    
+    return new BigFraction(num, den, Reduced.NO);
   }
   
   /**
