@@ -199,9 +199,6 @@ public final class BigFraction extends Number implements Comparable<Number>
    * {@code BigFraction.valueOf("2e4/-0.64"); //-174375/4}
    * 
    * @param s a string representation of a number or fraction
-   * @param radix radix of the String representation. If the radix is outside the range from
-   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
-   *              (as is the case for Integer.toString)
    * @return a fully reduced fraction equivalent to the specified string. Guaranteed to be non-null.
    * 
    * @throws NumberFormatException  if the string cannot be properly parsed.
