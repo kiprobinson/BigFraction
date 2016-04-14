@@ -95,6 +95,50 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testValueOf_Repeating() {
+    assertEquals("valueOf( \"0.(4)\")",  "4/9", BigFraction.valueOf( "0.(4)").toString());
+    assertEquals("valueOf(\"+0.(4)\")",  "4/9", BigFraction.valueOf("+0.(4)").toString());
+    assertEquals("valueOf(\"-0.(4)\")", "-4/9", BigFraction.valueOf("-0.(4)").toString());
+    assertEquals("valueOf(  \".(4)\")",  "4/9", BigFraction.valueOf(  ".(4)").toString());
+    assertEquals("valueOf( \"+.(4)\")",  "4/9", BigFraction.valueOf( "+.(4)").toString());
+    assertEquals("valueOf( \"-.(4)\")", "-4/9", BigFraction.valueOf( "-.(4)").toString());
+    
+    assertEquals("valueOf( \"0.0(4)\")",  "2/45", BigFraction.valueOf( "0.0(4)").toString());
+    assertEquals("valueOf(\"+0.0(4)\")",  "2/45", BigFraction.valueOf("+0.0(4)").toString());
+    assertEquals("valueOf(\"-0.0(4)\")", "-2/45", BigFraction.valueOf("-0.0(4)").toString());
+    assertEquals("valueOf(  \".0(4)\")",  "2/45", BigFraction.valueOf(  ".0(4)").toString());
+    assertEquals("valueOf( \"+.0(4)\")",  "2/45", BigFraction.valueOf( "+.0(4)").toString());
+    assertEquals("valueOf( \"-.0(4)\")", "-2/45", BigFraction.valueOf( "-.0(4)").toString());
+    
+    assertEquals("valueOf(\"0.444(4)\")", "4/9", BigFraction.valueOf("0.444(4)").toString());
+    assertEquals("valueOf(\"0.4(444)\")", "4/9", BigFraction.valueOf("0.4(444)").toString());
+    assertEquals("valueOf(\"0.044(4)\")", "2/45", BigFraction.valueOf("0.044(4)").toString());
+    assertEquals("valueOf(\"0.0(444)\")", "2/45", BigFraction.valueOf("0.0(444)").toString());
+    
+    assertEquals("valueOf(\"0.(56)\")", "56/99", BigFraction.valueOf("0.(56)").toString());
+    assertEquals("valueOf(\"0.5(65)\")", "56/99", BigFraction.valueOf("0.5(65)").toString());
+    assertEquals("valueOf(\"0.56(56)\")", "56/99", BigFraction.valueOf("0.56(56)").toString());
+    assertEquals("valueOf(\"0.565(6565)\")", "56/99", BigFraction.valueOf("0.565(6565)").toString());
+    
+    assertEquals("valueOf(\"0.(012)\")", "4/333", BigFraction.valueOf("0.(012)").toString());
+    assertEquals("valueOf(\"0.(9)\")", "1/1", BigFraction.valueOf("0.(9)").toString());
+    assertEquals("valueOf(\"0.000(4)\")", "1/2250", BigFraction.valueOf("0.000(4)").toString());
+    assertEquals("valueOf(\"0.000(9)\")", "1/1000", BigFraction.valueOf("0.000(9)").toString());
+    assertEquals("valueOf(\"0.000(120)\")", "1/8325", BigFraction.valueOf("0.000(120)").toString());
+    assertEquals("valueOf(\"1.23(4)\")", "1111/900", BigFraction.valueOf("1.23(4)").toString());
+    assertEquals("valueOf(\"0.3(789)\")", "631/1665", BigFraction.valueOf("0.3(789)").toString());
+    
+    assertEquals("valueOf(\"0.(012)/1.23(4)\")", "400/41107", BigFraction.valueOf("0.(012)/1.23(4)").toString());
+    assertEquals("valueOf(\"0.(012)/1.6e3\")", "1/133200", BigFraction.valueOf("0.(012)/1.6e3").toString());
+    
+    //different bases
+    assertEquals("valueOf(\"0.0(0011)\", 2)", "1/10", BigFraction.valueOf("0.0(0011)", 2).toString());
+    assertEquals("valueOf(\"0.1(9))\", 16)", "1/10", BigFraction.valueOf("0.1(9)", 16).toString());
+    assertEquals("valueOf(\"-a.(i))\", 19)", "-11/1", BigFraction.valueOf("-a.(i)", 19).toString());
+    assertEquals("valueOf(\"the.lazy(fox)\", 36)", "2994276908470787/78362484480", BigFraction.valueOf("the.lazy(fox)", 36).toString());
+  }
+  
+  @Test
   public void testValueOf_CustomNumberInterface() {
     assertEquals("Custom Number representing an integer", "123456/1", bf(new CustomNumber(123456.0)).toString());
     assertEquals("Custom Number representing a floating-point number", "987653/8", bf(new CustomNumber(123456.625)).toString());
