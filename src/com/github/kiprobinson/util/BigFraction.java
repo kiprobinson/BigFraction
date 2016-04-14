@@ -3,6 +3,8 @@ package com.github.kiprobinson.util;
 import java.math.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Arbitrary-precision fraction, utilizing BigIntegers for numerator and
@@ -193,10 +195,15 @@ public final class BigFraction extends Number implements Comparable<Number>
    * decimal number, which is in the same format as a parameter to the
    * {@link BigDecimal#BigDecimal(String)} constructor.<br>
    * <br>
+   * Numerator or denominator can also be expressed as a repeating decimal, such as 0.(1) = 0.1111...
+   * Scientific notation is not allowed when using repeating digits.<br>
+   * <br>
    * Examples:<br>
    * {@code BigFraction.valueOf("11"); //11/1}<br>
    * {@code BigFraction.valueOf("22/34"); //11/17}<br>
-   * {@code BigFraction.valueOf("2e4/-0.64"); //-174375/4}
+   * {@code BigFraction.valueOf("2e4/-0.64"); //-174375/4}<br>
+   * {@code BigFraction.valueOf("0.(1)"); //1/9}<br>
+   * {@code BigFraction.valueOf("12.34(56)"); //122222/9900}<br>
    * 
    * @param s a string representation of a number or fraction
    * @return a fully reduced fraction equivalent to the specified string. Guaranteed to be non-null.
@@ -223,14 +230,23 @@ public final class BigFraction extends Number implements Comparable<Number>
    * If {@code radix != 10}: the numerator and denominator may be a radixed string
    * string in that base, but <b>cannot</b> contain a scientific notation exponent.
    * The numerator and denominator must be in a format that, with the radix point removed,
-   * can be parsed by the {@link BigInteger#BigInteger(String, int)} constructor.<br>
+   * can be parsed by the {@link BigInteger#BigInteger(String, int)} constructor. This means
+   * that scientific notation is <em>not</em> allowed in bases other than 10.<br>
+   * <br>
+   * Numerator or denominator can also be expressed as a radixed string with a repeating
+   * digit, such as 0.(1) = 0.1111... This is allowed with any radix. Scientific notation
+   * is not allowed when using repeating digits.<br>
    * <br>
    * Examples:<br>
    * {@code BigFraction.valueOf("11", 10); //11/1}<br>
    * {@code BigFraction.valueOf("22/34", 10); //11/17}<br>
    * {@code BigFraction.valueOf("2e4/-0.64", 10); //-174375/4}<br>
-   * {@code BigFraction.valueOf("dead/beef", 16); //???????}<br>
-   * {@code BigFraction.valueOf("lazy.fox", 36); //???????}<br>
+   * {@code BigFraction.valueOf("dead/beef", 16); //57005/48879}<br>
+   * {@code BigFraction.valueOf("lazy.fox", 36); //15459161339/15552}<br>
+   * {@code BigFraction.valueOf("0.(1)", 10); //1/9}<br>
+   * {@code BigFraction.valueOf("12.34(56)", 10); //122222/9900}<br>
+   * {@code BigFraction.valueOf("0.(1)", 16); //1/15}<br>
+   * {@code BigFraction.valueOf("the.lazy(fox)", 36); //2994276908470787/78362484480}<br>
    * 
    * 
    * @param s a string representation of a number or fraction
@@ -244,6 +260,7 @@ public final class BigFraction extends Number implements Comparable<Number>
    * @throws IllegalArgumentException if s is null.
    * 
    * @see BigDecimal#BigDecimal(String)
+   * @see BigInteger#BigInteger(String, int)
    */
   public static BigFraction valueOf(String s, int radix)
   {
@@ -267,9 +284,10 @@ public final class BigFraction extends Number implements Comparable<Number>
       den = s.substring(slashPos+1, s.length());
     }
     
-    if(radix == 10)
+    int parenPos = s.indexOf('(');
+    if(radix == 10 && parenPos < 0)
     {
-      //if radix is 10, we piggy-back on BigDecimal
+      //if radix is 10, and we don't have repeating digits, we piggy-back on BigDecimal
       if(den == null)
         return valueOfHelper(new BigDecimal(num));
       else
@@ -2417,11 +2435,17 @@ public final class BigFraction extends Number implements Comparable<Number>
   
   /**
    * Converts a radixed string to a BigFraction.
-   * 
-   * @throws ArithmeticException if denominator == 0.
    */
   private static BigFraction valueOfHelper(String s, int radix)
   {
+    int parenPos = s.indexOf('(');
+    if(parenPos >= 0)
+      return valueOfHelper_repeating(s, radix);
+    
+    //in base 10, if we don't have repeating fractions, piggy-back off of BigDecimal
+    if(radix == 10)
+      return valueOfHelper(new BigDecimal(s));
+    
     int radixPos = s.indexOf('.');
     
     //if no radix point (decimal), this is just a BigInteger
@@ -2440,6 +2464,69 @@ public final class BigFraction extends Number implements Comparable<Number>
     BigInteger den = BigInteger.valueOf(radix).pow(fPart.length());
     
     return new BigFraction(num, den, Reduced.NO);
+  }
+  
+  /**
+   * Converts a radixed string with repeating digits to a BigFraction.
+   */
+  private static BigFraction valueOfHelper_repeating(String s, int radix)
+  {
+    //largest digit in this radix
+    char maxDigit = Character.forDigit(radix-1, radix);
+    
+    //digits group: regex pattern to match any digits in the given radix
+    String digitsGroup = null;
+    if(radix < 11)
+      digitsGroup = "[0-" + (radix-1) + "]";
+    else if(radix == 11)
+      digitsGroup = "[0-9" + maxDigit + "]";
+    else
+      digitsGroup = "[0-9" + Character.forDigit(10, radix) + "-" + maxDigit + "]";
+    
+    //optional sign, optional iPart digits before radix point, optional fPart digits after radix point, and at least one repeating digit in parens
+    Pattern pattern = Pattern.compile("^([\\+\\-]?)(" + digitsGroup + "*)\\.(" + digitsGroup + "*)\\((" + digitsGroup + "+)\\)$", Pattern.CASE_INSENSITIVE);
+    Matcher matcher = pattern.matcher(s);
+    
+    if(!matcher.find())
+      throw new NumberFormatException();
+    
+    String sign = matcher.group(1);
+    String ipart = matcher.group(2);
+    String fpart = matcher.group(3);
+    String repeating = matcher.group(4);
+    
+    // A.B(C) = A.B + 0.0(C). First create a BigFraction for terminating part A.B (iPart.fPart)
+    BigFraction terminating = BigFraction.ZERO;
+    if(ipart.length() + fpart.length() > 0)
+      terminating = valueOfHelper(ipart + '.' + fpart, radix);
+    
+    //No create a fraction just for the repeating part. We already have the numerator (repeating), we just need
+    //the denominator. The denominator is always a series of the largest digit in the base, with the same length
+    //as the numerator, followed by a series of 0s the same length as the fPart. For examples, in base 10:
+    // 0.(3) = 3/9
+    // 0.(36) = 36/99
+    // 0.000(4) = 4/9000
+    // 0.000(45) = 45/99000
+    //same holds true in other base. For example, in hex:
+    // 0.00(1f) = 1f/ff00
+    StringBuilder den = new StringBuilder(fpart.length() + repeating.length());
+    for(int i = 0; i < repeating.length(); i++)
+      den.append(maxDigit);
+    for(int i = 0; i < fpart.length(); i++)
+      den.append('0');
+    
+    //TODO: Instead of using a string builder, we could also compute denominator as:
+    //    BigInteger.valueOf(radix).pow(repeating.length()).subtract(BigInteger.ONE).multiply(BigInteger.valueOf(radix).pow(fPart.length())
+    //Need to do performance analysis to see which method is more efficient
+    
+    //add the terminating part and the repeating part together to get the true fraction
+    BigFraction ret = terminating.add(new BigFraction(new BigInteger(repeating, radix), new BigInteger(den.toString(), radix), Reduced.NO));
+    
+    //don't forget the sign!
+    if(sign.equals("-"))
+      ret = ret.negate();
+    
+    return ret;
   }
   
   /**
