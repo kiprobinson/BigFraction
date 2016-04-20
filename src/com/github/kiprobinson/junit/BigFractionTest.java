@@ -131,6 +131,9 @@ public class BigFractionTest {
     assertEquals("valueOf(\"0.(012)/1.23(4)\")", "400/41107", BigFraction.valueOf("0.(012)/1.23(4)").toString());
     assertEquals("valueOf(\"0.(012)/1.6e3\")", "1/133200", BigFraction.valueOf("0.(012)/1.6e3").toString());
     
+    assertEquals("valueOf(\"7.000(00)\")", "7/1", BigFraction.valueOf("7.000(00)").toString());
+    assertEquals("valueOf(\"000.00(00)\")", "0/1", BigFraction.valueOf("000.00(00)").toString());
+    
     //different bases
     assertEquals("valueOf(\"0.0(0011)\", 2)", "1/10", BigFraction.valueOf("0.0(0011)", 2).toString());
     assertEquals("valueOf(\"0.1(9))\", 16)", "1/10", BigFraction.valueOf("0.1(9)", 16).toString());
@@ -833,6 +836,64 @@ public class BigFractionTest {
     new ToRadixedStringTest("-10/64", 4, 2, "-0.03", "-0.02", "-0.02", "-0.03", "-0.03", "-0.02", "-0.02", "ArithmeticException").test();
     new ToRadixedStringTest( "14/64", 4, 2,  "0.10",  "0.03",  "0.10",  "0.03",  "0.10",  "0.03",  "0.10", "ArithmeticException").test();
     new ToRadixedStringTest("-14/64", 4, 2, "-0.10", "-0.03", "-0.03", "-0.10", "-0.10", "-0.03", "-0.10", "ArithmeticException").test();
+  }
+  
+  @Test
+  public void testToRepeatingDigitString() {
+    assertEquals("\"1.0\".toRepeatingDigitString(10, true)", "0.(9)", bf("1.0").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"10.0\".toRepeatingDigitString(10, true)", "9.(9)", bf("10.0").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"0.1\".toRepeatingDigitString(10, true)", "0.0(9)", bf("0.1").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"0.01\".toRepeatingDigitString(10, true)", "0.00(9)", bf("0.01").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"0.02\".toRepeatingDigitString(10, true)", "0.01(9)", bf("0.02").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"5.1\".toRepeatingDigitString(10, true)", "5.0(9)", bf("5.1").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"5.101\".toRepeatingDigitString(10, true)", "5.100(9)", bf("5.101").toRepeatingDigitString(10, true).toString());
+    
+    assertEquals("\"1.0\".toRepeatingDigitString(10, false)", "1.0", bf("1.0").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"10.0\".toRepeatingDigitString(10, false)", "10.0", bf("10.0").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"0.1\".toRepeatingDigitString(10, false)", "0.1", bf("0.1").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"0.01\".toRepeatingDigitString(10, false)", "0.01", bf("0.01").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"0.02\".toRepeatingDigitString(10, false)", "0.02", bf("0.02").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"5.1\".toRepeatingDigitString(10, false)", "5.1", bf("5.1").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"5.101\".toRepeatingDigitString(10, false)", "5.101", bf("5.101").toRepeatingDigitString(10, false).toString());
+    
+    
+    assertEquals("\"4/9\".toRepeatingDigitString(10, false)", "0.(4)", bf("4/9").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"4/9\".toRepeatingDigitString(10, true)", "0.(4)", bf("4/9").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"-4/9\".toRepeatingDigitString(10, false)", "-0.(4)", bf("-4/9").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"-4/9\".toRepeatingDigitString(10, true)", "-0.(4)", bf("-4/9").toRepeatingDigitString(10, true).toString());
+    
+    assertEquals("\"2/45\".toRepeatingDigitString(10, false)", "0.0(4)", bf("2/45").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"2/45\".toRepeatingDigitString(10, true)", "0.0(4)", bf("2/45").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"-2/45\".toRepeatingDigitString(10, false)", "-0.0(4)", bf("-2/45").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"-2/45\".toRepeatingDigitString(10, true)", "-0.0(4)", bf("-2/45").toRepeatingDigitString(10, true).toString());
+    
+    assertEquals("\"56/99\".toRepeatingDigitString(10, false)", "0.(56)", bf("56/99").toRepeatingDigitString(10, false).toString());
+    
+    assertEquals("\"4/333\".toRepeatingDigitString(10, false)", "0.(012)", bf("4/333").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1/1\".toRepeatingDigitString(10, false)", "1.0", bf("1/1").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1/1\".toRepeatingDigitString(10, true)", "0.(9)", bf("1/1").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"1/2250\".toRepeatingDigitString(10, false)", "0.000(4)", bf("1/2250").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1/1000\".toRepeatingDigitString(10, false)", "0.001", bf("1/1000").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1/1000\".toRepeatingDigitString(10, true)", "0.000(9)", bf("1/1000").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"1/8325\".toRepeatingDigitString(10, false)", "0.00(012)", bf("1/8325").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1111/900\".toRepeatingDigitString(10, false)", "1.23(4)", bf("1111/900").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"631/1665\".toRepeatingDigitString(10, false)", "0.3(789)", bf("631/1665").toRepeatingDigitString(10, false).toString());
+    
+    assertEquals("\"7/1\".toRepeatingDigitString(10, false)", "7.0", bf("7/1").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"7/1\".toRepeatingDigitString(10, true)", "6.(9)", bf("7/1").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"0/1\".toRepeatingDigitString(10, false)", "0.0", bf("0/1").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"0/1\".toRepeatingDigitString(10, true)", "0.(0)", bf("0/1").toRepeatingDigitString(10, true).toString());
+    
+    //different bases
+    assertEquals("\"1/10\".toRepeatingDigitString(2, false)", "0.0(0011)", bf("1/10").toRepeatingDigitString(2, false).toString());
+    assertEquals("\"1/10\".toRepeatingDigitString(2, true)", "0.0(0011)", bf("1/10").toRepeatingDigitString(2, true).toString());
+    assertEquals("\"1/10\".toRepeatingDigitString(16, false)", "0.1(9)", bf("1/10").toRepeatingDigitString(16, false).toString());
+    assertEquals("\"1/10\".toRepeatingDigitString(16, true)", "0.1(9)", bf("1/10").toRepeatingDigitString(16, true).toString());
+    assertEquals("\"-11/1\".toRepeatingDigitString(19, false)", "-b.0", bf("-11/1").toRepeatingDigitString(19, false).toString());
+    assertEquals("\"-11/1\".toRepeatingDigitString(19, true)", "-a.(i)", bf("-11/1").toRepeatingDigitString(19, true).toString());
+    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, false)", "the.lazy(fox)", bf("2994276908470787/78362484480").toRepeatingDigitString(36, false).toString());
+    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, true)", "the.lazy(fox)", bf("2994276908470787/78362484480").toRepeatingDigitString(36, true).toString());
+    
   }
   
   @Test

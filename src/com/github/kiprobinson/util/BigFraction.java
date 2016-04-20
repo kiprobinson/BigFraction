@@ -1583,6 +1583,169 @@ public final class BigFraction extends Number implements Comparable<Number>
   }
   
   /**
+   * Converts the fraction to a radixed string with repeating digits. The
+   * repeating digits are indicated by parenthesis: 1/9 becomes 0.(1)<br>
+   * <br>
+   * Equivalent to {@code toRepeatingString(10, false)}
+   * 
+   * @return radixed string representation of this fraction with repeating digits denoted in parenthesis.
+   * 
+   * @see #toRepeatingDigitString(int, boolean)
+   */
+  public String toRepeatingDigitString() {
+    return toRepeatingDigitString(10, false);
+  }
+  
+  /**
+   * Converts the fraction to a radixed string with repeating digits. The
+   * repeating digits are indicated by parenthesis: 1/9 becomes 0.(1)<br>
+   * <br>
+   * Equivalent to {@code toRepeatingString(10, forceRepeating)}
+   * 
+   * @param forceRepeating whether or not to force this function to always use a repeating fraction,
+   *                       even if the radixed string terminates
+   * @return radixed string representation of this fraction with repeating digits denoted in parenthesis.
+   * 
+   * @see #toRepeatingDigitString(int, boolean)
+   */
+  public String toRepeatingDigitString(boolean forceRepeating) {
+    return toRepeatingDigitString(10, forceRepeating);
+  }
+  
+  /**
+   * Converts the fraction to a radixed string with repeating digits, in the given radix. The
+   * repeating digits are indicated by parenthesis: 1/9 becomes 0.(1)<br>
+   * <br>
+   * Equivalent to {@code toRepeatingString(radix, false)}
+   * 
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @return radixed string representation of this fraction with repeating digits denoted in parenthesis.
+   * 
+   * @see #toRepeatingDigitString(int, boolean)
+   */
+  public String toRepeatingDigitString(int radix) {
+    return toRepeatingDigitString(radix, false);
+  }
+  
+  /**
+   * Converts the fraction to a radixed string with repeating digits, in the given radix. The
+   * repeating digits are indicated by parenthesis: 1/9 becomes 0.(1)<br>
+   * <br>
+   * All rational fractions can be represented as a radixed string with repeating digits, but
+   * some fractions can also be represented as a radixed string that terminates. In these cases,
+   * the {@code forceRepeating} parameter can be used to force this function to return the
+   * repeating fraction. For example, the fraction {@code 1/10} could be represented as terminating
+   * string {@code "0.1"} or as repeating string {@code "0.0(9)"}.<br>
+   * <br>
+   * There is one special case for the value of 0. If {@code forceRepeating==true}, the return
+   * value will be {@code "0.(0)"}. For all other fractions, the repeating digits will never
+   * be all zeros.<br>
+   * <br>
+   * The repeating digits will always follow the radix point. For example, {@code 500/11} is
+   * represented as {@code "45.(45)"}.<br>
+   * <br>
+   * <strong>Warning</strong>: This method is quite slow, as it essentially implements long division.<br>
+   * <br>
+   * The digit-to-character mapping provided by {@link Character#forDigit} is used.<br>
+   * <br>
+   * Examples:<br>
+   * {@code BigFraction.valueOf(1,9).toRepeatingDigitString(10, false): 0.(1)}<br>
+   * {@code BigFraction.valueOf(1).toRepeatingDigitString(10, false): 1.0}<br>
+   * {@code BigFraction.valueOf(1).toRepeatingDigitString(10, true): 0.(9)}<br>
+   * {@code BigFraction.valueOf(1,100).toRepeatingDigitString(10, false): 0.01}<br>
+   * {@code BigFraction.valueOf(1,100).toRepeatingDigitString(10, true): 0.00(9)}<br>
+   * {@code BigFraction.valueOf(45,22).toRepeatingDigitString(10, false): 2.0(45)}<br>
+   * {@code BigFraction.valueOf(500,11).toRepeatingDigitString(10, false): 45.(45)}<br>
+   * 
+   * @param radix radix of the String representation. If the radix is outside the range from
+   *              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+   *              (as is the case for Integer.toString)
+   * @param forceRepeating whether or not to force this function to always use a repeating fraction,
+   *                       even if the radixed string terminates
+   * @return radixed string representation of this fraction with repeating digits denoted in parenthesis.
+   */
+  public String toRepeatingDigitString(int radix, boolean forceRepeating) {
+    if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+      radix = 10;
+    
+    //special case for 0
+    if(this.numerator.equals(BigInteger.ZERO))
+      return (forceRepeating ? "0.(0)" : "0.0");
+    
+    BigInteger absNum = numerator.abs();
+    String sign = (numerator.signum() < 0 ? "-" : "");
+    char maxDigit = Character.forDigit(radix-1, radix);
+    
+    //whole numbers are also easy
+    if(this.denominator.equals(BigInteger.ONE))
+    {
+      if(forceRepeating)
+        return sign + absNum.subtract(BigInteger.ONE).toString(radix) + ".(" + maxDigit + ")";
+      else
+        return numerator.toString(radix) + ".0";
+    }
+    
+    //not a whole number or zero... we're going to have to do long division
+    //first start by dividing to a remainder
+    String iPart = "0";
+    BigInteger dividend = absNum;
+    if(dividend.compareTo(denominator) > 0)
+    {
+      BigInteger[] divmod = absNum.divideAndRemainder(denominator);
+      iPart = divmod[0].toString(radix);
+      dividend = divmod[1];
+    }
+    
+    BigInteger bigRadix = BigInteger.valueOf(radix);
+    StringBuilder quotient = new StringBuilder(); //stores the digits we get in long division algorithm
+    
+    //Next loop does the actual long division. Take dividend, add a zero on the end, divide by denominator,
+    //append the quotient digit, then update dividend to the remainder. Keep track of dividends that we
+    //have seen before--when we get a dividend that we have seen before, then the digits are repeating.
+    //The value in the hash map is the index where we saw that dividend--we'll need it to split the
+    //quotient string between static and repeating digits.
+    Map<BigInteger, Integer> prevDividends = new HashMap<BigInteger, Integer>();
+    while(!dividend.equals(BigInteger.ZERO) && !prevDividends.containsKey(dividend))
+    {
+      prevDividends.put(dividend, quotient.length());
+      dividend = dividend.multiply(bigRadix); //same as appending a "0" in this base
+      
+      BigInteger[] divmod = dividend.divideAndRemainder(denominator);
+      quotient.append(Character.forDigit(divmod[0].intValueExact(), radix));
+      dividend = divmod[1];
+    }
+    
+    StringBuilder result = new StringBuilder().append(sign).append(iPart).append('.');
+    
+    //if dividend is 0, the digits terminated
+    if(dividend.equals(BigInteger.ZERO))
+    {
+      //if we are not forcing a repeating string, this is simple
+      if(!forceRepeating)
+        return result.append(quotient).toString();
+      
+      //to force terminating, convert the qoutient into a big integer, and subtract one from it, then use
+      //the largest value in this radix as the repeating digit. i.e. 0.11 becomes 0.10(9)
+      String adjustedQuotient = new BigInteger(quotient.toString(), radix).subtract(BigInteger.ONE).toString(radix);
+      
+      //we may need to pad with leading zeros - the adjusted quotient won't have them
+      int padLen = quotient.length() - adjustedQuotient.length();
+      for(int i = 0; i < padLen; i++)
+        result.append('0');
+      
+      return result.append(adjustedQuotient).append('(').append(maxDigit).append(')').toString();
+    }
+    
+    //insert parens around the repeating part
+    int numStaticDigits = prevDividends.get(dividend);
+    quotient.insert(numStaticDigits, '(').append(')');
+    
+    return result.append(quotient).toString();
+  }
+  
+  /**
    * Returns if this object is equal to another object. In order to maintain symmetry,
    * this will *only* return true if the other object is a BigFraction. For looser
    * comparison to other Number objects, use the equalsNumber(Number) method.
