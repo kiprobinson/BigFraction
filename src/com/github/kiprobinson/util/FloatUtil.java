@@ -41,6 +41,17 @@ public final class FloatUtil
   private FloatUtil() {}
   
   /**
+   * Returns true if d is finite--not infinite and not NaN. (Equivalent to
+   * Float.isFinite() available from Java 8.)
+   * 
+   * @param f a float value
+   * @return whether this value is finite.
+   */
+  public static boolean isFinite(float f) {
+    return !Float.isInfinite(f) && !Float.isNaN(f);
+  }
+  
+  /**
    * Returns the sign bit (bit 63). 0=positive, 1=negative. This is returned even for NaN values.
    * 
    * @param d a float value

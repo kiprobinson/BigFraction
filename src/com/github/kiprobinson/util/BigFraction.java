@@ -2347,7 +2347,7 @@ public final class BigFraction extends Number implements Comparable<Number>
     //then make sure the copy of copy is identical to the original.
     
     float floatVal = this.floatValue();
-    if(DoubleUtil.isFinite(floatVal)) {
+    if(FloatUtil.isFinite(floatVal)) {
       BigFraction copy = valueOfHelper(floatVal);
       if(this.equals(copy))
         return floatVal;
