@@ -41,7 +41,7 @@ public final class FloatUtil
   private FloatUtil() {}
   
   /**
-   * Returns true if d is finite--not infinite and not NaN. (Equivalent to
+   * Returns true if f is finite--not infinite and not NaN. (Equivalent to
    * Float.isFinite() available from Java 8.)
    * 
    * @param f a float value
@@ -54,12 +54,12 @@ public final class FloatUtil
   /**
    * Returns the sign bit (bit 63). 0=positive, 1=negative. This is returned even for NaN values.
    * 
-   * @param d a float value
+   * @param f a float value
    * @return the sign bit
    */
-  public static int getSign(float d)
+  public static int getSign(float f)
   {
-    return (int)((Float.floatToRawIntBits(d) & SIGN_MASK) >>> SIGN_POS);
+    return (int)((Float.floatToRawIntBits(f) & SIGN_MASK) >>> SIGN_POS);
   }
   
   /**
@@ -76,12 +76,12 @@ public final class FloatUtil
    *   <li>NaN: Always returns 1024.</li>
    *   </ul>
    * 
-   * @param d any float value
+   * @param f any float value
    * @return adjusted exponent
    */
-  public static int getExponent(float d)
+  public static int getExponent(float f)
   {
-    return getExponentBits(d) - EXPONENT_OFFSET;
+    return getExponentBits(f) - EXPONENT_OFFSET;
   }
   
   /**
@@ -98,32 +98,32 @@ public final class FloatUtil
    *   <li>NaN: Always returns 0x7ff.</li>
    * </ul>
    * 
-   * @param d a float value
+   * @param f a float value
    * @return raw exponent bits
    */
-  public static int getExponentBits(float d)
+  public static int getExponentBits(float f)
   {
-    return (int)((Float.floatToRawIntBits(d) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
+    return (int)((Float.floatToRawIntBits(f) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
   }
   
   /**
    * Returns the mantissa bits (bits 51-0). Returned even for NaN values.
-   * @param d a float value
+   * @param f a float value
    * @return mantissa bits
    */
-  public static int getMantissa(float d)
+  public static int getMantissa(float f)
   {
-    return Float.floatToRawIntBits(d) & MANTISSA_MASK;
+    return Float.floatToRawIntBits(f) & MANTISSA_MASK;
   }
   
   /**
    * Returns whether or not this float is a subnormal value.
-   * @param d a float value
+   * @param f a float value
    * @return whether or not this float is a subnormal value
    */
-  public static boolean isSubnormal(float d)
+  public static boolean isSubnormal(float f)
   {
-    int bits = Float.floatToRawIntBits(d);
+    int bits = Float.floatToRawIntBits(f);
     return ((bits & EXPONENT_BITS_MASK) == 0) && ((bits & MANTISSA_MASK) != 0);
   }
   
@@ -131,35 +131,35 @@ public final class FloatUtil
   /**
    * Returns an array containing the parts of the float. Avoids the overhead of four separate function calls.
    * 
-   * @param d a float value
+   * @param f a float value
    * @return array with four elements:<ul>
-   *     <li>return[0]: Equivalent to getSign(d)</li>
-   *     <li>return[1]: Equivalent to getExponent(d)</li>
-   *     <li>return[2]: Equivalent to getMantissa(d)</li>
-   *     <li>return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.</li>
+   *     <li>return[0]: Equivalent to getSign(f)</li>
+   *     <li>return[1]: Equivalent to getExponent(f)</li>
+   *     <li>return[2]: Equivalent to getMantissa(f)</li>
+   *     <li>return[3]: Equivalent to isSubnormal(f) - Uses zero for false, non-zero for true.</li>
    * </ul>
    */
-  public static int[] getAllParts(float d)
+  public static int[] getAllParts(float f)
   {
-    return getAllParts(d, false);
+    return getAllParts(f, false);
   }
   
   /**
    * Returns an array containing the parts of the float. Avoids the overhead of four separate function calls.
    * 
-   * @param d a float value
+   * @param f a float value
    * @param exponentAsBits whether to return exponent as raw bits rather than adjusted value
    * @return array with four elements:<ul>
-   *     <li>return[0]: Equivalent to getSign(d)</li>
-   *     <li>return[1]: Equivalent to (exponentAsBits ? getExponentBits(d) : getExponent(d))</li>
-   *     <li>return[2]: Equivalent to getMantissa(d)</li>
-   *     <li>return[3]: Equivalent to isSubnormal(d) - Uses zero for false, non-zero for true.</li>
+   *     <li>return[0]: Equivalent to getSign(f)</li>
+   *     <li>return[1]: Equivalent to (exponentAsBits ? getExponentBits(f) : getExponent(f))</li>
+   *     <li>return[2]: Equivalent to getMantissa(f)</li>
+   *     <li>return[3]: Equivalent to isSubnormal(f) - Uses zero for false, non-zero for true.</li>
    * </ul>
    */
-  public static int[] getAllParts(float d, boolean exponentAsBits)
+  public static int[] getAllParts(float f, boolean exponentAsBits)
   {
     int[] segments = new int[4];
-    int bits = Float.floatToRawIntBits(d);
+    int bits = Float.floatToRawIntBits(f);
     
     segments[0] = (bits & SIGN_MASK) >>> SIGN_POS;
     segments[1] = (bits & EXPONENT_BITS_MASK) >>> EXPONENT_POS;
