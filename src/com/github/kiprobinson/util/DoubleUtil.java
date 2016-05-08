@@ -10,22 +10,32 @@ package com.github.kiprobinson.util;
  */
 public final class DoubleUtil
 {
-  /** Mask to get sign bit. */
+  /** Mask to get sign bit in a raw double value. */
   private final static long SIGN_MASK = 0x8000000000000000L;
   /** Bit position of the sign bit in IEEE 754 double-precision binary representation. */
   private final static int SIGN_POS = 63;
   
-  /** Mask to get exponent bits. */
-  private final static long EXPONENT_MASK = 0x7ff0000000000000L;
+  /** Mask to get exponent bits in a raw double value. */
+  private final static long EXPONENT_BITS_MASK = 0x7ff0000000000000L;
   /** Bit position of the exponent bits in IEEE 754 double-precision binary representation. */
   private final static int EXPONENT_POS = 52;
   /** Exponent offset, per IEEE 754 spec. */
   private final static int EXPONENT_OFFSET = 0x3ff;
-  /** Maximum allowed exponent bits */
-  private final static int MAX_EXPONENT = 0x7ff;
   
-  /** Mask to get mantissa bits. */
+  /** Mask to get mantissa bits in a raw double value. */
   private final static long MANTISSA_MASK = 0xfffffffffffffL;
+  
+  /** The largest permitted mantissa value. */
+  public final static long MAX_MANTISSA = MANTISSA_MASK;
+  
+  /** The largest permitted exponent value, when using raw exponent bits. */
+  public final static int MAX_EXPONENT_BITS = (int)(EXPONENT_BITS_MASK >> EXPONENT_POS);
+  
+  /** The smallest permitted exponent value, when using an exponent with offset. */
+  public final static int MIN_EXPONENT = -EXPONENT_OFFSET;
+  /** The largest permitted exponent value, when using an exponent with offset. */
+  public final static int MAX_EXPONENT = MAX_EXPONENT_BITS - EXPONENT_OFFSET;
+  
   
   /** Hide default constructor to prevent instantiation. */
   private DoubleUtil() {}
@@ -82,7 +92,7 @@ public final class DoubleUtil
    */
   public static int getExponentBits(double d)
   {
-    return (int)((Double.doubleToRawLongBits(d) & EXPONENT_MASK) >>> EXPONENT_POS);
+    return (int)((Double.doubleToRawLongBits(d) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
   }
   
   /**
@@ -103,7 +113,7 @@ public final class DoubleUtil
   public static boolean isSubnormal(double d)
   {
     long bits = Double.doubleToRawLongBits(d);
-    return ((bits & EXPONENT_MASK) == 0) && ((bits & MANTISSA_MASK) != 0);
+    return ((bits & EXPONENT_BITS_MASK) == 0) && ((bits & MANTISSA_MASK) != 0);
   }
   
   
@@ -141,7 +151,7 @@ public final class DoubleUtil
     long bits = Double.doubleToRawLongBits(d);
     
     segments[0] = (bits & SIGN_MASK) >>> SIGN_POS;
-    segments[1] = (bits & EXPONENT_MASK) >>> EXPONENT_POS;
+    segments[1] = (bits & EXPONENT_BITS_MASK) >>> EXPONENT_POS;
     segments[2] = bits & MANTISSA_MASK;
     segments[3] = (segments[1] == 0L && segments[2] != 0L ? 1L : 0L);
     
@@ -190,7 +200,7 @@ public final class DoubleUtil
     
     int offsetExponent = (exponentAsBits ? exponent : exponent + EXPONENT_OFFSET);
     
-    if(0 != (offsetExponent & ~MAX_EXPONENT))
+    if(0 != (offsetExponent & ~MAX_EXPONENT_BITS))
       throw new IllegalArgumentException("Illegal exponent: " + exponent);
     
     return Double.longBitsToDouble((((long)sign) << SIGN_POS) | (((long)offsetExponent) << EXPONENT_POS) | mantissa);
