@@ -1,4 +1,4 @@
-package com.github.kiprobinson.junit;
+package com.github.kiprobinson.util;
 
 import static org.junit.Assert.*;
 

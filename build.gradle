@@ -1,0 +1,41 @@
+// Apply the java plugin to add support for Java
+apply plugin: 'java'
+
+//jacoco: code coverage tool. Binary file is always generated (build/jacoco/*.exec).
+//To generate HTML report, run:  gradle jacoco
+apply plugin: 'jacoco'
+
+// Java compatibility. 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+//Use the maven repo...
+repositories {
+  mavenLocal()
+  mavenCentral()
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+  testCompile 'junit:junit:4.+'
+}
+
+javadoc {
+  source = sourceSets.main.allJava
+  options {
+    links 'http://docs.oracle.com/javase/8/docs/api/'
+  }
+}
+
+jacoco {
+  toolVersion = "0.7.+"
+}
+jacocoTestReport {
+  dependsOn test
+  reports {
+    xml.enabled false
+    csv.enabled false
+    html.destination "${buildDir}/reports/jacoco"
+  }
+}
+

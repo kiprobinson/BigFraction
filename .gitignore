@@ -8,3 +8,4 @@ bin/
 
 #Gradle build dir
 build/
+.gradle
