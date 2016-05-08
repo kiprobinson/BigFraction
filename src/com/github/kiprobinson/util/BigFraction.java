@@ -1713,7 +1713,7 @@ public final class BigFraction extends Number implements Comparable<Number>
       dividend = dividend.multiply(bigRadix); //same as appending a "0" in this base
       
       BigInteger[] divmod = dividend.divideAndRemainder(denominator);
-      quotient.append(Character.forDigit(divmod[0].intValueExact(), radix));
+      quotient.append(Character.forDigit(intValueExact(divmod[0]), radix));
       dividend = divmod[1];
     }
     
@@ -2826,5 +2826,18 @@ public final class BigFraction extends Number implements Comparable<Number>
   private static boolean isFloat(Number n)
   {
     return n instanceof Double || n instanceof Float;
+  }
+  
+  /**
+   * Implementation of BigInteger.intValueExact(), which does not exist yet in java 7.
+   */
+  private static int intValueExact(BigInteger n)
+  {
+    if(n.signum() > 0 && n.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0)
+      throw new ArithmeticException("BigInteger out of int range");
+    if(n.signum() < 0 && n.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) < 0)
+      throw new ArithmeticException("BigInteger out of int range");
+    
+    return n.intValue();
   }
 }
