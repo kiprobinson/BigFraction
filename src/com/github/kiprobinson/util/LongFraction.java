@@ -1292,7 +1292,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    * @throws IllegalArgumentException If newDenominator is null.
    * @throws ArithmeticException If newDenominator is zero or negative.
    * 
-   * @see #roundToDenominator(BigInteger, RoundingMode)
+   * @see #roundToDenominator(long, RoundingMode)
    */
   public long roundToDenominator(long newDenominator)
   {
