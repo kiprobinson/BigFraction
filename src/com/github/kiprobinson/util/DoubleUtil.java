@@ -41,6 +41,21 @@ public final class DoubleUtil
   private DoubleUtil() {}
   
   /**
+   * Returns true if d is finite--not infinite and not NaN. (Equivalent to
+   * Double.isFinite() available from Java 8.)
+   * 
+   * @param d a float value
+   * @return whether this value is finite.
+   * 
+   * @deprecated use {@link Double#isFinite(double)} instead. This method was provided
+   *             for use in Java7, where {@link Double#isFinite(double)} did not exist yet.
+   */
+  @Deprecated
+  public static boolean isFinite(double d) {
+    return Double.isFinite(d);
+  }
+  
+  /**
    * Returns the sign bit (bit 63). 0=positive, 1=negative. This is returned even for NaN values.
    * 
    * @param d a double value
