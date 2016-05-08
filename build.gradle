@@ -6,8 +6,8 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 // Java compatibility. 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 //Use the maven repo...
 repositories {
@@ -23,7 +23,7 @@ dependencies {
 javadoc {
   source = sourceSets.main.allJava
   options {
-    links 'http://docs.oracle.com/javase/8/docs/api/'
+    links 'http://docs.oracle.com/javase/7/docs/api/'
   }
 }
 
