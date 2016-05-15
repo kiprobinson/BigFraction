@@ -115,7 +115,6 @@ public class FloatUtilTest {
   /**
    * Takes a float value and the expected components, and makes sure that all functions return the expected value.
    */
-  @SuppressWarnings("deprecation")
   private void runTest(float val, int sign, int exponentBits, int exponent, int mantissa, boolean isSubnormal, boolean isFinite) {
     assertEquals("getSign(" + val + ")", sign, FloatUtil.getSign(val));
     assertEquals("getExponentBits(" + val + ")", exponentBits, FloatUtil.getExponentBits(val));

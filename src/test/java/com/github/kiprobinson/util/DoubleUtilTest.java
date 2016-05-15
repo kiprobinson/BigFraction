@@ -115,7 +115,6 @@ public class DoubleUtilTest {
   /**
    * Takes a double value and the expected components, and makes sure that all functions return the expected value.
    */
-  @SuppressWarnings("deprecation")
   private void runTest(double val, int sign, int exponentBits, int exponent, long mantissa, boolean isSubnormal, boolean isFinite) {
     assertEquals("getSign(" + val + ")", sign, DoubleUtil.getSign(val));
     assertEquals("getExponentBits(" + val + ")", exponentBits, DoubleUtil.getExponentBits(val));
