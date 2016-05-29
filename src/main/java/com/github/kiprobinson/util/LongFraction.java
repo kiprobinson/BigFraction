@@ -27,7 +27,6 @@ public final class LongFraction extends Number implements Comparable<Number>
   private final long denominator;
   
   //some constants used
-  //private final static BigInteger BIGINT_TWO = BigInteger.valueOf(2);
   private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
   
   /** The value 0/1. */
@@ -335,6 +334,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction add(Number n)
   {
+    if(isZero(n))
+      return this;
+    
     if(n == null)
       throw new IllegalArgumentException("Null argument");
     
@@ -377,6 +379,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction subtract(Number n)
   {
+    if(isZero(n))
+      return this;
+    
     if(n == null)
       throw new IllegalArgumentException("Null argument");
     
@@ -407,6 +412,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction subtractFrom(Number n)
   {
+    if(isZero(n))
+      return this.negate();
+    
     if(n == null)
       throw new IllegalArgumentException("Null argument");
     
@@ -449,8 +457,10 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction multiply(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
+    if(isZero(n))
+      return LongFraction.ZERO;
+    if(isOne(n))
+      return this;
     
     LongFraction f = valueOf(n);
     
@@ -491,6 +501,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction divide(Number n)
   {
+    if(isOne(n))
+      return this;
+    
     //division is the same thing as constructing new fraction
     return valueOf(this, n);
   }
@@ -506,6 +519,11 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction divideInto(Number n)
   {
+    if(isOne(n))
+      return this.reciprocal();
+    if(isZero(n) && !isZero(this))
+      return LongFraction.ZERO;
+    
     //division is the same thing as constructing new fraction
     return valueOf(n, this);
   }
@@ -560,7 +578,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public long divideToIntegralValue(Number n, DivisionMode divisionMode)
   {
-    return (long)(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.QUOTIENT));
+    return (long)(divideAndRemainderImpl(this, n, divisionMode, RemainderMode.QUOTIENT));
   }
   
   /**
@@ -595,7 +613,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction remainder(Number n, DivisionMode divisionMode)
   {
-    return (LongFraction)(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.REMAINDER));
+    return (LongFraction)(divideAndRemainderImpl(this, n, divisionMode, RemainderMode.REMAINDER));
   }
   
   /**
@@ -633,7 +651,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public Number[] divideAndRemainder(Number n, DivisionMode divisionMode)
   {
-    return (Number[])(divideAndRemainderImpl(this, valueOf(n), divisionMode, RemainderMode.BOTH));
+    return (Number[])(divideAndRemainderImpl(this, n, divisionMode, RemainderMode.BOTH));
   }
   
   /**
@@ -642,12 +660,19 @@ public final class LongFraction extends Number implements Comparable<Number>
    * Returns either just the quotient, just the remainder, or an array of both,
    * depending on the remainder mode.
    */
-  private static Object divideAndRemainderImpl(LongFraction a, LongFraction b, DivisionMode divisionMode, RemainderMode remainderMode)
+  private static Object divideAndRemainderImpl(Number na, Number nb, DivisionMode divisionMode, RemainderMode remainderMode)
   {
-    if(b.numerator == 0L)
+    if(divisionMode == null)
+      throw new IllegalArgumentException("Null argument");
+    else if(isZero(nb))
       throw new ArithmeticException("Divide by zero.");
-    else if(a.numerator == 0L)
+    else if(isZero(na))
       return divideAndRemainderReturner(0L, LongFraction.ZERO, remainderMode);
+    
+    LongFraction a = valueOf(na);
+    LongFraction b = valueOf(nb);
+    
+    //TODO: Compute gcd and reduce before multiplying, to reduce chance of overflow?
     
     //First calculate true a/b value. We don't care about reducing to lowest terms
     //yet, so calculate numerator and denominator separately:
@@ -710,7 +735,7 @@ public final class LongFraction extends Number implements Comparable<Number>
     
     //if the remainder is 0, we don't do any adjustments, and we already know the remainder will
     //be zero, so go ahead and return this.
-    if(r != null && r == 0L)
+    if(isZero(r))
       return divideAndRemainderReturner(q, LongFraction.ZERO, remainderMode); //or could do: adjustment=0
     
     //avoid doing unnecessary math... at this point if we got both q and r, but only need q, we can drop r.
@@ -897,9 +922,9 @@ public final class LongFraction extends Number implements Comparable<Number>
   public LongFraction gcd(Number n) {
     LongFraction f = valueOf(n);
     
-    if(this.numerator == 0L)
+    if(isZero(this))
       return f.abs();
-    if(f.numerator == 0L)
+    if(isZero(f))
       return this.abs();
     
     //gcd((a/b),(c/d)) = gcd(a,c) / lcm(b,d)
@@ -945,7 +970,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction pow(int exponent)
   {
-    if(exponent < 0 && numerator == 0L)
+    if(exponent < 0 && isZero(this))
       throw new ArithmeticException("Divide by zero: raising zero to negative exponent.");
     
     if(exponent == 0)
@@ -967,7 +992,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction reciprocal()
   {
-    if(numerator == 0L)
+    if(isZero(this))
       throw new ArithmeticException("Divide by zero: reciprocal of zero.");
     
     return new LongFraction(denominator, numerator, Reduced.YES);
@@ -1015,7 +1040,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction withSign(int sgn)
   {
-    if(sgn == 0 || numerator == 0L)
+    if(sgn == 0 || isZero(this))
       return LongFraction.ZERO;
     
     int thisSignum = signum();
@@ -1062,6 +1087,8 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public long getIntegerPart(DivisionMode divisionMode)
   {
+    if(divisionMode == null)
+      throw new IllegalArgumentException("Null argument");
     if(denominator == 1L)
       return numerator;
     
@@ -1102,6 +1129,8 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction getFractionPart(DivisionMode divisionMode)
   {
+    if(divisionMode == null)
+      throw new IllegalArgumentException("Null argument");
     if(denominator == 1L)
       return LongFraction.ZERO;
     
@@ -1167,6 +1196,8 @@ public final class LongFraction extends Number implements Comparable<Number>
    * @see DivisionMode
    */
   public Number[] getParts(DivisionMode divisionMode) {
+    if(divisionMode == null)
+      throw new IllegalArgumentException("Null argument");
     if(denominator == 1L)
       return new Number[]{numerator, LongFraction.ZERO};
     
@@ -1204,6 +1235,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public long round(RoundingMode roundingMode)
   {
+    if(roundingMode == null)
+      throw new IllegalArgumentException("Null argument");
+    
     //Since fraction is always in lowest terms, this is an exact integer
     //iff the denominator is 1.
     if(denominator == 1L)
@@ -1267,7 +1301,7 @@ public final class LongFraction extends Number implements Comparable<Number>
     
     //Sanity check... at this point all possible values should be turned to up or down.
     if(roundingMode != RoundingMode.UP && roundingMode != RoundingMode.DOWN)
-      throw new IllegalArgumentException("Unsupported rounding mode: " + roundingMode);
+      throw new IllegalArgumentException("Unsupported rounding mode: " + roundingMode.toString());
     
     if(roundingMode == RoundingMode.UP)
     {
@@ -1324,6 +1358,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public long roundToDenominator(long newDenominator, RoundingMode roundingMode)
   {
+    if(roundingMode == null)
+      throw new IllegalArgumentException("Null argument");
+    
     if(newDenominator <= 0L)
       throw new ArithmeticException("newDenominator must be positive");
     
@@ -1517,6 +1554,9 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public String toRadixedString(int radix, int numFractionalDigits, RoundingMode roundingMode)
   {
+    if(roundingMode == null)
+      throw new IllegalArgumentException("Null argument");
+    
     if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
       radix = 10;
     
@@ -1657,7 +1697,7 @@ public final class LongFraction extends Number implements Comparable<Number>
       radix = 10;
     
     //special case for 0
-    if(numerator == 0L)
+    if(isZero(this))
       return (forceRepeating ? "0.(0)" : "0.0");
     
     long absNum = absAndCheck(numerator);
@@ -1787,9 +1827,6 @@ public final class LongFraction extends Number implements Comparable<Number>
   @Override
   public int compareTo(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
     LongFraction f = valueOf(n);
     
     //easy case: this and f have different signs
@@ -1959,9 +1996,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public Number min(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
     return (this.compareTo(n) <= 0 ? this : n);
   }
   
@@ -1977,9 +2011,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public static Number min(Number a, Number b)
   {
-    if(a == null || b == null)
-      throw new IllegalArgumentException("Null argument");
-    
     return (valueOf(a).compareTo(b) <= 0 ? a : b);
   }
   
@@ -1995,9 +2026,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public Number max(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
     return (this.compareTo(n) >= 0 ? this : n);
   }
   
@@ -2013,9 +2041,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public static Number max(Number a, Number b)
   {
-    if(a == null || b == null)
-      throw new IllegalArgumentException("Null argument");
-    
     return (valueOf(a).compareTo(b) >= 0 ? a : b);
   }
   
@@ -2031,9 +2056,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public LongFraction mediant(Number n)
   {
-    if(n == null)
-      throw new IllegalArgumentException("Null argument");
-    
     LongFraction f = valueOf(n);
     
     //if the two fractions are equal, we can avoid the math
@@ -2061,9 +2083,8 @@ public final class LongFraction extends Number implements Comparable<Number>
    * Returns a BigDecimal representation of this fraction.<br>
    * <br>
    * If possible, the returned value will be exactly equal to the fraction. If not,
-   * the BigDecimal will have a scale large enough to hold the same number of
-   * significant figures as both numerator and denominator, or the equivalent of a
-   * double-precision number, whichever is more.
+   * this is equivalent to {@code toBigDecimal(18)}, approximately the same precision
+   * as a double-precision number.
    * 
    * @return This fraction represented as a BigDecimal (exactly, if possible).
    */
@@ -2105,22 +2126,11 @@ public final class LongFraction extends Number implements Comparable<Number>
       return new BigDecimal(unscaled, scale);
     }
     
-    //else: this number will repeat infinitely in base-10. So try to figure out
-    //a good number of significant digits. Start with the number of digits required
-    //to represent the numerator and denominator in base-10, which is given by
-    //bitLength / log[2](10). (bitLenth is the number of digits in base-2).
-    final double LG10 = 3.321928094887362; //Precomputed ln(10)/ln(2), a.k.a. log[2](10)
-    int precision = Math.max(Long.bitCount(numerator), Long.bitCount(denominator));
-    precision = (int)Math.ceil(precision / LG10);
-    
-    //If the precision is less than that of a double, use double-precision so
-    //that the result will be at least as accurate as a cast to a double. For
-    //example, with the fraction 1/3, precision will be 1, giving a result of
-    //0.3. This is quite a bit different from what a user would expect.
-    if(precision < MathContext.DECIMAL64.getPrecision() + 2)
-      precision = MathContext.DECIMAL64.getPrecision() + 2;
-    
-    return toBigDecimal(precision);
+    //else: this number will repeat infinitely in base-10. I used to try to figure out an
+    //appropriate precision based the bit length of the numerator and denominator, but that
+    //was just an approximation and not very useful in most circumstances. Instead, it now
+    //uses 18 digits of precision (comparable to a double-precision number).
+    return toBigDecimal(18);
   }
   
   /**
@@ -2350,7 +2360,7 @@ public final class LongFraction extends Number implements Comparable<Number>
       throw new IllegalArgumentException("double val is NaN");
     
     //special case - math below won't work right for 0.0 or -0.0
-    if(d == 0)
+    if(d == 0.0)
       return LongFraction.ZERO;
     
     //Per IEEE spec...
@@ -2446,10 +2456,13 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   private static LongFraction valueOfHelper(double numerator, double denominator)
   {
-    if(denominator == 0)
+    if(denominator == 0.0)
       throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
     
-    if(denominator < 0)
+    if(numerator == 0.0)
+      return LongFraction.ZERO;
+    
+    if(denominator < 0.0)
     {
       numerator = -numerator;
       denominator = -denominator;
@@ -2542,6 +2555,9 @@ public final class LongFraction extends Number implements Comparable<Number>
     //Format of BigDecimal: unscaled / 10^scale
     long tmpNumerator = numerator.unscaledValue().longValueExact();
     long tmpDenominator = denominator.unscaledValue().longValueExact();
+    
+    if(tmpNumerator == 0L)
+      return LongFraction.ZERO;
     
     // (u1/10^s1) / (u2/10^s2) = u1 / (u2 * 10^(s1-s2)) = (u1 * 10^(s2-s1)) / u2
     if(numerator.scale() > denominator.scale())
@@ -2673,7 +2689,7 @@ public final class LongFraction extends Number implements Comparable<Number>
       throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
     
     //if numerator is zero, we don't care about the denominator. force it to 1.
-    if(numerator == 0)
+    if(reduced == Reduced.NO && numerator == 0)
     {
       denominator = 1L;
       reduced = Reduced.YES;
@@ -2686,6 +2702,10 @@ public final class LongFraction extends Number implements Comparable<Number>
       denominator = negateAndCheck(denominator);
     }
     
+    if(reduced == Reduced.NO && denominator == 1L)
+      reduced = Reduced.YES;
+
+    //common special case - denominator is one. No need to do GCD check.
     if(reduced == Reduced.NO)
     {
       //create a reduced fraction
@@ -2713,25 +2733,11 @@ public final class LongFraction extends Number implements Comparable<Number>
     if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
       return n.longValue();
     
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).getNumerator().longValueExact();
+    
     if(n instanceof LongFraction)
       return ((LongFraction)n).numerator;
-    
-    if(n instanceof Double || n instanceof Float || n instanceof DoubleAdder || n instanceof DoubleAccumulator)
-    {
-      final double d = n.doubleValue();
-      
-      if(d == 0.0)
-        return 0L;
-      
-      //This is similar to valueOfHelper(double), except we know that the exponent is greater than 52. See the comments
-      //in valueOfHelper(double) for much more detailed information
-      final int sign = DoubleUtil.getSign(d);
-      final int exponent = DoubleUtil.getExponent(d);
-      final long mantissa = DoubleUtil.getMantissa(d);
-      
-      BigInteger ret = BigInteger.valueOf(0x10000000000000L + mantissa).shiftLeft(exponent - 52);
-      return (sign == 0 ? ret : ret.negate()).longValueExact();
-    }
     
     if(n instanceof BigDecimal)
     {
@@ -2739,9 +2745,20 @@ public final class LongFraction extends Number implements Comparable<Number>
       return bd.unscaledValue().multiply(BigInteger.TEN.pow(-bd.scale())).longValueExact();
     }
     
-    //we should never get here...
-    assert false : "Critical error in toLong. n=" + n.toString() + " [" + n.getClass().getName() + "]";
-    return 0L;
+    //unknown implementation... fall back to double value
+    final double d = n.doubleValue();
+    
+    if(d == 0.0)
+      return 0L;
+    
+    //This is similar to valueOfHelper(double), except we know that the exponent is greater than 52. See the comments
+    //in valueOfHelper(double) for much more detailed information
+    final int sign = DoubleUtil.getSign(d);
+    final int exponent = DoubleUtil.getExponent(d);
+    final long mantissa = DoubleUtil.getMantissa(d);
+    
+    BigInteger ret = BigInteger.valueOf(0x10000000000000L + mantissa).shiftLeft(exponent - 52);
+    return (sign == 0 ? ret : ret.negate()).longValueExact();
   }
   
   /**
@@ -2760,27 +2777,89 @@ public final class LongFraction extends Number implements Comparable<Number>
     if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof BigInteger || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
       return true;
     
-    if(n instanceof LongFraction)
-      return ((LongFraction)n).denominator == 1L;
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).getDenominator().equals(BigInteger.ONE);
     
-    if(n instanceof Double || n instanceof Float || n instanceof DoubleAdder || n instanceof DoubleAccumulator)
-    {
-      final double d = n.doubleValue();
-      if(d == 0.0)
-        return true;
-      
-      if(Double.isInfinite(d) || Double.isNaN(d))
-        return false;
-      
-      return (DoubleUtil.getExponent(d) >= 52);
-    }
+    if(n instanceof LongFraction)
+      return ((LongFraction)n).getDenominator() == 1L;
     
     //BigDecimal format: unscaled / 10^scale
     if(n instanceof BigDecimal)
       return (((BigDecimal)n).scale() <= 0);
     
-    //unknown type... play it safe...
-    return false;
+    //unknown type - use the doubleValue()
+    final double d = n.doubleValue();
+    if(d == 0.0)
+      return true;
+    
+    if(Double.isInfinite(d) || Double.isNaN(d))
+      return false;
+    
+    return (DoubleUtil.getExponent(d) >= 52);
+  }
+  
+  /**
+   * Returns true if the given BigFraction represents zero. Overloaded as this is a common case.
+   */
+  private final static boolean isZero(Number n)
+  {
+    //micro-optimization- most common type first...
+    if(n instanceof LongFraction)
+      return ((LongFraction)n).getNumerator() == 0L;
+    
+    if(n instanceof BigInteger)
+      return ((BigInteger)n).equals(BigInteger.ZERO);
+    
+    if(n == null)
+      return false;
+    
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
+      return n.longValue() == 0L;
+    
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).getNumerator().equals(BigInteger.ZERO);
+    
+    if(n instanceof BigDecimal)
+      return ((BigDecimal)n).unscaledValue().equals(BigInteger.ZERO);
+    
+    //double or unknown type - use doubleValue()
+    return n.doubleValue() == 0.0;
+  }
+  
+  /**
+   * Returns true if the given Number represents zero. For unknown numbers, utilizes Number.doubleValue().
+   */
+  private final static boolean isZero(LongFraction f)
+  {
+    return f.numerator == 0L;
+  }
+  
+  /**
+   * Returns true if the given Number represents one. For unknown numbers, utilizes Number.doubleValue().
+   */
+  private final static boolean isOne(Number n)
+  {
+    //micro-optimization- most common type first...
+    if(n instanceof LongFraction)
+      return ((LongFraction)n).equals(LongFraction.ONE);
+    
+    if(n == null)
+      return false;
+    
+    if(n instanceof BigInteger)
+      return ((BigInteger)n).equals(BigInteger.ONE);
+    
+    if(n instanceof Long || n instanceof Integer || n instanceof Short || n instanceof Byte || n instanceof AtomicInteger || n instanceof AtomicLong || n instanceof LongAdder || n instanceof LongAccumulator)
+      return n.longValue() == 1L;
+    
+    if(n instanceof BigFraction)
+      return ((BigFraction)n).equals(BigFraction.ONE);
+    
+    if(n instanceof BigDecimal)
+      return ((BigDecimal)n).compareTo(BigDecimal.ONE) == 0;
+    
+    //double or unknown type - use doubleValue()
+    return n.doubleValue() == 1.0;
   }
   
   /**
