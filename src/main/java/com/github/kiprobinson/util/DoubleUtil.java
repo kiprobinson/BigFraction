@@ -44,7 +44,7 @@ public final class DoubleUtil
    * Returns true if d is finite--not infinite and not NaN. (Equivalent to
    * Double.isFinite() available from Java 8.)
    * 
-   * @param d a float value
+   * @param d a double value
    * @return whether this value is finite.
    * 
    * @deprecated use {@link Double#isFinite(double)} instead. This method was provided
