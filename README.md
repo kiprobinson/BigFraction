@@ -3,11 +3,11 @@ BigFraction
 
 Java class that represents a fraction as a ratio of two BigIntegers, reduced to lowest terms. Originally created for use Project Euler problems.
 
-###Support for Older Java Versions
+## Support for Older Java Versions
 
 Switch to the java7 branch for a version of this library that compiles in Java7. I think it will also compile in Java 5-6. Master branch will keep up to date with latest Java version.
 
-###Creating BigFractions
+## Creating BigFractions
 
 Constructors are protected. Create new BigFractions using `valueOf(Number numerator)`, `valueOf(Number numerator, Number denominator)`, or `valueOf(String)`:
 
@@ -61,7 +61,7 @@ A few exceptions:
     BigFraction.valueOf(Double.POSITIVE_INFINITY); //IllegalArgumentException
     BigFraction.valueOf(Double.NaN); //IllegalArgumentException
 
-### Mathematical Operations
+## Mathematical Operations
 
     BigFraction a = BigFraction.valueOf(1,2);
     BigFraction b = BigFraction.valueOf(3,4);
@@ -105,3 +105,27 @@ Complement is `1 - n`. Useful in statistics a lot:
     a.complement(); // 1 - 1/2 = 1/2
     b.complement(); // 1 - 3/4 = 1/4
     z.complement(); // 1 - 0/1 = 1/1
+
+## Building
+
+This project is built using Gradle. The simplest way to build is to use the enclosed Gradle wrapper:
+
+    $ gradlew build
+
+You can also download Gradle and install it locally, then build with:
+
+    $ gradle build
+
+I also have project files set up for Eclipse. If you check out as an Eclipse project, and you have the
+Gradle plugin for Eclipse installed, you can right-click on project and select "Run As > Gradle Build".
+
+If you get an error like the following:
+
+    > Could not find tools.jar. Please check that SOME_PATH contains a valid JDK installation.
+
+This means your system default Java is a JRE rather than a JDK. In Eclipse, to resolve it, right-click on
+project and select Run As > Gradle Build..., then select arguments, and select the JDK that is configured
+in Eclipse.
+
+If you are running from command line and get this error, either install a JDK, or set JAVA_HOME variable
+to point to a JDK.
