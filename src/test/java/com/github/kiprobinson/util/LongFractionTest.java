@@ -39,8 +39,15 @@ public class LongFractionTest {
     assertEquals("valueOf(\"+9.02E-10\")", "451/500000000000", LongFraction.valueOf("+9.02E-10").toString());
     assertEquals("valueOf(\"-0.000000E+500\")", "0/1", LongFraction.valueOf("-0.000000E+500").toString());
     assertEquals("valueOf(0,19)", "0/1", LongFraction.valueOf(0,19).toString());
+    assertEquals("valueOf(0.0,19.0)", "0/1", LongFraction.valueOf(0.0,19.0).toString());
     assertEquals("valueOf(\"dead/BEEF\", 16)", "57005/48879", LongFraction.valueOf("dead/BEEF", 16).toString());
     assertEquals("valueOf(\"lAzY.fOx\", 36)", "15459161339/15552", LongFraction.valueOf("lAzY.fOx", 36).toString());
+    
+    //invalid radix must convert convert to 10
+    assertEquals("valueOf(\"13/5\", -1)", "13/5", LongFraction.valueOf("13/5", -1).toString());
+    assertEquals("valueOf(\"13/5\", 0)", "13/5", LongFraction.valueOf("13/5", 0).toString());
+    assertEquals("valueOf(\"13/5\", 1)", "13/5", LongFraction.valueOf("13/5", 1).toString());
+    assertEquals("valueOf(\"13/5\", 37)", "13/5", LongFraction.valueOf("13/5", 37).toString());
     
     assertEquals("10/1", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(10), 0)).toString());
     assertEquals("10/1", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(1), -1)).toString());
@@ -58,6 +65,13 @@ public class LongFractionTest {
     assertEquals("1230/1", LongFraction.valueOf(1.23e3).toString());
     assertEquals("12300/1", LongFraction.valueOf(1.23e4).toString());
     
+    assertEquals("58/25", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(348), 2), new BigDecimal(BigInteger.valueOf(15), 1)).toString());
+    assertEquals("25/58", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(15), 1), new BigDecimal(BigInteger.valueOf(348), 2)).toString());
+    assertEquals("-58/25", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(-348), 2), new BigDecimal(BigInteger.valueOf(15), 1)).toString());
+    assertEquals("-25/58", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(-15), 1), new BigDecimal(BigInteger.valueOf(348), 2)).toString());
+    assertEquals("4/1", LongFraction.valueOf(14, new BigDecimal(BigInteger.valueOf(3500), 3)).toString());
+    assertEquals("-1/4", LongFraction.valueOf(new BigDecimal(BigInteger.valueOf(3500), 3), -14).toString());
+    
     //some doubles which should have simple, exact representations
     assertEquals("1/2", LongFraction.valueOf(0.5).toString());
     assertEquals("1/4", LongFraction.valueOf(0.25).toString());
@@ -68,6 +82,17 @@ public class LongFractionTest {
     
     assertEquals("-2/9", LongFraction.valueOf(0.5, -2.25).toString());
     assertEquals("-2/9", LongFraction.valueOf(-2.0, 9.0).toString());
+    
+    assertEquals("valueOf(4.5, 0.625)", "36/5", LongFraction.valueOf(4.5, 0.625).toString());
+    assertEquals("valueOf(0.625, 4.5)", "5/36", LongFraction.valueOf(0.625, 4.5).toString());
+    assertEquals("valueOf(4.5, -0.625)", "-36/5", LongFraction.valueOf(4.5, -0.625).toString());
+    assertEquals("valueOf(0.625, -4.5)", "-5/36", LongFraction.valueOf(0.625, -4.5).toString());
+    
+    //BigFraction -> LongFraction
+    assertEquals("0/1", LongFraction.valueOf(BigFraction.ZERO).toString());
+    assertEquals("1/1", LongFraction.valueOf(BigFraction.ONE).toString());
+    assertEquals("-9223372036854775808/1", LongFraction.valueOf(BigFraction.valueOf(Long.MIN_VALUE)).toString());
+    assertEquals("1/9223372036854775807", LongFraction.valueOf(1, BigFraction.valueOf(Long.MAX_VALUE)).toString());
   }
   
   @Test
@@ -113,6 +138,7 @@ public class LongFractionTest {
     //different bases
     assertEquals("valueOf(\"0.0(0011)\", 2)", "1/10", LongFraction.valueOf("0.0(0011)", 2).toString());
     assertEquals("valueOf(\"0.1(9))\", 16)", "1/10", LongFraction.valueOf("0.1(9)", 16).toString());
+    assertEquals("valueOf(\"12.(a9))\", 11)", "1679/120", LongFraction.valueOf("12.(a9)", 11).toString());
     assertEquals("valueOf(\"-a.(i))\", 19)", "-11/1", LongFraction.valueOf("-a.(i)", 19).toString());
     assertEquals("valueOf(\"the.lazy(fox)\", 36)", "2994276908470787/78362484480", LongFraction.valueOf("the.lazy(fox)", 36).toString());
   }
@@ -127,6 +153,126 @@ public class LongFractionTest {
   
   
   @Test
+  public void testConstructor() {
+    assertEquals("constructor(1.1)", "2476979795053773/2251799813685248", new LongFraction(1.1).toString());
+    assertEquals("constructor(-0.0)", "0/1", new LongFraction(-0.0).toString());
+    assertEquals("constructor(1.1f)", "9227469/8388608", new LongFraction(1.1f).toString());
+    assertEquals("constructor(\"1.1\")", "11/10", new LongFraction("1.1").toString());
+    assertEquals("constructor(11,10)", "11/10", new LongFraction(11,10).toString());
+    assertEquals("constructor(2*5*7, 3*5*11)", "14/33", new LongFraction(2*5*7,3*5*11).toString());
+    assertEquals("constructor(100,-7)", "-100/7", new LongFraction(100,-7).toString());
+    assertEquals("constructor(\"-1.0E2/-0.007E3\")", "100/7", new LongFraction("-1.0E2/-0.007E3").toString());
+    assertEquals("constructor(\"+9.02E-10\")", "451/500000000000", new LongFraction("+9.02E-10").toString());
+    assertEquals("constructor(\"-0.000000E+500\")", "0/1", new LongFraction("-0.000000E+500").toString());
+    assertEquals("constructor(0,19)", "0/1", new LongFraction(0,19).toString());
+    assertEquals("valueOf(0.0,19.0)", "0/1", new LongFraction(0.0,19.0).toString());
+    assertEquals("constructor(\"dead/BEEF\", 16)", "57005/48879", new LongFraction("dead/BEEF", 16).toString());
+    assertEquals("constructor(\"lAzY.fOx\", 36)", "15459161339/15552", new LongFraction("lAzY.fOx", 36).toString());
+    
+    //invalid radix must convert convert to 10
+    assertEquals("constructor(\"13/5\", -1)", "13/5", new LongFraction("13/5", -1).toString());
+    assertEquals("constructor(\"13/5\", 0)", "13/5", new LongFraction("13/5", 0).toString());
+    assertEquals("constructor(\"13/5\", 1)", "13/5", new LongFraction("13/5", 1).toString());
+    assertEquals("constructor(\"13/5\", 37)", "13/5", new LongFraction("13/5", 37).toString());
+    
+    assertEquals("10/1", new LongFraction(new BigDecimal(BigInteger.valueOf(10), 0)).toString());
+    assertEquals("10/1", new LongFraction(new BigDecimal(BigInteger.valueOf(1), -1)).toString());
+    assertEquals("10/1", new LongFraction(new BigDecimal(BigInteger.valueOf(100), 1)).toString());
+    
+    assertEquals("123000/1", new LongFraction(new BigDecimal(BigInteger.valueOf(123), -3)).toString());
+    assertEquals("12300/1", new LongFraction(new BigDecimal(BigInteger.valueOf(123), -2)).toString());
+    assertEquals("1230/1", new LongFraction(new BigDecimal(BigInteger.valueOf(123), -1)).toString());
+    assertEquals("123/1", new LongFraction(new BigDecimal(BigInteger.valueOf(123), 0)).toString());
+    assertEquals("123/10", new LongFraction(new BigDecimal(BigInteger.valueOf(123), 1)).toString());
+    assertEquals("123/100", new LongFraction(new BigDecimal(BigInteger.valueOf(123), 2)).toString());
+    assertEquals("123/1000", new LongFraction(new BigDecimal(BigInteger.valueOf(123), 3)).toString());
+    
+    assertEquals("123/1", new LongFraction(1.23e2).toString());
+    assertEquals("1230/1", new LongFraction(1.23e3).toString());
+    assertEquals("12300/1", new LongFraction(1.23e4).toString());
+    
+    assertEquals("58/25", new LongFraction(new BigDecimal(BigInteger.valueOf(348), 2), new BigDecimal(BigInteger.valueOf(15), 1)).toString());
+    assertEquals("25/58", new LongFraction(new BigDecimal(BigInteger.valueOf(15), 1), new BigDecimal(BigInteger.valueOf(348), 2)).toString());
+    assertEquals("-58/25", new LongFraction(new BigDecimal(BigInteger.valueOf(-348), 2), new BigDecimal(BigInteger.valueOf(15), 1)).toString());
+    assertEquals("-25/58", new LongFraction(new BigDecimal(BigInteger.valueOf(-15), 1), new BigDecimal(BigInteger.valueOf(348), 2)).toString());
+    assertEquals("4/1", new LongFraction(14, new BigDecimal(BigInteger.valueOf(3500), 3)).toString());
+    assertEquals("-1/4", new LongFraction(new BigDecimal(BigInteger.valueOf(3500), 3), -14).toString());
+    
+    //some doubles which should have simple, exact representations
+    assertEquals("1/2", new LongFraction(0.5).toString());
+    assertEquals("1/4", new LongFraction(0.25).toString());
+    assertEquals("5/8", new LongFraction(0.625).toString());
+    assertEquals("-3/2", new LongFraction(-1.5).toString());
+    assertEquals("-9/4", new LongFraction(-2.25).toString());
+    assertEquals("-29/8", new LongFraction(-3.625).toString());
+    
+    assertEquals("-2/9", new LongFraction(0.5, -2.25).toString());
+    assertEquals("-2/9", new LongFraction(-2.0, 9.0).toString());
+    
+    assertEquals("valueOf(4.5, 0.625)", "36/5", new LongFraction(4.5, 0.625).toString());
+    assertEquals("valueOf(0.625, 4.5)", "5/36", new LongFraction(0.625, 4.5).toString());
+    assertEquals("valueOf(4.5, -0.625)", "-36/5", new LongFraction(4.5, -0.625).toString());
+    assertEquals("valueOf(0.625, -4.5)", "-5/36", new LongFraction(0.625, -4.5).toString());
+  }
+  
+  @Test
+  public void testConstructor_Repeating() {
+    assertEquals("constructor( \"0.(4)\")",  "4/9", new LongFraction( "0.(4)").toString());
+    assertEquals("constructor(\"+0.(4)\")",  "4/9", new LongFraction("+0.(4)").toString());
+    assertEquals("constructor(\"-0.(4)\")", "-4/9", new LongFraction("-0.(4)").toString());
+    assertEquals("constructor(  \".(4)\")",  "4/9", new LongFraction(  ".(4)").toString());
+    assertEquals("constructor( \"+.(4)\")",  "4/9", new LongFraction( "+.(4)").toString());
+    assertEquals("constructor( \"-.(4)\")", "-4/9", new LongFraction( "-.(4)").toString());
+    
+    assertEquals("constructor( \"0.0(4)\")",  "2/45", new LongFraction( "0.0(4)").toString());
+    assertEquals("constructor(\"+0.0(4)\")",  "2/45", new LongFraction("+0.0(4)").toString());
+    assertEquals("constructor(\"-0.0(4)\")", "-2/45", new LongFraction("-0.0(4)").toString());
+    assertEquals("constructor(  \".0(4)\")",  "2/45", new LongFraction(  ".0(4)").toString());
+    assertEquals("constructor( \"+.0(4)\")",  "2/45", new LongFraction( "+.0(4)").toString());
+    assertEquals("constructor( \"-.0(4)\")", "-2/45", new LongFraction( "-.0(4)").toString());
+    
+    assertEquals("constructor(\"0.444(4)\")", "4/9", new LongFraction("0.444(4)").toString());
+    assertEquals("constructor(\"0.4(444)\")", "4/9", new LongFraction("0.4(444)").toString());
+    assertEquals("constructor(\"0.044(4)\")", "2/45", new LongFraction("0.044(4)").toString());
+    assertEquals("constructor(\"0.0(444)\")", "2/45", new LongFraction("0.0(444)").toString());
+    
+    assertEquals("constructor(\"0.(56)\")", "56/99", new LongFraction("0.(56)").toString());
+    assertEquals("constructor(\"0.5(65)\")", "56/99", new LongFraction("0.5(65)").toString());
+    assertEquals("constructor(\"0.56(56)\")", "56/99", new LongFraction("0.56(56)").toString());
+    assertEquals("constructor(\"0.565(6565)\")", "56/99", new LongFraction("0.565(6565)").toString());
+    
+    assertEquals("constructor(\"0.(012)\")", "4/333", new LongFraction("0.(012)").toString());
+    assertEquals("constructor(\"0.(9)\")", "1/1", new LongFraction("0.(9)").toString());
+    assertEquals("constructor(\"0.000(4)\")", "1/2250", new LongFraction("0.000(4)").toString());
+    assertEquals("constructor(\"0.000(9)\")", "1/1000", new LongFraction("0.000(9)").toString());
+    assertEquals("constructor(\"0.000(120)\")", "1/8325", new LongFraction("0.000(120)").toString());
+    assertEquals("constructor(\"1.23(4)\")", "1111/900", new LongFraction("1.23(4)").toString());
+    assertEquals("constructor(\"0.3(789)\")", "631/1665", new LongFraction("0.3(789)").toString());
+    
+    assertEquals("constructor(\"0.(012)/1.23(4)\")", "400/41107", new LongFraction("0.(012)/1.23(4)").toString());
+    assertEquals("constructor(\"0.(012)/1.6e3\")", "1/133200", new LongFraction("0.(012)/1.6e3").toString());
+    
+    assertEquals("constructor(\"7.000(00)\")", "7/1", new LongFraction("7.000(00)").toString());
+    assertEquals("constructor(\"000.00(00)\")", "0/1", new LongFraction("000.00(00)").toString());
+    
+    //different bases
+    assertEquals("constructor(\"0.0(0011)\", 2)", "1/10", new LongFraction("0.0(0011)", 2).toString());
+    assertEquals("constructor(\"0.1(9))\", 16)", "1/10", new LongFraction("0.1(9)", 16).toString());
+    assertEquals("constructor(\"12.(a9))\", 11)", "1679/120", new LongFraction("12.(a9)", 11).toString());
+    assertEquals("constructor(\"-a.(i))\", 19)", "-11/1", new LongFraction("-a.(i)", 19).toString());
+    assertEquals("constructor(\"the.lazy(fox)\", 36)", "2994276908470787/78362484480", new LongFraction("the.lazy(fox)", 36).toString());
+  }
+  
+  @Test
+  public void testConstructor_CustomNumberInterface() {
+    assertEquals("Custom Number representing an integer", "123456/1", new LongFraction(new CustomNumber(123456.0)).toString());
+    assertEquals("Custom Number representing a floating-point number", "987653/8", new LongFraction(new CustomNumber(123456.625)).toString());
+    assertEquals("Custom Number representing a negative number", "-1/8", new LongFraction(new CustomNumber(-0.125)).toString());
+    assertEquals("Custom Number representing zero", "0/1", new LongFraction(new CustomNumber(0)).toString());
+  }
+  
+  
+  @Test
   public void testAdd() {
     assertEquals("5/1 + -3", "2/1", lf(5).add(-3).toString());
     assertEquals("11/17 + 2/3", "67/51", lf("11/17").add(lf("2/3")).toString());
@@ -135,6 +281,8 @@ public class LongFractionTest {
     assertEquals("-1/6 + 1/6", "0/1", lf("-1/6").add(lf("1/6")).toString());
     assertEquals("-1/6 + -1/6", "-1/3", lf("-1/6").add(lf("-1/6")).toString());
     assertEquals("-1/6 + 1/15", "-1/10", lf("-1/6").add(lf("1/15")).toString());
+    assertEquals("1/7 + 0", "1/7", lf("1/7").add(0).toString());
+    assertEquals("-1/7 + 0", "-1/7", lf("-1/7").add(0.0).toString());
   }
   
   @Test
@@ -152,6 +300,8 @@ public class LongFractionTest {
     assertEquals("11/17 - 2/3", "-1/51", lf("11/17").subtract(lf("2/3")).toString());
     assertEquals("1/6 - 1/6", "0/1", lf("1/6").subtract(lf("1/6")).toString());
     assertEquals("-1/6 - 1/6", "-1/3", lf("-1/6").subtract(lf("1/6")).toString());
+    assertEquals("1/7 + 0", "1/7", lf("1/7").subtract(0).toString());
+    assertEquals("-1/7 + 0", "-1/7", lf("-1/7").subtract(0.0).toString());
   }
   
   @Test
@@ -162,6 +312,8 @@ public class LongFractionTest {
     assertEquals("2/3 - 11/17", "1/51", lf("11/17").subtractFrom(lf("2/3")).toString());
     assertEquals("1/6 - 1/6", "0/1", lf("1/6").subtractFrom(lf("1/6")).toString());
     assertEquals("1/6 - -1/6", "1/3", lf("-1/6").subtractFrom(lf("1/6")).toString());
+    assertEquals("1/7 + 0", "1/7", lf("-1/7").subtractFrom(0).toString());
+    assertEquals("-1/7 + 0", "-1/7", lf("1/7").subtractFrom(0.0).toString());
   }
   
   @Test
@@ -178,6 +330,10 @@ public class LongFractionTest {
     assertEquals("(-1/12)(16/5)", "-4/15", lf("-1/12").multiply(lf("16/5")).toString());
     assertEquals("(-7/6)(-5/9)", "35/54", lf("-7/6").multiply(lf("-5/9")).toString());
     assertEquals("(4/5)(-7/2)", "-14/5", lf("4/5").multiply(lf("7/-2")).toString());
+    assertEquals("(1/7)(0)", "0/1", lf("1/7").multiply(0).toString());
+    assertEquals("(-1/7)(0)", "0/1", lf("-1/7").multiply(0.0).toString());
+    assertEquals("(1/7)(1)", "1/7", lf("1/7").multiply(1).toString());
+    assertEquals("(-1/7)(1)", "-1/7", lf("-1/7").multiply(1.0).toString());
   }
   
   @Test
@@ -193,6 +349,27 @@ public class LongFractionTest {
     assertEquals("(-1/12)/(5/16)", "-4/15", lf("-1/12").divide(lf("5/16")).toString());
     assertEquals("(-7/6)/(-9/5)", "35/54", lf("-7/6").divide(lf("9/-5")).toString());
     assertEquals("(4/5)/(-2/7)", "-14/5", lf("4/5").divide(lf("-2/7")).toString());
+    assertEquals("(1/7)/(1)", "1/7", lf("1/7").divide(1).toString());
+    assertEquals("(-1/7)/(1)", "-1/7", lf("-1/7").divide(1.0).toString());
+  }
+  
+  @Test
+  public void testDivideInto() {
+    assertEquals("(4/3)/(1/3)", "4/1", lf("1/3").divideInto(lf("4/3")).toString());
+    assertEquals("(5/16)/(-1/12)", "-15/4", lf("-1/12").divideInto(lf("5/16")).toString());
+    assertEquals("(-9/5)/(-7/6)", "54/35", lf("-7/6").divideInto(lf("9/-5")).toString());
+    assertEquals("(-2/7)/(4/5)", "-5/14", lf("4/5").divideInto(lf("-2/7")).toString());
+    assertEquals("(0)/(1/7)", "0/1", lf("1/7").divideInto(0).toString());
+    assertEquals("(0)/(-1/7)", "0/1", lf("-1/7").divideInto(0.0).toString());
+    assertEquals("(1)/(1/7)", "1/7", lf("7/1").divideInto(1).toString());
+    assertEquals("(1)/(-1/7)", "-1/7", lf("-7/1").divideInto(1.0).toString());
+  }
+  
+  @Test
+  public void testQuotient() {
+    assertEquals("-5/3", LongFraction.quotient(5, -3).toString());
+    assertEquals("-2/1", LongFraction.quotient(6.5, -3.25f).toString());
+    assertEquals("6600/3337", LongFraction.quotient(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
   }
   
   @Test
@@ -251,21 +428,6 @@ public class LongFractionTest {
     new DivideAndRemainderTest("-13/5", "-5/13",  "6", "-19/65",  "6", "-19/65",  "7",  "6/65").test();
   }
   
-  
-  @Test
-  public void testDivideInto() {
-    assertEquals("(4/3)/(1/3)", "4/1", lf("1/3").divideInto(lf("4/3")).toString());
-    assertEquals("(5/16)/(-1/12)", "-15/4", lf("-1/12").divideInto(lf("5/16")).toString());
-    assertEquals("(-9/5)/(-7/6)", "54/35", lf("-7/6").divideInto(lf("9/-5")).toString());
-    assertEquals("(-2/7)/(4/5)", "-5/14", lf("4/5").divideInto(lf("-2/7")).toString());
-  }
-  
-  @Test
-  public void testQuotient() {
-    assertEquals("-5/3", LongFraction.quotient(5, -3).toString());
-    assertEquals("-2/1", LongFraction.quotient(6.5, -3.25f).toString());
-    assertEquals("6600/3337", LongFraction.quotient(BigInteger.valueOf(66), new BigDecimal("33.37")).toString());
-  }
   
   @Test
   public void testReciprocal() {
@@ -456,6 +618,11 @@ public class LongFractionTest {
     assertEquals("mediant(0,81/19)", lf(81,20), lf(0).mediant(lf(81,19)));
     assertEquals("mediant(0,-81/19)", lf(-81,20), lf(0).mediant(lf(-81,19)));
     assertEquals("mediant(0,0)", lf(0), lf(0).mediant(lf(0)));
+    
+    //test static method
+    assertEquals("mediant(1/1,1/2)", lf(1,2), LongFraction.mediant(lf(1,1), lf(1,3)));
+    assertEquals("mediant(2/2,1/2)", lf(1,2), LongFraction.mediant(lf(2,2), lf(1,3)));
+    assertEquals("mediant(3/29,7/15)", lf(5,22), LongFraction.mediant(lf(3,29), lf(7,15)));
   }
   
   
@@ -500,6 +667,15 @@ public class LongFractionTest {
   
   @Test
   public void testFareyClosest() {
+    //a few simple cases- if we are in the sequence already, it should just return what was passed in
+    assertEquals("4/3", lf(4,3).fareyClosest(3).toString());
+    assertEquals("4/3", lf(4,3).fareyClosest(4).toString());
+    assertEquals("4/3", lf(4,3).fareyClosest(99).toString());
+    
+    assertEquals("-4/3", lf(-4,3).fareyClosest(3).toString());
+    assertEquals("-4/3", lf(-4,3).fareyClosest(4).toString());
+    assertEquals("-4/3", lf(-4,3).fareyClosest(99).toString());
+    
     LongFraction lfPi = lf(Math.PI);
     LongFraction lfNegPi = lfPi.negate();
     
@@ -668,6 +844,30 @@ public class LongFractionTest {
   }
   
   @Test
+  public void testToBigDecimal() {
+    //default scale is 18 significant digits
+    assertEquals("333.333333333333333", lf("1000/3").toBigDecimal().toString());
+    assertEquals("-3.33333333333333333", lf("-10/3").toBigDecimal().toString());
+    assertEquals("0.333333333333333333", lf("1/3").toBigDecimal().toString());
+    assertEquals("-0.00333333333333333333", lf("-1/300").toBigDecimal().toString());
+    
+    assertEquals("-300", lf("-300").toBigDecimal().toString());
+    assertEquals("3", lf("3").toBigDecimal().toString());
+    assertEquals("-0.3", lf("-3/10").toBigDecimal().toString());
+    assertEquals("0.003", lf("3/1000").toBigDecimal().toString());
+    
+    //714285 714285 714285
+    assertEquals("71.4286", lf("500/7").toBigDecimal(6).toString());
+    assertEquals("-0.714286", lf("-5/7").toBigDecimal(6).toString());
+    assertEquals("0.0714286", lf("5/70").toBigDecimal(6).toString());
+    assertEquals("-0.000714286", lf("-5/7000").toBigDecimal(6).toString());
+    
+    //if numerator or denominator has more than 18 significant digits, we should use as many as the larger
+    assertEquals("3.07445734561825860E+18", lf(Long.MAX_VALUE, 3).toBigDecimal().toString());
+  }
+  
+  
+  @Test
   public void testToDecimalString() {
     new ToRadixedStringTest("55/10", 1, "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5", "5.5").test();
     new ToRadixedStringTest("555/100", 1, "5.6", "5.5", "5.6", "5.5", "5.6", "5.5", "5.6", "ArithmeticException").test();
@@ -790,64 +990,140 @@ public class LongFractionTest {
     new ToRadixedStringTest("-10/64", 4, 2, "-0.03", "-0.02", "-0.02", "-0.03", "-0.03", "-0.02", "-0.02", "ArithmeticException").test();
     new ToRadixedStringTest( "14/64", 4, 2,  "0.10",  "0.03",  "0.10",  "0.03",  "0.10",  "0.03",  "0.10", "ArithmeticException").test();
     new ToRadixedStringTest("-14/64", 4, 2, "-0.10", "-0.03", "-0.03", "-0.10", "-0.10", "-0.03", "-0.10", "ArithmeticException").test();
+    
+    //invalid radix should be same as radix 10 (no exception thrown)
+    new ToRadixedStringTest("3/7", -100, 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", -1, 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 0, 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 1, 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 37, 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
+    new ToRadixedStringTest("3/7", 100, 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
   }
   
   @Test
   public void testToRepeatingDigitString() {
-    assertEquals("\"1.0\".toRepeatingDigitString(10, true)", "0.(9)", lf("1.0").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"10.0\".toRepeatingDigitString(10, true)", "9.(9)", lf("10.0").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"0.1\".toRepeatingDigitString(10, true)", "0.0(9)", lf("0.1").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"0.01\".toRepeatingDigitString(10, true)", "0.00(9)", lf("0.01").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"0.02\".toRepeatingDigitString(10, true)", "0.01(9)", lf("0.02").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"5.1\".toRepeatingDigitString(10, true)", "5.0(9)", lf("5.1").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"5.101\".toRepeatingDigitString(10, true)", "5.100(9)", lf("5.101").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"1.0\".toRepeatingDigitString(10, true)", "0.(9)", lf("1.0").toRepeatingDigitString(10, true));
+    assertEquals("\"10.0\".toRepeatingDigitString(10, true)", "9.(9)", lf("10.0").toRepeatingDigitString(10, true));
+    assertEquals("\"0.1\".toRepeatingDigitString(10, true)", "0.0(9)", lf("0.1").toRepeatingDigitString(10, true));
+    assertEquals("\"0.01\".toRepeatingDigitString(10, true)", "0.00(9)", lf("0.01").toRepeatingDigitString(10, true));
+    assertEquals("\"0.02\".toRepeatingDigitString(10, true)", "0.01(9)", lf("0.02").toRepeatingDigitString(10, true));
+    assertEquals("\"5.1\".toRepeatingDigitString(10, true)", "5.0(9)", lf("5.1").toRepeatingDigitString(10, true));
+    assertEquals("\"5.101\".toRepeatingDigitString(10, true)", "5.100(9)", lf("5.101").toRepeatingDigitString(10, true));
     
-    assertEquals("\"1.0\".toRepeatingDigitString(10, false)", "1.0", lf("1.0").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"10.0\".toRepeatingDigitString(10, false)", "10.0", lf("10.0").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"0.1\".toRepeatingDigitString(10, false)", "0.1", lf("0.1").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"0.01\".toRepeatingDigitString(10, false)", "0.01", lf("0.01").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"0.02\".toRepeatingDigitString(10, false)", "0.02", lf("0.02").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"5.1\".toRepeatingDigitString(10, false)", "5.1", lf("5.1").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"5.101\".toRepeatingDigitString(10, false)", "5.101", lf("5.101").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"1.0\".toRepeatingDigitString(10, false)", "1.0", lf("1.0").toRepeatingDigitString(10, false));
+    assertEquals("\"10.0\".toRepeatingDigitString(10, false)", "10.0", lf("10.0").toRepeatingDigitString(10, false));
+    assertEquals("\"0.1\".toRepeatingDigitString(10, false)", "0.1", lf("0.1").toRepeatingDigitString(10, false));
+    assertEquals("\"0.01\".toRepeatingDigitString(10, false)", "0.01", lf("0.01").toRepeatingDigitString(10, false));
+    assertEquals("\"0.02\".toRepeatingDigitString(10, false)", "0.02", lf("0.02").toRepeatingDigitString(10, false));
+    assertEquals("\"5.1\".toRepeatingDigitString(10, false)", "5.1", lf("5.1").toRepeatingDigitString(10, false));
+    assertEquals("\"5.101\".toRepeatingDigitString(10, false)", "5.101", lf("5.101").toRepeatingDigitString(10, false));
     
     
-    assertEquals("\"4/9\".toRepeatingDigitString(10, false)", "0.(4)", lf("4/9").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"4/9\".toRepeatingDigitString(10, true)", "0.(4)", lf("4/9").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"-4/9\".toRepeatingDigitString(10, false)", "-0.(4)", lf("-4/9").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"-4/9\".toRepeatingDigitString(10, true)", "-0.(4)", lf("-4/9").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"4/9\".toRepeatingDigitString(10, false)", "0.(4)", lf("4/9").toRepeatingDigitString(10, false));
+    assertEquals("\"4/9\".toRepeatingDigitString(10, true)", "0.(4)", lf("4/9").toRepeatingDigitString(10, true));
+    assertEquals("\"-4/9\".toRepeatingDigitString(10, false)", "-0.(4)", lf("-4/9").toRepeatingDigitString(10, false));
+    assertEquals("\"-4/9\".toRepeatingDigitString(10, true)", "-0.(4)", lf("-4/9").toRepeatingDigitString(10, true));
     
-    assertEquals("\"2/45\".toRepeatingDigitString(10, false)", "0.0(4)", lf("2/45").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"2/45\".toRepeatingDigitString(10, true)", "0.0(4)", lf("2/45").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"-2/45\".toRepeatingDigitString(10, false)", "-0.0(4)", lf("-2/45").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"-2/45\".toRepeatingDigitString(10, true)", "-0.0(4)", lf("-2/45").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"2/45\".toRepeatingDigitString(10, false)", "0.0(4)", lf("2/45").toRepeatingDigitString(10, false));
+    assertEquals("\"2/45\".toRepeatingDigitString(10, true)", "0.0(4)", lf("2/45").toRepeatingDigitString(10, true));
+    assertEquals("\"-2/45\".toRepeatingDigitString(10, false)", "-0.0(4)", lf("-2/45").toRepeatingDigitString(10, false));
+    assertEquals("\"-2/45\".toRepeatingDigitString(10, true)", "-0.0(4)", lf("-2/45").toRepeatingDigitString(10, true));
     
-    assertEquals("\"56/99\".toRepeatingDigitString(10, false)", "0.(56)", lf("56/99").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"56/99\".toRepeatingDigitString(10, false)", "0.(56)", lf("56/99").toRepeatingDigitString(10, false));
     
-    assertEquals("\"4/333\".toRepeatingDigitString(10, false)", "0.(012)", lf("4/333").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"1/1\".toRepeatingDigitString(10, false)", "1.0", lf("1/1").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"1/1\".toRepeatingDigitString(10, true)", "0.(9)", lf("1/1").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"1/2250\".toRepeatingDigitString(10, false)", "0.000(4)", lf("1/2250").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"1/1000\".toRepeatingDigitString(10, false)", "0.001", lf("1/1000").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"1/1000\".toRepeatingDigitString(10, true)", "0.000(9)", lf("1/1000").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"1/8325\".toRepeatingDigitString(10, false)", "0.00(012)", lf("1/8325").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"1111/900\".toRepeatingDigitString(10, false)", "1.23(4)", lf("1111/900").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"631/1665\".toRepeatingDigitString(10, false)", "0.3(789)", lf("631/1665").toRepeatingDigitString(10, false).toString());
+    assertEquals("\"4/333\".toRepeatingDigitString(10, false)", "0.(012)", lf("4/333").toRepeatingDigitString(10, false));
+    assertEquals("\"1/1\".toRepeatingDigitString(10, false)", "1.0", lf("1/1").toRepeatingDigitString(10, false));
+    assertEquals("\"1/1\".toRepeatingDigitString(10, true)", "0.(9)", lf("1/1").toRepeatingDigitString(10, true));
+    assertEquals("\"1/2250\".toRepeatingDigitString(10, false)", "0.000(4)", lf("1/2250").toRepeatingDigitString(10, false));
+    assertEquals("\"1/1000\".toRepeatingDigitString(10, false)", "0.001", lf("1/1000").toRepeatingDigitString(10, false));
+    assertEquals("\"1/1000\".toRepeatingDigitString(10, true)", "0.000(9)", lf("1/1000").toRepeatingDigitString(10, true));
+    assertEquals("\"1/8325\".toRepeatingDigitString(10, false)", "0.00(012)", lf("1/8325").toRepeatingDigitString(10, false));
+    assertEquals("\"1111/900\".toRepeatingDigitString(10, false)", "1.23(4)", lf("1111/900").toRepeatingDigitString(10, false));
+    assertEquals("\"631/1665\".toRepeatingDigitString(10, false)", "0.3(789)", lf("631/1665").toRepeatingDigitString(10, false));
     
-    assertEquals("\"7/1\".toRepeatingDigitString(10, false)", "7.0", lf("7/1").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"7/1\".toRepeatingDigitString(10, true)", "6.(9)", lf("7/1").toRepeatingDigitString(10, true).toString());
-    assertEquals("\"0/1\".toRepeatingDigitString(10, false)", "0.0", lf("0/1").toRepeatingDigitString(10, false).toString());
-    assertEquals("\"0/1\".toRepeatingDigitString(10, true)", "0.(0)", lf("0/1").toRepeatingDigitString(10, true).toString());
+    assertEquals("\"7/1\".toRepeatingDigitString(10, false)", "7.0", lf("7/1").toRepeatingDigitString(10, false));
+    assertEquals("\"7/1\".toRepeatingDigitString(10, true)", "6.(9)", lf("7/1").toRepeatingDigitString(10, true));
+    assertEquals("\"0/1\".toRepeatingDigitString(10, false)", "0.0", lf("0/1").toRepeatingDigitString(10, false));
+    assertEquals("\"0/1\".toRepeatingDigitString(10, true)", "0.(0)", lf("0/1").toRepeatingDigitString(10, true));
     
     //different bases
-    assertEquals("\"1/10\".toRepeatingDigitString(2, false)", "0.0(0011)", lf("1/10").toRepeatingDigitString(2, false).toString());
-    assertEquals("\"1/10\".toRepeatingDigitString(2, true)", "0.0(0011)", lf("1/10").toRepeatingDigitString(2, true).toString());
-    assertEquals("\"1/10\".toRepeatingDigitString(16, false)", "0.1(9)", lf("1/10").toRepeatingDigitString(16, false).toString());
-    assertEquals("\"1/10\".toRepeatingDigitString(16, true)", "0.1(9)", lf("1/10").toRepeatingDigitString(16, true).toString());
-    assertEquals("\"-11/1\".toRepeatingDigitString(19, false)", "-b.0", lf("-11/1").toRepeatingDigitString(19, false).toString());
-    assertEquals("\"-11/1\".toRepeatingDigitString(19, true)", "-a.(i)", lf("-11/1").toRepeatingDigitString(19, true).toString());
-    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, false)", "the.lazy(fox)", lf("2994276908470787/78362484480").toRepeatingDigitString(36, false).toString());
-    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, true)", "the.lazy(fox)", lf("2994276908470787/78362484480").toRepeatingDigitString(36, true).toString());
+    assertEquals("\"1/10\".toRepeatingDigitString(2, false)", "0.0(0011)", lf("1/10").toRepeatingDigitString(2, false));
+    assertEquals("\"1/10\".toRepeatingDigitString(2, true)", "0.0(0011)", lf("1/10").toRepeatingDigitString(2, true));
+    assertEquals("\"1/10\".toRepeatingDigitString(16, false)", "0.1(9)", lf("1/10").toRepeatingDigitString(16, false));
+    assertEquals("\"1/10\".toRepeatingDigitString(16, true)", "0.1(9)", lf("1/10").toRepeatingDigitString(16, true));
+    assertEquals("\"-11/1\".toRepeatingDigitString(19, false)", "-b.0", lf("-11/1").toRepeatingDigitString(19, false));
+    assertEquals("\"-11/1\".toRepeatingDigitString(19, true)", "-a.(i)", lf("-11/1").toRepeatingDigitString(19, true));
+    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, false)", "the.lazy(fox)", lf("2994276908470787/78362484480").toRepeatingDigitString(36, false));
+    assertEquals("\"2994276908470787/78362484480\".toRepeatingDigitString(36, true)", "the.lazy(fox)", lf("2994276908470787/78362484480").toRepeatingDigitString(36, true));
     
+    //optional args should be same as (10, false)
+    assertEquals("\"12.0\".toRepeatingDigitString()", "12.0", lf("12.0").toRepeatingDigitString());
+    assertEquals("\"12.0\".toRepeatingDigitString(16)", "c.0", lf("12.0").toRepeatingDigitString(16));
+    assertEquals("\"12.0\".toRepeatingDigitString(true)", "11.(9)", lf("12.0").toRepeatingDigitString(true));
+    assertEquals("\"12.0\".toRepeatingDigitString(16, true)", "b.(f)", lf("12.0").toRepeatingDigitString(16, true));
+    
+    //invalid radix equivalent to 10
+    assertEquals("\"12.0\".toRepeatingDigitString(-100)", "12.0", lf("12.0").toRepeatingDigitString(-100));
+    assertEquals("\"12.0\".toRepeatingDigitString(-1)", "12.0", lf("12.0").toRepeatingDigitString(-1));
+    assertEquals("\"12.0\".toRepeatingDigitString(0)", "12.0", lf("12.0").toRepeatingDigitString(0));
+    assertEquals("\"12.0\".toRepeatingDigitString(1)", "12.0", lf("12.0").toRepeatingDigitString(1));
+    assertEquals("\"12.0\".toRepeatingDigitString(37)", "12.0", lf("12.0").toRepeatingDigitString(37));
+    assertEquals("\"12.0\".toRepeatingDigitString(100)", "12.0", lf("12.0").toRepeatingDigitString(100));
+  }
+  
+  @Test
+  public void testEquals() {
+    assertTrue(lf(5,7).equals(lf(15,21)));
+    assertTrue(lf(5,10).equals(LongFraction.ONE_HALF));
+    assertTrue(LongFraction.TEN.equals(lf(BigInteger.valueOf(10))));
+    assertTrue(lf(1,2).equals(lf(0.5)));
+    assertTrue(lf(1,2).equals(lf("1/2")));
+    assertTrue(lf(1,2).equals(lf("0.5")));
+    assertTrue(lf(1,2).equals(lf("5e-1")));
+    assertTrue(lf(5,1).equals(lf(5)));
+    assertFalse(lf(5,1).equals(5));
+    assertFalse(lf(5,1).equals(BigInteger.valueOf(5)));
+    assertFalse(lf(7,10).equals(new BigDecimal("0.70")));
+    assertFalse(lf(3,4).equals(null));
+    assertFalse(lf(3,4).equals("3/4"));
+    assertFalse(lf(3,4).equals(0.75));
+    
+    assertTrue(lf(-11,17).equals(lf("-11/17")));
+    assertTrue(LongFraction.ZERO.equals(lf(0)));
+    assertFalse(LongFraction.ZERO.equals(0));
+    assertFalse(LongFraction.ZERO.equals(0.0));
+    assertFalse(LongFraction.ZERO.equals(-0.0));
+    assertFalse(LongFraction.ZERO.equals(BigInteger.ZERO));
+    
+    assertFalse(lf(1,10).equals(lf(0.1)));
+    assertFalse(lf(1,10).equals(0.1));
+  }
+  
+  @Test
+  public void testEqualsNumber() {
+    assertTrue(lf(5,7).equalsNumber(lf(15,21)));
+    assertTrue(lf(5,10).equalsNumber(LongFraction.ONE_HALF));
+    assertTrue(LongFraction.TEN.equalsNumber(lf(BigInteger.valueOf(10))));
+    assertTrue(lf(1,2).equalsNumber(lf(0.5)));
+    assertTrue(lf(1,2).equalsNumber(lf("1/2")));
+    assertTrue(lf(1,2).equalsNumber(lf("0.5")));
+    assertTrue(lf(1,2).equalsNumber(lf("5e-1")));
+    assertTrue(lf(5,1).equalsNumber(lf(5)));
+    assertTrue(lf(5,1).equalsNumber(5));
+    assertTrue(lf(5,1).equalsNumber(BigInteger.valueOf(5)));
+    assertTrue(lf(7,10).equalsNumber(new BigDecimal("0.70")));
+    assertFalse(lf(3,4).equalsNumber(null));
+    assertTrue(lf(3,4).equalsNumber(0.75));
+    
+    assertTrue(lf(-11,17).equalsNumber(lf("-11/17")));
+    assertTrue(LongFraction.ZERO.equalsNumber(lf(0)));
+    assertTrue(LongFraction.ZERO.equalsNumber(0));
+    assertTrue(LongFraction.ZERO.equalsNumber(0.0));
+    assertTrue(LongFraction.ZERO.equalsNumber(-0.0));
+    assertTrue(LongFraction.ZERO.equalsNumber(BigInteger.ZERO));
+    
+    assertFalse(lf(1,10).equalsNumber(lf(0.1)));
+    assertFalse(lf(1,10).equalsNumber(0.1));
   }
   
   @Test
@@ -902,6 +1178,26 @@ public class LongFractionTest {
                     + ", 11/1, 12/1, 13/1, 14/1, 15/1, 16/1, 17/1, 18/1, 19/1, 20/1]";
     
     assertEquals(expected, lst.toString());
+    
+    //throw in min/max test here too
+    for(int i = 0; i < lst.size(); i++) {
+      for(int j = 0; j < lst.size(); j++) {
+        LongFraction lhs = lst.get(i);
+        LongFraction rhs = lst.get(j);
+        if(i <= j) {
+          assertEquals(lhs, lhs.min(rhs));
+          assertEquals(lhs, LongFraction.min(lhs, rhs));
+          assertEquals(rhs, lhs.max(rhs));
+          assertEquals(rhs, LongFraction.max(lhs, rhs));
+        }
+        else {
+          assertEquals(rhs, lhs.min(rhs));
+          assertEquals(rhs, LongFraction.min(lhs, rhs));
+          assertEquals(lhs, lhs.max(rhs));
+          assertEquals(lhs, LongFraction.max(lhs, rhs));
+        }
+      }
+    }
   }
   
   @Test
@@ -1246,6 +1542,36 @@ public class LongFractionTest {
   //exception testing
   //---------------------------------------------------------------------------
 
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull1() {
+    LongFraction.valueOf((Number) null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull2() {
+    LongFraction.valueOf((Number) null, (Number) null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull3() {
+    LongFraction.valueOf(1, (Number) null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull4() {
+    LongFraction.valueOf((Number) null, 1);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull5() {
+    LongFraction.valueOf((String) null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testValueOfNull6() {
+    LongFraction.valueOf((String) null, 1);
+  }
+  
   @Test(expected=ArithmeticException.class)
   public void testValueOfOverflow1() {
     lf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE));
@@ -1306,6 +1632,46 @@ public class LongFractionTest {
     lf("-0.000000000000000000000000000000000000000000000000000000000000000000000001");
   }
   
+  @Test(expected=ArithmeticException.class)
+  public void testValueOfOverflow13() {
+    lf(BigFraction.valueOf(1, BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testValueOfOverflow14() {
+    lf(BigFraction.valueOf(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE)), 1);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testValueOfOverflow15() {
+    lf(BigFraction.valueOf(1, BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testValueOfOverflow16() {
+    lf(BigFraction.valueOf(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE)), 1);
+  }
+  
+  @Test(expected=NumberFormatException.class)
+  public void testValueOfString1() {
+    LongFraction.valueOf("uh oh");
+  }
+  
+  @Test(expected=NumberFormatException.class)
+  public void testValueOfString2() {
+    LongFraction.valueOf("12345678", 8);
+  }
+  
+  @Test(expected=NumberFormatException.class)
+  public void testValueOfString3() {
+    LongFraction.valueOf("12.34(5)", 5);
+  }
+  
+  @Test(expected=NumberFormatException.class)
+  public void testValueOfString4() {
+    LongFraction.valueOf("5.4(321)", 5);
+  }
+  
   @Test(expected=IllegalArgumentException.class)
   public void testNaN() {
     lf(Double.NaN);
@@ -1334,6 +1700,381 @@ public class LongFractionTest {
   @Test(expected=IllegalArgumentException.class)
   public void testNegativeInfinity_CustomNumber() {
     lf(new CustomNumber(Double.NEGATIVE_INFINITY));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testAddNull() {
+    lf(4,3).add(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testSumNull1() {
+    LongFraction.sum(lf(4,3), null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testSumNull2() {
+    LongFraction.sum(null, lf(4,3));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testSumNull3() {
+    LongFraction.sum(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testSubtractNull() {
+    lf(4,3).subtract(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testSubtractFromNull() {
+    lf(4,3).subtractFrom(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDifferenceNull1() {
+    LongFraction.difference(lf(4,3), null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDifferenceNull2() {
+    LongFraction.difference(null, lf(4,3));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDifferenceNull3() {
+    LongFraction.difference(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testMultiplyNull() {
+    lf(4,3).multiply(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testProductNull1() {
+    LongFraction.product(lf(4,3), null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testProductNull2() {
+    LongFraction.product(null, lf(4,3));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testProductNull3() {
+    LongFraction.product(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideNull() {
+    lf(4,3).divide(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideIntoNull() {
+    lf(4,3).divideInto(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testQuotientNull1() {
+    LongFraction.quotient(lf(4,3), null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testQuotientNull2() {
+    LongFraction.quotient(null, lf(4,3));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testQuotientNull3() {
+    LongFraction.quotient(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideToIntegralValueNull1() {
+    lf(4,3).divideToIntegralValue(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideToIntegralValueNull2() {
+    lf(4,3).divideToIntegralValue(7, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideToIntegralValueNull3() {
+    lf(4,3).divideToIntegralValue(null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testDivideToIntegralValueNull4() {
+    lf(4,3).divideToIntegralValue(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemainderNull1() {
+    lf(4,3).remainder(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemainderNull2() {
+    lf(4,3).remainder(7, (DivisionMode)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemainderNull3() {
+    lf(4,3).remainder(null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRemainderNull4() {
+    lf(4,3).remainder(null, (DivisionMode)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull1() {
+    LongFraction.integralQuotient(7, (Number)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull2() {
+    LongFraction.integralQuotient(null, 8);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull3() {
+    LongFraction.integralQuotient(null, (Number)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull4() {
+    LongFraction.integralQuotient(7, null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull5() {
+    LongFraction.integralQuotient(null, 8, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull6() {
+    LongFraction.integralQuotient(null, null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull7() {
+    LongFraction.integralQuotient(7, 8, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull8() {
+    LongFraction.integralQuotient(7, null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull9() {
+    LongFraction.integralQuotient(null, 8, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testIntegralQuotientNull10() {
+    LongFraction.integralQuotient(null, null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull1() {
+    LongFraction.remainder(7, (Number)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull2() {
+    LongFraction.remainder(null, 8);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull3() {
+    LongFraction.remainder(null, (Number)null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull4() {
+    LongFraction.remainder(7, null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull5() {
+    LongFraction.remainder(null, 8, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull6() {
+    LongFraction.remainder(null, null, DivisionMode.TRUNCATED);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull7() {
+    LongFraction.remainder(7, 8, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull8() {
+    LongFraction.remainder(7, null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull9() {
+    LongFraction.remainder(null, 8, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticRemainderNull10() {
+    LongFraction.remainder(null, null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testGcdNull() {
+    lf(4,3).gcd(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testLcmNull() {
+    lf(4,3).lcm(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testGetIntegerPartNull() {
+    lf(4,3).getIntegerPart(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testGetFractionPartNull() {
+    lf(4,3).getFractionPart(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testGetPartsNull() {
+    lf(4,3).getParts(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRoundNull() {
+    lf(4,3).round(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRoundToDenominatorNull() {
+    lf(4,3).roundToDenominator(7, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testToDecimalStringNull() {
+    lf(4,3).toDecimalString(2, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testToRadixedStringNull() {
+    lf(4,3).toRadixedString(10, 2, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testToRadixedStringInvalidDigits() {
+    lf(4,3).toRadixedString(10, -1);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testCompareToNull() {
+    lf(4,3).compareTo(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyNextZero() {
+    lf(4,3).fareyNext(0);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyNextNegative() {
+    lf(4,3).fareyNext(-1);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyPrevZero() {
+    lf(4,3).fareyPrev(0);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyPrevNegative() {
+    lf(4,3).fareyPrev(-1);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyClosestZero() {
+    lf(4,3).fareyClosest(0);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testFareyClosestNegative() {
+    lf(4,3).fareyClosest(-1);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testMinNull() {
+    lf(4,3).min(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMinNull1() {
+    LongFraction.min(7, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMinNull2() {
+    LongFraction.min(null, 8);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMinNull3() {
+    LongFraction.min(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testMaxNull() {
+    lf(4,3).max(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMaxNull1() {
+    LongFraction.max(7, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMaxNull2() {
+    LongFraction.max(null, 8);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMaxNull3() {
+    LongFraction.max(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testMediantNull() {
+    lf(4,3).mediant(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMediantNull1() {
+    LongFraction.mediant(7, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMediantNull2() {
+    LongFraction.mediant(null, 8);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testStaticMediantNull3() {
+    LongFraction.mediant(null, null);
   }
   
   @Test(expected=ArithmeticException.class)
@@ -1389,6 +2130,16 @@ public class LongFractionTest {
   @Test(expected=ArithmeticException.class)
   public void testDivideZero7() {
     LongFraction.quotient(1, lf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideZero8() {
+    lf(0).divideInto(lf(0));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testDivideZero9() {
+    lf(0).divideInto(7);
   }
   
   @Test(expected=ArithmeticException.class)
@@ -1716,11 +2467,26 @@ public class LongFractionTest {
         catch(Exception e) {
           actual = e.getClass().getSimpleName();
         }
-        assertEquals("(" + input + ").toRadixedString(" + radix + ", " + digits + ", " + mode + ")", expected.get(mode), actual);
+        assertEquals("(" + input + ").toRadixedString(" + digits + ", " + mode + ")", expected.get(mode), actual);
+        
+        //toDecimalString() should be same as toRadixedString(10)
+        if(radix == 10)
+        {
+          try {
+            actual = lf.toDecimalString(digits, mode).toString();
+          }
+          catch(Exception e) {
+            actual = e.getClass().getSimpleName();
+          }
+          assertEquals("(" + input + ").toDecimalString(" + radix + ", " + digits + ", " + mode + ")", expected.get(mode), actual);
+        }
       }
       
       //test that default rounding mode is the same as HALF_UP
       assertEquals("(" + input + ").toRadixedString(" + radix + ", " + digits + ")", expected.get(RoundingMode.HALF_UP), lf.toRadixedString(radix, digits));
+      
+      if(radix == 10)
+        assertEquals("(" + input + ").toDecimalString(" + digits + ")", expected.get(RoundingMode.HALF_UP), lf.toDecimalString(digits));
     }
   }
   
