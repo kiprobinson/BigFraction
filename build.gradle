@@ -6,8 +6,8 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 // Java compatibility. 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 //Use the maven repo...
 repositories {

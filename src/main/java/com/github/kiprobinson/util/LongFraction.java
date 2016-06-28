@@ -578,7 +578,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    */
   public long divideToIntegralValue(Number n, DivisionMode divisionMode)
   {
-    return (long)(divideAndRemainderImpl(this, n, divisionMode, RemainderMode.QUOTIENT));
+    return (Long)(divideAndRemainderImpl(this, n, divisionMode, RemainderMode.QUOTIENT));
   }
   
   /**
@@ -1835,7 +1835,7 @@ public final class LongFraction extends Number implements Comparable<Number>
     
     //next easy case: this and f have the same denominator
     if(denominator == f.denominator)
-      return Long.compare(numerator, f.numerator);
+      return longCompare(numerator, f.numerator);
     
     //to reduce possibility of overflow, first try comparing double values. This should work most
     //of the time.
@@ -1957,7 +1957,7 @@ public final class LongFraction extends Number implements Comparable<Number>
     while(b+d <= maxDenominator)
     {
       long med_n = a+c, med_d = b+d;
-      int cmp = Long.compare(mulAndCheck(med_n, this.denominator), mulAndCheck(med_d, this.numerator));
+      int cmp = longCompare(mulAndCheck(med_n, this.denominator), mulAndCheck(med_d, this.numerator));
       if(cmp < 0 || (cmp == 0 && fareyMode == FareyMode.NEXT))
       {
         a = med_n;
@@ -3032,5 +3032,13 @@ public final class LongFraction extends Number implements Comparable<Number>
       throw new ArithmeticException("BigInteger out of int range");
     
     return n.longValue();
+  }
+  
+  /**
+   * Equivalent to Long.compare(long, long), which does not exist yet in java 6.
+   */
+  private static int longCompare(long a, long b)
+  {
+    return (a == b ? 0 : (a > b ? 1 : -1));
   }
 }

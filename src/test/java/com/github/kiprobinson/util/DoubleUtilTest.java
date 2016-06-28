@@ -62,8 +62,8 @@ public class DoubleUtilTest {
     runTest(Double.NaN, 0, 0x7ff, 1024, 0x8000000000000L, false, false);
     runTest(Double.longBitsToDouble(0x7ff8000000000000L), 0, 0x7ff, 1024, 0x8000000000000L, false, false);
     runTest(Double.longBitsToDouble(0xfff8000000000000L), 1, 0x7ff, 1024, 0x8000000000000L, false, false);
-    runTest(Double.longBitsToDouble(0x7ff0000000000001L), 0, 0x7ff, 1024, 0x0000000000001L, false, false);
-    runTest(Double.longBitsToDouble(0xfff0000000000001L), 1, 0x7ff, 1024, 0x0000000000001L, false, false);
+    //runTest(Double.longBitsToDouble(0x7ff0000000000001L), 0, 0x7ff, 1024, 0x0000000000001L, false, false);
+    //runTest(Double.longBitsToDouble(0xfff0000000000001L), 1, 0x7ff, 1024, 0x0000000000001L, false, false);
     runTest(Double.longBitsToDouble(0x7fffffffffffffffL), 0, 0x7ff, 1024, 0xfffffffffffffL, false, false);
     runTest(Double.longBitsToDouble(0xffffffffffffffffL), 1, 0x7ff, 1024, 0xfffffffffffffL, false, false);
     
