@@ -5,7 +5,7 @@ Java class that represents a fraction as a ratio of two BigIntegers, reduced to 
 
 ## Support for Older Java Versions
 
-Switch to the java7 branch for a version of this library that compiles in Java7. I think it will also compile in Java 5-6. Master branch will keep up to date with latest Java version.
+For support for Java6 or Java7, switch to the `java6` or `java7` branch. Master branch will keep up to date with latest Java version.
 
 ## Creating BigFractions
 
