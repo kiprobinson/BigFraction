@@ -998,6 +998,43 @@ public class BigFractionTest {
   }
   
   @Test
+  public void testToDecimalString_NegativeFractionalDigits() {
+    new ToRadixedStringTest("1230", -1, "1230", "1230", "1230", "1230", "1230", "1230", "1230", "1230").test();
+    new ToRadixedStringTest("-1230", -1, "-1230", "-1230", "-1230", "-1230", "-1230", "-1230", "-1230", "-1230").test();
+    
+    new ToRadixedStringTest("1234", -1, "1240", "1230", "1240", "1230", "1230", "1230", "1230", "ArithmeticException").test();
+    new ToRadixedStringTest("1234", -2, "1300", "1200", "1300", "1200", "1200", "1200", "1200", "ArithmeticException").test();
+    new ToRadixedStringTest("1234", -3, "2000", "1000", "2000", "1000", "1000", "1000", "1000", "ArithmeticException").test();
+    new ToRadixedStringTest("1234", -4, "10000", "0", "10000", "0", "0", "0", "0", "ArithmeticException").test();
+    new ToRadixedStringTest("1234", -5, "100000", "0", "100000", "0", "0", "0", "0", "ArithmeticException").test();
+    new ToRadixedStringTest("1234", -6, "1000000", "0", "1000000", "0", "0", "0", "0", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("-1234", -1, "-1240", "-1230", "-1230", "-1240", "-1230", "-1230", "-1230", "ArithmeticException").test();
+    new ToRadixedStringTest("-1234", -2, "-1300", "-1200", "-1200", "-1300", "-1200", "-1200", "-1200", "ArithmeticException").test();
+    new ToRadixedStringTest("-1234", -3, "-2000", "-1000", "-1000", "-2000", "-1000", "-1000", "-1000", "ArithmeticException").test();
+    new ToRadixedStringTest("-1234", -4, "-10000", "0", "0", "-10000", "0", "0", "0", "ArithmeticException").test();
+    new ToRadixedStringTest("-1234", -5, "-100000", "0", "0", "-100000", "0", "0", "0", "ArithmeticException").test();
+    new ToRadixedStringTest("-1234", -6, "-1000000", "0", "0", "-1000000", "0", "0", "0", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("12345000", -4, "12350000", "12340000", "12350000", "12340000", "12350000", "12340000", "12340000", "ArithmeticException").test();
+    new ToRadixedStringTest("12355000", -4, "12360000", "12350000", "12360000", "12350000", "12360000", "12350000", "12360000", "ArithmeticException").test();
+    new ToRadixedStringTest("12345001", -4, "12350000", "12340000", "12350000", "12340000", "12350000", "12350000", "12350000", "ArithmeticException").test();
+    new ToRadixedStringTest("12355001", -4, "12360000", "12350000", "12360000", "12350000", "12360000", "12360000", "12360000", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("-12345000", -4, "-12350000", "-12340000", "-12340000", "-12350000", "-12350000", "-12340000", "-12340000", "ArithmeticException").test();
+    new ToRadixedStringTest("-12355000", -4, "-12360000", "-12350000", "-12350000", "-12360000", "-12360000", "-12350000", "-12360000", "ArithmeticException").test();
+    new ToRadixedStringTest("-12345001", -4, "-12350000", "-12340000", "-12340000", "-12350000", "-12350000", "-12350000", "-12350000", "ArithmeticException").test();
+    new ToRadixedStringTest("-12355001", -4, "-12360000", "-12350000", "-12350000", "-12360000", "-12360000", "-12360000", "-12360000", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("999", -1, "1000", "990", "1000", "990", "1000", "1000", "1000", "ArithmeticException").test();
+    new ToRadixedStringTest("-999", -1, "-1000", "-990", "-990", "-1000", "-1000", "-1000", "-1000", "ArithmeticException").test();
+    
+    //1E6/7 = 142857.142857...
+    new ToRadixedStringTest("1E6/7", -3, "143000", "142000", "143000", "142000", "143000", "143000", "143000", "ArithmeticException").test();
+    new ToRadixedStringTest("1E6/-7", -3, "-143000", "-142000", "-142000", "-143000", "-143000", "-143000", "-143000", "ArithmeticException").test();
+  }
+  
+  @Test
   public void testToRadixedString() {
     new ToRadixedStringTest("5/2", 2, 1, "10.1", "10.1", "10.1", "10.1", "10.1", "10.1", "10.1", "10.1").test();
     new ToRadixedStringTest("-5/2", 2, 1, "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1", "-10.1").test();
@@ -1074,6 +1111,52 @@ public class BigFractionTest {
     new ToRadixedStringTest("3/7", 1, 3, "0.429", "0.428", "0.429", "0.428", "0.429", "0.429", "0.429", "ArithmeticException").test();
     new ToRadixedStringTest("3/7", 37, 5, "0.42858", "0.42857", "0.42858", "0.42857", "0.42857", "0.42857", "0.42857", "ArithmeticException").test();
     new ToRadixedStringTest("3/7", 100, 9, "0.428571429", "0.428571428", "0.428571429", "0.428571428", "0.428571429", "0.428571429", "0.428571429", "ArithmeticException").test();
+  }
+  
+  @Test
+  public void testToRadixedString_NegativeFractionalDigits() {
+    new ToRadixedStringTest("5/2", 2, -1, "100", "10", "100", "10", "10", "10", "10", "ArithmeticException").test();
+    new ToRadixedStringTest("-5/2", 2, -1, "-100", "-10", "-10", "-100", "-10", "-10", "-10", "ArithmeticException").test();
+    
+    //b83160 base 12
+    new ToRadixedStringTest("2908440", 12, -1, "b83160", "b83160", "b83160", "b83160", "b83160", "b83160", "b83160",              "b83160").test();
+    new ToRadixedStringTest("2908440", 12, -2, "b83200", "b83100", "b83200", "b83100", "b83200", "b83100", "b83200", "ArithmeticException").test();
+    new ToRadixedStringTest("2908440", 12, -3, "b84000", "b83000", "b84000", "b83000", "b83000", "b83000", "b83000", "ArithmeticException").test();
+    
+    //b83060 base 12
+    new ToRadixedStringTest("2908296", 12, -2, "b83100", "b83000", "b83100", "b83000", "b83100", "b83000", "b83000", "ArithmeticException").test();
+    //b83b60 base 12
+    new ToRadixedStringTest("2909880", 12, -2, "b84000", "b83b00", "b84000", "b83b00", "b84000", "b83b00", "b84000", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("-2908440", 12, -1, "-b83160", "-b83160", "-b83160", "-b83160", "-b83160", "-b83160", "-b83160",             "-b83160").test();
+    new ToRadixedStringTest("-2908440", 12, -2, "-b83200", "-b83100", "-b83100", "-b83200", "-b83200", "-b83100", "-b83200", "ArithmeticException").test();
+    new ToRadixedStringTest("-2908440", 12, -3, "-b84000", "-b83000", "-b83000", "-b84000", "-b83000", "-b83000", "-b83000", "ArithmeticException").test();
+    new ToRadixedStringTest("-2908296", 12, -2, "-b83100", "-b83000", "-b83000", "-b83100", "-b83100", "-b83000", "-b83000", "ArithmeticException").test();
+    new ToRadixedStringTest("-2909880", 12, -2, "-b84000", "-b83b00", "-b83b00", "-b84000", "-b84000", "-b83b00", "-b84000", "ArithmeticException").test();
+    
+    //lazy.fox in base 36
+    new ToRadixedStringTest("46377484017/46656", 36,  0,   "lazz", "lazy",   "lazz", "lazy",  "lazy",  "lazy",  "lazy", "ArithmeticException").test();
+    new ToRadixedStringTest("46377484017/46656", 36, -1,   "lb00", "laz0",   "lb00", "laz0",  "lb00",  "lb00",  "lb00", "ArithmeticException").test();
+    new ToRadixedStringTest("46377484017/46656", 36, -2,   "lb00", "la00",   "lb00", "la00",  "lb00",  "lb00",  "lb00", "ArithmeticException").test();
+    new ToRadixedStringTest("46377484017/46656", 36, -3,   "m000", "l000",   "m000", "l000",  "l000",  "l000",  "l000", "ArithmeticException").test();
+    new ToRadixedStringTest("46377484017/46656", 36, -4,  "10000",    "0",  "10000",    "0", "10000", "10000", "10000", "ArithmeticException").test();
+    new ToRadixedStringTest("46377484017/46656", 36, -5, "100000",    "0", "100000",    "0",     "0",     "0",     "0", "ArithmeticException").test();
+    
+    new ToRadixedStringTest("-46377484017/46656", 36,  0,   "-lazz", "-lazy", "-lazy",   "-lazz",  "-lazy",  "-lazy",  "-lazy", "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, -1,   "-lb00", "-laz0", "-laz0",   "-lb00",  "-lb00",  "-lb00",  "-lb00", "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, -2,   "-lb00", "-la00", "-la00",   "-lb00",  "-lb00",  "-lb00",  "-lb00", "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, -3,   "-m000", "-l000", "-l000",   "-m000",  "-l000",  "-l000",  "-l000", "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, -4,  "-10000",     "0",     "0",  "-10000", "-10000", "-10000", "-10000", "ArithmeticException").test();
+    new ToRadixedStringTest("-46377484017/46656", 36, -5, "-100000",     "0",     "0", "-100000",      "0",      "0",      "0", "ArithmeticException").test();
+    
+    //428571.428571
+    //invalid radix should be same as radix 10 (no exception thrown)
+    new ToRadixedStringTest("3000000/7", -100, -2, "428600", "428500", "428600", "428500", "428600", "428600", "428600", "ArithmeticException").test();
+    new ToRadixedStringTest("3000000/7",   -1, -4, "430000", "420000", "430000", "420000", "430000", "430000", "430000", "ArithmeticException").test();
+    new ToRadixedStringTest("3000000/7",    0, -6, "1000000", "0", "1000000", "0", "0", "0", "0", "ArithmeticException").test();
+    new ToRadixedStringTest("3000000/7",    1, -2, "428600", "428500", "428600", "428500", "428600", "428600", "428600", "ArithmeticException").test();
+    new ToRadixedStringTest("3000000/7",   37, -4, "430000", "420000", "430000", "420000", "430000", "430000", "430000", "ArithmeticException").test();
+    new ToRadixedStringTest("3000000/7",  100, -6, "1000000", "0", "1000000", "0", "0", "0", "0", "ArithmeticException").test();
   }
   
   @Test
@@ -1958,11 +2041,6 @@ public class BigFractionTest {
   @Test(expected=IllegalArgumentException.class)
   public void testToRadixedStringNull() {
     bf(4,3).toRadixedString(10, 2, null);
-  }
-  
-  @Test(expected=IllegalArgumentException.class)
-  public void testToRadixedStringInvalidDigits() {
-    bf(4,3).toRadixedString(10, -1);
   }
   
   @Test(expected=IllegalArgumentException.class)

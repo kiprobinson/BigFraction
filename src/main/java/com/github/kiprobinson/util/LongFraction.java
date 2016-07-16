@@ -1487,7 +1487,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    * @param numDecimalDigits number of digits to be displayed after the decimal
    * @return decimal string representation of this fraction.
    * 
-   * @throws IllegalArgumentException if numDecimalDigits is negative
    * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
   public String toDecimalString(int numDecimalDigits)
@@ -1505,7 +1504,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    * @param roundingMode how to round the number if necessary
    * @return decimal string representation of this fraction.
    * 
-   * @throws IllegalArgumentException if numDecimalDigits is negative
    * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
   public String toDecimalString(int numDecimalDigits, RoundingMode roundingMode)
@@ -1523,8 +1521,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    *              (as is the case for Integer.toString)
    * @param numFractionalDigits number of digits to be displayed after the radix point.
    * @return radixed string representation of this fraction.
-   * 
-   * @throws IllegalArgumentException if numFractionDigits is negative
    */
   public String toRadixedString(int radix, int numFractionalDigits)
   {
@@ -1540,6 +1536,10 @@ public final class LongFraction extends Number implements Comparable<Number>
    * <br>
    * Will append trailing 0s as needed: (1/2).toRadixedString(3,2) is 0.100.<br>
    * <br>
+   * If passed negative numFractionalDigits, rounds to nearest radix^(-numFractionalDigits). For example,
+   * -1 means round to nearest 10, -2 means round to nearest 100, etc. No extra zeros are prepended in this
+   * case, since the only time it would be necessary is if a value were rounded to zero.<br>
+   * <br>
    * The digit-to-character mapping provided by {@link Character#forDigit} is used.
    * 
    * @param radix radix of the String representation. If the radix is outside the range from
@@ -1549,7 +1549,6 @@ public final class LongFraction extends Number implements Comparable<Number>
    * @param roundingMode how to round the number if necessary
    * @return radixed string representation of this fraction.
    * 
-   * @throws IllegalArgumentException if numFractionDigits is negative
    * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
   public String toRadixedString(int radix, int numFractionalDigits, RoundingMode roundingMode)
@@ -1560,52 +1559,71 @@ public final class LongFraction extends Number implements Comparable<Number>
     if(radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
       radix = 10;
     
-    if(numFractionalDigits < 0)
-      throw new IllegalArgumentException("numFractionDigits must be nonnegative");
-    
     //shortcut - if we don't want any fractional digits, this is equivalent to round()
     if(numFractionalDigits == 0)
       return Long.toString(this.round(roundingMode), radix);
     
-    //multiply by (radix)^(digits), then round to integer
-    long rounded = this.multiply(powAndCheck(radix, numFractionalDigits)).round(roundingMode);
-    
-    //get the actual digits (ignoring the sign bit)
-    String digits = Long.toString(absAndCheck(rounded), radix);
-    
-    String beforeRadixPoint = "0";
-    String afterRadixPoint = digits;
-    int padLen = 0; //number of zeros we need to pad afterDecimal with with
-    
-    if(digits.length() > numFractionalDigits)
+    if(numFractionalDigits > 0)
     {
-      //we got too many digits... need to split into before/after decimal parts
-      beforeRadixPoint = digits.substring(0, digits.length() - numFractionalDigits);
-      afterRadixPoint = digits.substring(digits.length() - numFractionalDigits);
+      //multiply by (radix)^(digits), then round to integer
+      long rounded = this.multiply(BigInteger.valueOf(radix).pow(numFractionalDigits)).round(roundingMode);
+      
+      //get the actual digits (ignoring the sign bit)
+      String digits = Long.toString(Math.abs(rounded), radix);
+      
+      String beforeRadixPoint = "0";
+      String afterRadixPoint = digits;
+      int padLen = 0; //number of zeros we need to pad afterDecimal with with
+      
+      if(digits.length() > numFractionalDigits)
+      {
+        //we got too many digits... need to split into before/after decimal parts
+        beforeRadixPoint = digits.substring(0, digits.length() - numFractionalDigits);
+        afterRadixPoint = digits.substring(digits.length() - numFractionalDigits);
+      }
+      else if (digits.length() < numFractionalDigits)
+      {
+        //we don't have enough digits. We will have to pad with zeros
+        padLen = numFractionalDigits - digits.length();
+      }
+      //else: we got exactly the right number of digits. nothing to do!
+      
+      //create string builder to hold result. init buffer to max possible size: length of parts plus length of padding plus space for . and -
+      StringBuilder sb = new StringBuilder(beforeRadixPoint.length() + afterRadixPoint.length() + padLen + 2);
+      
+      //Note: need to use sign of rounded, not sign of this, because if we round a small negative number to
+      //zero the sign will be lost.
+      if(rounded < 0)
+        sb.append('-');
+      
+      sb.append(beforeRadixPoint).append('.');
+      
+      for(int i = 0; i < padLen; i++)
+        sb.append('0');
+      
+      sb.append(afterRadixPoint);
+      
+      return sb.toString();
     }
-    else if (digits.length() < numFractionalDigits)
+    else
     {
-      //we don't have enough digits. We will have to pad with zeros
-      padLen = numFractionalDigits - digits.length();
+      //numFractionalDigits is negative. divide out the number of digits then round to integer
+      int absFractionalDigits = -numFractionalDigits;
+      
+      String rounded = Long.toString(this.divide(BigInteger.valueOf(radix).pow(absFractionalDigits)).round(roundingMode), radix);
+      
+      //at this point, if we got 0, just return 0. No need to return something like "00000". if we have anything
+      //other than 0, then we need to append as many 0s as abs(numFractionalDigits)
+      if(rounded.equals("0"))
+        return "0";
+      
+      StringBuilder sb = new StringBuilder(rounded.length() + absFractionalDigits);
+      sb.append(rounded);
+      for(int i = 0; i < absFractionalDigits; i++)
+        sb.append('0');
+      
+      return sb.toString();
     }
-    //else: we got exactly the right number of digits. nothing to do!
-    
-    //create string builder to hold result. init buffer to max possible size: length of parts plus length of padding plus space for . and -
-    StringBuilder sb = new StringBuilder(beforeRadixPoint.length() + afterRadixPoint.length() + padLen + 2);
-    
-    //Note: need to use sign of rounded, not sign of this, because if we round a small negative number to
-    //zero the sign will be lost.
-    if(rounded < 0)
-      sb.append('-');
-    
-    sb.append(beforeRadixPoint).append('.');
-    
-    for(int i = 0; i < padLen; i++)
-      sb.append('0');
-    
-    sb.append(afterRadixPoint);
-    
-    return sb.toString();
   }
   
   /**
