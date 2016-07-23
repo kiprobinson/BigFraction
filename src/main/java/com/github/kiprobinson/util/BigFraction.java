@@ -1326,6 +1326,50 @@ public final class BigFraction extends Number implements Comparable<Number>
     return intVal;
   }
   
+  /**
+   * Rounds this fraction to the nearest multiple of the given number, using HALF_UP
+   * rounding method.
+   * 
+   * @param n number to which we will round to the nearest multiple
+   * 
+   * @return this value, rounded to the nearest multiple of n
+   * 
+   * @throws IllegalArgumentException If n is null.
+   * @throws ArithmeticException If n is zero or negative.
+   */
+  public BigFraction roundToNumber(Number n) {
+    return roundToNumber(n, RoundingMode.HALF_UP);
+  }
+  
+  /**
+   * Rounds this fraction to the nearest multiple of the given number, using the
+   * specified rounding method.<br>
+   * <br>
+   * Note for HALF_EVEN rounding method: this rounds to the nearest even multiple of
+   * n, which may or may not be even. For example, if rounding to the nearest 2, every
+   * result will be even. So 9 rounded to nearest 2 with HALF_EVEN will round to 8, since
+   * 8=2*4 (4 being an even number), whereas 10=2*5 (5 being odd).
+   * 
+   * @param n number to which we will round to the nearest multiple
+   * 
+   * @return this value, rounded to the nearest multiple of n
+   * 
+   * @throws IllegalArgumentException If n is null.
+   * @throws ArithmeticException If n is zero or negative.
+   * @throws ArithmeticException if RoundingMode.UNNECESSARY is used but
+   *         this fraction is not an exact multiple of the given value.
+   */
+  public BigFraction roundToNumber(Number n, RoundingMode roundingMode) {
+    if(n == null || roundingMode == null)
+      throw new IllegalArgumentException("Null argument");
+    
+    BigFraction f = valueOf(n);
+    
+    if(f.signum() <= 0)
+      throw new ArithmeticException("newDenominator must be positive");
+    
+    return product(this.divide(f).round(roundingMode), f);
+  }
   
   /**
    * Rounds the given fraction to the nearest fraction having the given denominator,

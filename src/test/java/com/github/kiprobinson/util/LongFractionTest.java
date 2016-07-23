@@ -819,6 +819,61 @@ public class LongFractionTest {
   }
   
   @Test
+  public void testRoundToNumber() {
+    new RoundToNumberTest("13", 2, "14/1", "12/1", "14/1", "12/1", "14/1", "12/1", "12/1", "ArithmeticException").test();
+    new RoundToNumberTest("14", 2, "14/1", "14/1", "14/1", "14/1", "14/1", "14/1", "14/1", "14/1").test();
+    new RoundToNumberTest("15", 2, "16/1", "14/1", "16/1", "14/1", "16/1", "14/1", "16/1", "ArithmeticException").test();
+    new RoundToNumberTest("15", 5, "15/1", "15/1", "15/1", "15/1", "15/1", "15/1", "15/1", "15/1").test();
+    new RoundToNumberTest("2.49", 5, "5/1", "0/1", "5/1", "0/1", "0/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("2.50", 5, "5/1", "0/1", "5/1", "0/1", "5/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("2.51", 5, "5/1", "0/1", "5/1", "0/1", "5/1", "5/1", "5/1", "ArithmeticException").test();
+    new RoundToNumberTest("12.49", 5, "15/1", "10/1", "15/1", "10/1", "10/1", "10/1", "10/1", "ArithmeticException").test();
+    new RoundToNumberTest("12.50", 5, "15/1", "10/1", "15/1", "10/1", "15/1", "10/1", "10/1", "ArithmeticException").test();
+    new RoundToNumberTest("12.51", 5, "15/1", "10/1", "15/1", "10/1", "15/1", "15/1", "15/1", "ArithmeticException").test();
+    new RoundToNumberTest("17.49", 5, "20/1", "15/1", "20/1", "15/1", "15/1", "15/1", "15/1", "ArithmeticException").test();
+    new RoundToNumberTest("17.50", 5, "20/1", "15/1", "20/1", "15/1", "20/1", "15/1", "20/1", "ArithmeticException").test();
+    new RoundToNumberTest("17.51", 5, "20/1", "15/1", "20/1", "15/1", "20/1", "20/1", "20/1", "ArithmeticException").test();
+    new RoundToNumberTest("4/7", lf(1,7), "4/7", "4/7", "4/7", "4/7", "4/7", "4/7", "4/7", "4/7").test();
+    new RoundToNumberTest("2/3", lf(1,7), "5/7", "4/7", "5/7", "4/7", "5/7", "5/7", "5/7", "ArithmeticException").test();
+    new RoundToNumberTest("31/14", lf(1,7), "16/7", "15/7", "16/7", "15/7", "16/7", "15/7", "16/7", "ArithmeticException").test();
+    new RoundToNumberTest("33/14", lf(1,7), "17/7", "16/7", "17/7", "16/7", "17/7", "16/7", "16/7", "ArithmeticException").test();
+    new RoundToNumberTest("1649/11", lf(17,11), "1649/11", "1649/11", "1649/11", "1649/11", "1649/11", "1649/11", "1649/11", "1649/11").test();
+    new RoundToNumberTest("1650/11", lf(17,11), "1666/11", "1649/11", "1666/11", "1649/11", "1649/11", "1649/11", "1649/11", "ArithmeticException").test();
+    new RoundToNumberTest("1648/11", lf(17,11), "1649/11", "1632/11", "1649/11", "1632/11", "1649/11", "1649/11", "1649/11", "ArithmeticException").test();
+    
+    new RoundToNumberTest("0.49/16", lf(1,16), "1/16", "0/1", "1/16", "0/1", "0/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("0.50/16", lf(1,16), "1/16", "0/1", "1/16", "0/1", "1/16", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("0.51/16", lf(1,16), "1/16", "0/1", "1/16", "0/1", "1/16", "1/16", "1/16", "ArithmeticException").test();
+    
+    new RoundToNumberTest("0", 4, "0/1", "0/1", "0/1", "0/1", "0/1", "0/1", "0/1", "0/1").test();
+    
+    new RoundToNumberTest("-13", 2, "-14/1", "-12/1", "-12/1", "-14/1", "-14/1", "-12/1", "-12/1", "ArithmeticException").test();
+    new RoundToNumberTest("-14", 2, "-14/1", "-14/1", "-14/1", "-14/1", "-14/1", "-14/1", "-14/1", "-14/1").test();
+    new RoundToNumberTest("-15", 2, "-16/1", "-14/1", "-14/1", "-16/1", "-16/1", "-14/1", "-16/1", "ArithmeticException").test();
+    new RoundToNumberTest("-15", 5, "-15/1", "-15/1", "-15/1", "-15/1", "-15/1", "-15/1", "-15/1", "-15/1").test();
+    new RoundToNumberTest("-2.49", 5, "-5/1", "0/1", "0/1", "-5/1", "0/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("-2.50", 5, "-5/1", "0/1", "0/1", "-5/1", "-5/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("-2.51", 5, "-5/1", "0/1", "0/1", "-5/1", "-5/1", "-5/1", "-5/1", "ArithmeticException").test();
+    new RoundToNumberTest("-12.49", 5, "-15/1", "-10/1", "-10/1", "-15/1", "-10/1", "-10/1", "-10/1", "ArithmeticException").test();
+    new RoundToNumberTest("-12.50", 5, "-15/1", "-10/1", "-10/1", "-15/1", "-15/1", "-10/1", "-10/1", "ArithmeticException").test();
+    new RoundToNumberTest("-12.51", 5, "-15/1", "-10/1", "-10/1", "-15/1", "-15/1", "-15/1", "-15/1", "ArithmeticException").test();
+    new RoundToNumberTest("-17.49", 5, "-20/1", "-15/1", "-15/1", "-20/1", "-15/1", "-15/1", "-15/1", "ArithmeticException").test();
+    new RoundToNumberTest("-17.50", 5, "-20/1", "-15/1", "-15/1", "-20/1", "-20/1", "-15/1", "-20/1", "ArithmeticException").test();
+    new RoundToNumberTest("-17.51", 5, "-20/1", "-15/1", "-15/1", "-20/1", "-20/1", "-20/1", "-20/1", "ArithmeticException").test();
+    new RoundToNumberTest("-4/7", lf(1,7), "-4/7", "-4/7", "-4/7", "-4/7", "-4/7", "-4/7", "-4/7", "-4/7").test();
+    new RoundToNumberTest("-2/3", lf(1,7), "-5/7", "-4/7", "-4/7", "-5/7", "-5/7", "-5/7", "-5/7", "ArithmeticException").test();
+    new RoundToNumberTest("-31/14", lf(1,7), "-16/7", "-15/7", "-15/7", "-16/7", "-16/7", "-15/7", "-16/7", "ArithmeticException").test();
+    new RoundToNumberTest("-33/14", lf(1,7), "-17/7", "-16/7", "-16/7", "-17/7", "-17/7", "-16/7", "-16/7", "ArithmeticException").test();
+    new RoundToNumberTest("-1649/11", lf(17,11), "-1649/11", "-1649/11", "-1649/11", "-1649/11", "-1649/11", "-1649/11", "-1649/11", "-1649/11").test();
+    new RoundToNumberTest("-1650/11", lf(17,11), "-1666/11", "-1649/11", "-1649/11", "-1666/11", "-1649/11", "-1649/11", "-1649/11", "ArithmeticException").test();
+    new RoundToNumberTest("-1648/11", lf(17,11), "-1649/11", "-1632/11", "-1632/11", "-1649/11", "-1649/11", "-1649/11", "-1649/11", "ArithmeticException").test();
+    
+    new RoundToNumberTest("-0.49/16", lf(1,16), "-1/16", "0/1", "0/1", "-1/16", "0/1", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("-0.50/16", lf(1,16), "-1/16", "0/1", "0/1", "-1/16", "-1/16", "0/1", "0/1", "ArithmeticException").test();
+    new RoundToNumberTest("-0.51/16", lf(1,16), "-1/16", "0/1", "0/1", "-1/16", "-1/16", "-1/16", "-1/16", "ArithmeticException").test();
+  }
+  
+  @Test
   public void testRoundToDenominator() {
     new RoundingToDenominatorTest("5.5", 1, "6", "5", "6", "5", "6", "5", "6", "ArithmeticException").test();
     new RoundingToDenominatorTest("7/15", 6, "3", "2", "3", "2", "3", "3", "3", "ArithmeticException").test();
@@ -2046,6 +2101,26 @@ public class LongFractionTest {
   }
   
   @Test(expected=IllegalArgumentException.class)
+  public void testRoundToNumberNull1() {
+    lf(4,3).roundToNumber(null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRoundToNumberNull2() {
+    lf(4,3).roundToNumber(lf(1,7), null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRoundToNumberNull3() {
+    lf(4,3).roundToNumber(null, RoundingMode.HALF_UP);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testRoundToNumberNull4() {
+    lf(4,3).roundToNumber(null, null);
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
   public void testRoundToDenominatorNull() {
     lf(4,3).roundToDenominator(7, null);
   }
@@ -2266,6 +2341,16 @@ public class LongFractionTest {
   }
   
   @Test(expected=ArithmeticException.class)
+  public void testRoundToNumberZero() {
+    lf(11,17).roundToNumber(BigInteger.ZERO);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testRoundToNumberNegative() {
+    lf(11,17).roundToNumber(lf(-1,4));
+  }
+  
+  @Test(expected=ArithmeticException.class)
   public void testRoundToDenominatorZero() {
     lf(11,17).roundToDenominator(0L);
   }
@@ -2447,6 +2532,54 @@ public class LongFractionTest {
       
       //test that default rounding mode is the same as HALF_UP
       assertEquals("round(" + input + ")", expected.get(RoundingMode.HALF_UP), Long.toString(lf.round()));
+    }
+  }
+  
+  
+  /**
+   * Helper class to reduce repetitive typing of tests for roundToNumber. Basically, you
+   * call the constructor with the input value (as a String), and the expected output
+   * for that rounding method.
+   */
+  private static class RoundToNumberTest
+  {
+    private final String input;
+    private final Number n;
+    private final LongFraction lf;
+    private final Map<RoundingMode, String> expected = new HashMap<RoundingMode, String>();
+    
+    public RoundToNumberTest(String input, Number n, String up, String down, String ceiling, String floor,
+        String halfUp, String halfDown, String halfEven, String unnecessary)
+    {
+      this.input = input;
+      this.n = n;
+      lf = lf(input);
+      expected.put(RoundingMode.UP, up);
+      expected.put(RoundingMode.DOWN, down);
+      expected.put(RoundingMode.CEILING, ceiling);
+      expected.put(RoundingMode.FLOOR, floor);
+      expected.put(RoundingMode.HALF_UP, halfUp);
+      expected.put(RoundingMode.HALF_DOWN, halfDown);
+      expected.put(RoundingMode.HALF_EVEN, halfEven);
+      expected.put(RoundingMode.UNNECESSARY, unnecessary);
+    }
+    
+    public void test()
+    {
+      for(RoundingMode mode : RoundingMode.values())
+      {
+        String actual;
+        try {
+          actual = lf.roundToNumber(n, mode).toString();
+        }
+        catch(Exception e) {
+          actual = e.getClass().getSimpleName();
+        }
+        assertEquals("(" + input + ").roundToNumber(" + n + ", " + mode + ")", expected.get(mode), actual);
+      }
+      
+      //test that default rounding mode is the same as HALF_UP
+      assertEquals("(" + input + ").roundToNumber(" + n + ")", expected.get(RoundingMode.HALF_UP), lf.roundToNumber(n).toString());
     }
   }
   
