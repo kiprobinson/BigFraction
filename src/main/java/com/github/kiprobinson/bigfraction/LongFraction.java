@@ -1,4 +1,4 @@
-package com.github.kiprobinson.util;
+package com.github.kiprobinson.bigfraction;
 
 import java.math.*;
 import java.util.*;

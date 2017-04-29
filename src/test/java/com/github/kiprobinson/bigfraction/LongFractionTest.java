@@ -1,4 +1,4 @@
-package com.github.kiprobinson.util;
+package com.github.kiprobinson.bigfraction;
 
 import static org.junit.Assert.*;
 
@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.kiprobinson.util.LongFraction;
-import com.github.kiprobinson.util.DivisionMode;
-import com.github.kiprobinson.util.DoubleUtil;
-import com.github.kiprobinson.util.FloatUtil;
+import com.github.kiprobinson.bigfraction.LongFraction;
+import com.github.kiprobinson.bigfraction.DivisionMode;
+import com.github.kiprobinson.bigfraction.DoubleUtil;
+import com.github.kiprobinson.bigfraction.FloatUtil;
 
 import org.junit.Test;
 

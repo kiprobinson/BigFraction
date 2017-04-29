@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.github.kiprobinson.util;
+package com.github.kiprobinson.bigfraction;
 
 /**
  * Representation of methods of performing Euclidean division--dividing to an integer and obtaining

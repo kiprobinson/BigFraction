@@ -1,9 +1,9 @@
-package com.github.kiprobinson.main;
+package com.github.kiprobinson.bigfraction.main;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.github.kiprobinson.util.BigFraction;
+import com.github.kiprobinson.bigfraction.BigFraction;
 
 /**
  * Class with public static void main(). Allows easy demo..
