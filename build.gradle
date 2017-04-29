@@ -1,6 +1,9 @@
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
+apply plugin: 'maven'
+apply plugin: 'signing'
+
 //jacoco: code coverage tool. Binary file is always generated (build/jacoco/*.exec).
 //To generate HTML report, run:  gradle jacoco
 apply plugin: 'jacoco'
@@ -8,6 +11,10 @@ apply plugin: 'jacoco'
 // Java compatibility. 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+group = "com.github.kiprobinson"
+archivesBaseName = "bigfraction"
+version = "0.0.2"
 
 //Use the maven repo...
 repositories {
@@ -17,7 +24,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-  testCompile 'junit:junit:4.+'
+  testCompile 'junit:junit:4.12'
 }
 
 javadoc {
@@ -27,20 +34,77 @@ javadoc {
   }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+  classifier = 'javadoc'
+  from javadoc.destinationDir
 }
 
 artifacts {
-    archives sourcesJar
-    archives javadocJar
+  archives sourcesJar
+  archives javadocJar
 }
+
+
+signing {
+  sign configurations.archives
+}
+
+//NOTE TO SELF: following properties come from gitignore'd gradle.properties file:
+// signing.keyId
+// signing.password
+// signing.secretKeyRingFile
+// ossrhUsername
+// ossrhPassword
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+      
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+      
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+      
+      pom.project {
+        name 'Big Fraction'
+        packaging 'jar'
+        artifactId 'bigfraction'
+        description 'Java library to represent arbitrary-precision fraction as a ratio of two BigIntegers.'
+        url 'https://github.com/kiprobinson/BigFraction'
+        
+        scm {
+          connection 'scm:git:git://github.com/kiprobinson/BigFraction.git'
+          developerConnection 'scm:git:ssh://github.com/kiprobinson/BigFraction.git'
+          url 'https://github.com/kiprobinson/BigFraction/tree/master'
+        }
+        
+        licenses {
+          license {
+            name 'The Apache License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+        
+        developers {
+          developer {
+            id 'kiprobinson'
+            name 'Kip Robinson'
+            email 'kip.robinson@gmail.com'
+          }
+        }
+      }
+    }
+  }
+}
+
 
 jacoco {
   toolVersion = "0.7.+"
