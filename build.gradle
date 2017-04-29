@@ -14,7 +14,7 @@ targetCompatibility = 1.6
 
 group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
-version = "0.0.2-java7"
+version = "0.0.2-java6"
 
 //Use the maven repo...
 repositories {
