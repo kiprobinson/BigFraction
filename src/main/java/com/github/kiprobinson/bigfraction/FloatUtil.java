@@ -1,4 +1,4 @@
-package com.github.kiprobinson.util;
+package com.github.kiprobinson.bigfraction;
 
 /**
  * Additional utilities for working with floay values. Useful to prevent hard-coding IEEE 754 constants in code.
