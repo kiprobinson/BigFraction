@@ -9,3 +9,6 @@ bin/
 #Gradle build dir
 build/
 .gradle
+
+#Contains passwords/credentials for deploying to maven central
+gradle.properties
