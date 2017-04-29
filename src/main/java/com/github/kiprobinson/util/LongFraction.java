@@ -1340,6 +1340,7 @@ public final class LongFraction extends Number implements Comparable<Number>
    * 8=2*4 (4 being an even number), whereas 10=2*5 (5 being odd).
    * 
    * @param n number to which we will round to the nearest multiple
+   * @param roundingMode rounding mode to use if the answer must be rounded
    * 
    * @return this value, rounded to the nearest multiple of n
    * 
