@@ -1,8 +1,8 @@
-package com.github.kiprobinson.util;
+package com.github.kiprobinson.bigfraction;
 
 import static org.junit.Assert.*;
 
-import com.github.kiprobinson.util.DoubleUtil;
+import com.github.kiprobinson.bigfraction.DoubleUtil;
 
 import org.junit.Test;
 
