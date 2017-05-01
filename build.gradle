@@ -24,9 +24,9 @@ targetCompatibility = 1.7
 
 group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
-version = "0.0.3-java7"
+version = "0.0.3"
 
-def projectClassifier = null
+def projectClassifier = 'java7'
 
 //Use the maven repo...
 repositories {
