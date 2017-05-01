@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.github.kiprobinson.bigfraction.util.DoubleUtil;
+
 /**
  * Arbitrary-precision fraction, utilizing {@code long}s for numerator and
  * denominator. Fraction is always kept in lowest terms. Fraction is
