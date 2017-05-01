@@ -2348,7 +2348,11 @@ public final class LongFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns an exact double representation of this fraction.
+   * Returns an exact double representation of this fraction.<br>
+   * <br>
+   * <b>Warning</b>: Current algorithm is simply to convert to double, then convert back to
+   * BigFraction, then make sure the copy of copy is identical to the original. This is not
+   * optimized, and fails on some edge cases. This will be addressed in future updates.
    * 
    * @return exact double representation of this fraction
    * @throws ArithmeticException if this cannot be represented exactly as a double.
@@ -2387,7 +2391,11 @@ public final class LongFraction extends Number implements Comparable<Number>
   }
   
   /**
-   * Returns an exact float representation of this fraction.
+   * Returns an exact float representation of this fraction.<br>
+   * <br>
+   * <b>Warning</b>: Current algorithm is simply to convert to float, then convert back to
+   * BigFraction, then make sure the copy of copy is identical to the original. This is not
+   * optimized, and fails on some edge cases. This will be addressed in future updates.
    * 
    * @return exact float representation of this fraction
    * @throws ArithmeticException if this cannot be represented exactly as a float.
