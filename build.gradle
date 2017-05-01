@@ -26,6 +26,8 @@ group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
 version = "0.0.3"
 
+def projectClassifier = null
+
 //Use the maven repo...
 repositories {
   mavenLocal()
@@ -44,13 +46,17 @@ javadoc {
   }
 }
 
+jar {
+  classifier = projectClassifier
+}
+
 task sourcesJar(type: Jar) {
-  classifier = 'sources'
+  classifier = (projectClassifier == null ? '' : projectClassifier + '-') + 'sources'
   from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
+  classifier = (projectClassifier == null ? '' : projectClassifier + '-') + 'javadoc'
   from javadoc.destinationDir
 }
 
