@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.github.kiprobinson.bigfraction.BigFraction;
-import com.github.kiprobinson.bigfraction.DivisionMode;
-
 import org.junit.Test;
 
 

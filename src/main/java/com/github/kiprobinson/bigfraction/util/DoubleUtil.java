@@ -1,4 +1,4 @@
-package com.github.kiprobinson.bigfraction;
+package com.github.kiprobinson.bigfraction.util;
 
 /**
  * Additional utilities for working with double values. Useful to prevent hard-coding IEEE 754 constants in code.
