@@ -1,18 +1,8 @@
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.8.0"
-  }
-}
-
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
 
 apply plugin: 'maven'
 apply plugin: 'signing'
-apply plugin: 'io.codearte.nexus-staging'
 
 //jacoco: code coverage tool. Binary file is always generated (build/jacoco/*.exec).
 //To generate HTML report, run:  gradle jacoco
@@ -73,10 +63,8 @@ signing {
 //
 // Another note to self-  release process:
 // 1.  gradlew clean build uploadArchives
-//   ... wait a minute or two ...
-// 2.  gradlew closeRepository
-//   ... wait a minute or two ...
-// 3.  gradlew releaseRepository
+// 
+// JAVA6 ONLY: manual release on: https://oss.sonatype.org/
 uploadArchives {
   repositories {
     mavenDeployer {
@@ -120,14 +108,6 @@ uploadArchives {
       }
     }
   }
-}
-
-nexusStaging {
-  packageGroup = 'com.github.kiprobinson'
-  stagingProfileId = '5ff5b050a01221'
-  username = ossrhUsername
-  password = ossrhPassword
-  numberOfRetries = 3
 }
 
 jacoco {
