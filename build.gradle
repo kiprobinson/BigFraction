@@ -24,9 +24,13 @@ targetCompatibility = 1.7
 
 group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
-version = "0.0.3"
+version = "0.0.4"
 
+//Project classifier will be null on master, 'java6' or 'java7' on branch.
+//Keeping as a separate var to avoid a merge conflict on every new version released.
 def projectClassifier = 'java7'
+if(projectClassifier != null)
+  version += '-' + projectClassifier
 
 //Use the maven repo...
 repositories {
@@ -46,17 +50,13 @@ javadoc {
   }
 }
 
-jar {
-  classifier = projectClassifier
-}
-
 task sourcesJar(type: Jar) {
-  classifier = (projectClassifier == null ? '' : projectClassifier + '-') + 'sources'
+  classifier = 'sources'
   from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = (projectClassifier == null ? '' : projectClassifier + '-') + 'javadoc'
+  classifier = 'javadoc'
   from javadoc.destinationDir
 }
 
@@ -133,7 +133,7 @@ nexusStaging {
   stagingProfileId = '5ff5b050a01221'
   username = ossrhUsername
   password = ossrhPassword
-  numberOfRetries = 3
+  //numberOfRetries = 3
 }
 
 jacoco {
