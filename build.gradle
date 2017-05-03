@@ -24,7 +24,7 @@ targetCompatibility = 1.7
 
 group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
-version = "0.0.4"
+version = "1.0.0"
 
 //Project classifier will be null on master, 'java6' or 'java7' on branch.
 //Keeping as a separate var to avoid a merge conflict on every new version released.
