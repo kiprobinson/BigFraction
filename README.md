@@ -1,11 +1,7 @@
 BigFraction
 ===========
 
-Java class that represents a fraction as a ratio of two BigIntegers, reduced to lowest terms. Originally created for use Project Euler problems.
-
-## Support for Older Java Versions
-
-For support for Java6 or Java7, switch to the `java6` or `java7` branch. Master branch will keep up to date with latest Java version.
+Java library that represents a fraction as a ratio of two `BigInteger`s, reduced to lowest terms. A rich set of mathematical functions are supported.
 
 ## Creating BigFractions
 
@@ -42,7 +38,7 @@ The version that takes a String may be more like what you expect:
     BigFraction.valueOf(Double.toString(1.1)); // 11/10
     BigFraction.valueOf(Float.toString(1.1f)); // 11/10
 
-You can also use BigInteger and BigDecimal:
+You can also use `BigInteger` and `BigDecimal`:
 
     BigFraction.valueOf(new BigInteger("9999999999999999999"), BigInteger.valueOf(1));
     // ->  9999999999999999999/1   (note that this is larger than Long.MAX_VALUE)
@@ -50,7 +46,7 @@ You can also use BigInteger and BigDecimal:
     BigFraction.valueOf(new BigDecimal("1.23456789012345678901E-50"));
     // ->  123456789012345678901/10000000000000000000000000000000000000000000000000000000000000000000000
 
-You can even mix different Number types for numerator and denominator:
+You can even mix different `Number` types for numerator and denominator:
 
     BigFraction.valueOf(1.5, BigInteger.valueOf(17)); // 3/34
 
@@ -106,26 +102,17 @@ Complement is `1 - n`. Useful in statistics a lot:
     b.complement(); // 1 - 3/4 = 1/4
     z.complement(); // 1 - 0/1 = 1/1
 
-## Building
+## LongFraction
 
-This project is built using Gradle. The simplest way to build is to use the enclosed Gradle wrapper:
+There is also a `LongFraction` that represents a fraction as a ratio of two `long`s, with the same methods as `BigFraction`. The mathematics are much faster, but you run the risk of overflows.
 
-    $ gradlew build
+## How to Get BigFraction
 
-You can also download Gradle and install it locally, then build with:
+The library is [available via Maven Central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.github.kiprobinson%22%20AND%20a%3A%22bigfraction%22) and can be used in any project built using Maven or a compatible build tool (Ivy, Gradle, etc.).
 
-    $ gradle build
+You can also download the jar file from the repository and manually add it to your project, if you are not utilizing a supported build tool.
 
-I also have project files set up for Eclipse. If you check out as an Eclipse project, and you have the
-Gradle plugin for Eclipse installed, you can right-click on project and select "Run As > Gradle Build".
+### Support for Older Java Versions
 
-If you get an error like the following:
+I am currently building my jar files using Java 8, with source compatibility only for Java 8+. These jar files will not run in older versions of Java. If you need support for Java 6 or Java 7, notice that there are `-java6` or `-java7` versions available from Maven. These are compiled with compatibility to that Java version.
 
-    > Could not find tools.jar. Please check that SOME_PATH contains a valid JDK installation.
-
-This means your system default Java is a JRE rather than a JDK. In Eclipse, to resolve it, right-click on
-project and select Run As > Gradle Build..., then select arguments, and select the JDK that is configured
-in Eclipse.
-
-If you are running from command line and get this error, either install a JDK, or set JAVA_HOME variable
-to point to a JDK.
