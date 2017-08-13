@@ -578,6 +578,7 @@ public class BigFractionTest {
   public void testPow() {
     //Note: 0^0 returns 1 (just like Math.pow())
     assertEquals("(0/1)^(0)", "1/1", bf(0,1).pow(0).toString());
+    assertEquals("(0/1)^(10)", "0/1", bf(0,1).pow(10).toString());
     assertEquals("(11/17)^(5)", "161051/1419857", bf(11,17).pow(5).toString());
     assertEquals("(11/17)^(-5)", "1419857/161051", bf(11,17).pow(-5).toString());
     assertEquals("(5/8)^(0)", "1/1", bf(5,8).pow(0).toString());
@@ -585,6 +586,66 @@ public class BigFractionTest {
     assertEquals("(9/16)^(1)", "9/16", bf(9,16).pow(1).toString());
   }
   
+  @Test
+  public void testPowFract() {
+    //some cases where we have integer roots...
+    assertEquals("25/49", bf(125,343).pow(bf(2,3), bf(1)).toString());
+    assertEquals("343/125", bf(49,25).pow(bf(3,2), bf(1)).toString());
+    assertEquals("49/25", bf(125,343).pow(bf(-2,3), bf(1)).toString());
+    assertEquals("125/343", bf(49,25).pow(bf(-3,2), bf(1)).toString());
+    
+    assertEquals("25/49", bf(-125,343).pow(bf(2,3), bf(1)).toString());
+    assertEquals("49/25", bf(-125,343).pow(bf(-2,3), bf(1)).toString());
+    
+    assertEquals("19/21", bf(19,21).pow(bf(1), bf(1)).toString());
+    assertEquals("21/19", bf(19,21).pow(bf(-1), bf(1)).toString());
+    assertEquals("-19/21", bf(-19,21).pow(bf(1), bf(1)).toString());
+    assertEquals("-21/19", bf(-19,21).pow(bf(-1), bf(1)).toString());
+    
+    //test some values where we don't have an exact answer. Use Math.pow() as a reference for expected results.
+    assertEquals(Math.pow(15.0/43.0, 7.0/17.0), bf(15,43).pow(bf(7,17), bf(1,2)).doubleValue(), 0.5);
+    assertEquals(Math.pow(15.0/43.0, 7.0/17.0), bf(15,43).pow(bf(7,17), bf(1,10)).doubleValue(), 0.1);
+    
+    assertEquals("0/1", bf(0).pow(bf(2,3), bf(1)).toString());
+    assertEquals("1/1", bf(0).pow(bf(0), bf(1)).toString());
+    assertEquals("1/1", bf(0).pow(bf(0), bf(1)).toString());
+  }
+  
+  @Test
+  public void nthRootTest() {
+    assertEquals("2983/1", bf(2983).nthRoot(1, bf(1)).toString());
+    assertEquals("0/1", bf(0).nthRoot(1, bf(1)).toString());
+    assertEquals("0/1", bf(0).nthRoot(2, bf(1)).toString());
+    assertEquals("0/1", bf(0).nthRoot(198465, bf(1)).toString());
+    
+    assertEquals("1/1", bf(1).nthRoot(1, bf(1)).toString());
+    assertEquals("1/1", bf(1).nthRoot(2, bf(1)).toString());
+    assertEquals("1/1", bf(1).nthRoot(198465, bf(1)).toString());
+    
+    //some cases where we have rational roots...
+    assertEquals("3/5", bf(27,125).nthRoot(3, bf(1)).toString());
+    assertEquals("-3/5", bf(-27,125).nthRoot(3, bf(1)).toString());
+    assertEquals("5/3", bf(27,125).nthRoot(-3, bf(1)).toString());
+    assertEquals("-5/3", bf(-27,125).nthRoot(-3, bf(1)).toString());
+    
+    assertEquals("10/7", bf(10000,2401).nthRoot(4, bf(1)).toString());
+    assertEquals("7/10", bf(10000,2401).nthRoot(-4, bf(1)).toString());
+    
+    assertEquals("2/11", bf(2048,285311670611L).nthRoot(11, bf(1)).toString());
+    assertEquals("-2/11", bf(-2048,285311670611L).nthRoot(11, bf(1)).toString());
+    assertEquals("11/2", bf(2048,285311670611L).nthRoot(-11, bf(1)).toString());
+    assertEquals("-11/2", bf(-2048,285311670611L).nthRoot(-11, bf(1)).toString());
+    
+    //test some values where we don't have an exact answer. Use Math.pow() as a reference for expected results.
+    assertEquals(Math.sqrt(5.0/7.0), bf(5,7).nthRoot(2, bf(1,2)).doubleValue(), 0.5);
+    assertEquals(Math.sqrt(5.0/7.0), bf(5,7).nthRoot(2, bf(1,10)).doubleValue(), 0.1);
+    
+    assertEquals(Math.pow(123.456/789.012, 1.0/6.0), bf("123.456/789.012").nthRoot(6, bf(1,10000000)).doubleValue(), 0.0000001);
+    
+    //test when one of numerator or denominator has an exact root, but not the other
+    assertEquals(Math.pow(4.0/27.0, 1.0/2.0), bf("4/27").nthRoot(2, bf(1,10000000)).doubleValue(), 0.0000001);
+    assertEquals(Math.pow(4.0/27.0, 1.0/3.0), bf("4/27").nthRoot(3, bf(1,10000000)).doubleValue(), 0.0000001);
+  }
   
   @Test
   public void testGcdAndLcm() {
@@ -2312,6 +2373,121 @@ public class BigFractionTest {
   @Test(expected=ArithmeticException.class)
   public void testZeroNegativePow() {
     BigFraction.ZERO.pow(-3);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowIntMin() {
+    bf(11,17).pow(Integer.MIN_VALUE);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testZeroNegativePowFract() {
+    BigFraction.ZERO.pow(bf(-3), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractOverflow1() {
+    bf(11,17).pow(bf(0x100000000L, 1L), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractOverflow2() {
+    bf(11,17).pow(bf(1L, 0x100000000L), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractOverflow3() {
+    bf(11,17).pow(bf(0x100000000L, 0x100000001L), bf(1));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testPowFractEpsilonZero() {
+    bf(4).pow(bf(2), bf(0));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testPowFractEpsilonNegative() {
+    bf(4).pow(bf(2), bf(-1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractNegativeValEvenRoot1() {
+    bf(-4).pow(bf(-1, 2), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractNegativeValEvenRoot2() {
+    bf(-4).pow(bf(-1, 8), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractNegativeValEvenRoot3() {
+    bf(-49,25).pow(bf(3,2), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testPowFractNegativeValEvenRoot4() {
+    bf(-49,25).pow(bf(-3,2), bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootZeroRoot1() {
+    bf(4).nthRoot(0, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootZeroRoot2() {
+    bf(1).nthRoot(0, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootZeroRoot3() {
+    bf(0).nthRoot(0, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootZeroRoot4() {
+    bf(-3).nthRoot(0, bf(1));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testNthRootZeroEpsilon() {
+    bf(4).nthRoot(2, bf(0));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testNthRootNegativeEpsilon() {
+    bf(4).nthRoot(2, bf(-1));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testNthRootNullEpsilon() {
+    bf(4).nthRoot(2, null);
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootIntMin() {
+    bf(4).nthRoot(Integer.MIN_VALUE, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootEvenRoot1() {
+    bf(-4).nthRoot(2, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootEvenRoot2() {
+    bf(-4).nthRoot(-2, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootEvenRoot3() {
+    bf(-10000, 2401).nthRoot(4, bf(1));
+  }
+  
+  @Test(expected=ArithmeticException.class)
+  public void testNthRootEvenRoot4() {
+    bf(-10000, 2401).nthRoot(-4, bf(1));
   }
   
   @Test(expected=ArithmeticException.class)

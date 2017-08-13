@@ -965,20 +965,228 @@ public final class BigFraction extends Number implements Comparable<Number>
    * @return this^exponent
    * 
    * @throws ArithmeticException if {@code this == 0 && exponent < 0}.
+   * @throws ArithmeticException if {@code exponent == Integer.MIN_VALUE}.
    */
   public BigFraction pow(int exponent)
   {
-    if(exponent < 0 && isZero(this))
-      throw new ArithmeticException("Divide by zero: raising zero to negative exponent.");
+    if(exponent < 0) {
+      if(isZero(this))
+        throw new ArithmeticException("Divide by zero: raising zero to negative exponent.");
+      
+      //edge case: because we negate the exponent if it's negative, we would get into
+      //an infinite loop because -MIN_VALUE == MIN_VALUE
+      if (exponent == Integer.MIN_VALUE)
+        throw new ArithmeticException("Overflow: exponent cannot be negated");
+      
+      return new BigFraction(denominator.pow(-exponent), numerator.pow(-exponent), Reduced.YES);
+    }
     
     if(exponent == 0)
       return BigFraction.ONE;
+    else if (isZero(this))
+      return BigFraction.ZERO;
     else if (exponent == 1)
       return this;
-    else if (exponent > 0)
-      return new BigFraction(numerator.pow(exponent), denominator.pow(exponent), Reduced.YES);
     else
-      return new BigFraction(denominator.pow(-exponent), numerator.pow(-exponent), Reduced.YES);
+      return new BigFraction(numerator.pow(exponent), denominator.pow(exponent), Reduced.YES);
+  }
+  
+  /**
+   * Returns a value approximately equal to this^exponent, where the exponent itself may be a fraction.<br>
+   * <br>
+   * Equivalent to: {@code this.pow(exponent.getNumerator()).nthRoot(exponent.getDenominator(), epsilon)}<br>
+   * <br>
+   * <b>WARNING</b>: Read important notes in {@link #nthRoot(int n, BigFraction epsilon)}.
+   * 
+   * @param exponent power to raise this fraction to.
+   * @param epsilon value used in the <a href="https://en.wikipedia.org/wiki/Nth_root_algorithm">nth-root algorithm</a>.
+   * 
+   * @return an approximation of {@code this^(exponent)}
+   * 
+   * @throws ArithmeticException if {@code this == 0 && exponent < 0}.
+   * @throws ArithmeticException if {@code abs(exponent.numerator) >= Integer.MAX_VALUE || abs(exponent.numerator) >= Integer.MAX_VALUE}.
+   * @throws ArithmeticException if {@code this < 0 && (exponent.denominator is even)}.
+   * @throws IllegalArgumentException if {@code epsilon == null || epsilon <= 0}.
+   * 
+   * @see #pow(int n)
+   * @see #nthRoot(int n, BigFraction epsilon)
+   */
+  public BigFraction pow(BigFraction exponent, BigFraction epsilon)
+  {
+    if(exponent.signum() < 0) {
+      if(isZero(this))
+        throw new ArithmeticException("Divide by zero: raising zero to negative exponent.");
+      else
+        return this.reciprocal().pow(exponent.negate(), epsilon);
+    }
+    
+    if(exponent.numerator.bitLength() > 31 || exponent.denominator.bitLength() > 31)
+      throw new ArithmeticException("Overflow: numerator and denominator of exponent cannot exceed Integer.MAX_VALUE.");
+    
+    int expNum = exponent.numerator.intValue();
+    int expDen = exponent.denominator.intValue();
+    
+    if(expNum == 0)
+      return BigFraction.ONE;
+    if(isZero(this))
+      return BigFraction.ZERO;
+    if(expNum == 1 && expDen == 1)
+      return this;
+    
+    if(this.signum() < 0 && (expDen & 1) == 0)
+      throw new ArithmeticException("Cannot compute even root of a negative number.");
+    
+    //x^(a/b) == (x^a)^(1/b)
+    return this.pow(intValueExact(exponent.numerator)).nthRoot(intValueExact(exponent.denominator), epsilon);
+  }
+  
+  
+  /**
+   * Returns a value approximately equal to the nth root of this, i.e. {@code this^(1/n)}.
+   * If the solution to this is rational, then that exact value will be returned. Otherwise,
+   * returns an approximation.<br>
+   * <br>
+   * If this is negative, and n is odd, then the result is equivalent to: {@code -(this.nthRoot(n, epsilon))}.<br>
+   * If this is negative, and n is even, then an exception is thrown because there is no valid answer.<br>
+   * <br>
+   * <b>WARNING</b>: This implementation is very slow. The mathematics of this are beyond my
+   * comfort zone and any contributions would be appreciated. This implementation starts by
+   * doing something like a binary search to find the closest BigInteger to the nth root of
+   * the numerator and denominator, separately. If both of those are exact answers, then that
+   * value is returned. Otherwise, it is used as the initial guess to the
+   * <a href="https://en.wikipedia.org/wiki/Nth_root_algorithm">nth-root algorithm</a>.
+   * 
+   * @param n root to find.
+   * @param epsilon value used in the <a href="https://en.wikipedia.org/wiki/Nth_root_algorithm">nth-root algorithm</a>.
+   * 
+   * @return an approximation of {@code this^(1/n)}
+   * 
+   * @throws ArithmeticException if {@code n == 0}.
+   * @throws ArithmeticException if {@code n == Integer.MIN_VALUE}.
+   * @throws ArithmeticException if {@code this < 0 && (n is even)}.
+   * @throws IllegalArgumentException if {@code epsilon == null || epsilon <= 0}.
+   */
+  public BigFraction nthRoot(int n, BigFraction epsilon)
+  {
+    if(n == 0)
+      throw new ArithmeticException("Divide by zero: zeroth root is not defined.");
+    if(n == Integer.MIN_VALUE)
+      throw new ArithmeticException("Overflow: n cannot be negated");
+    if(n < 0)
+      return this.reciprocal().nthRoot(-n, epsilon);
+    
+    if(this.signum() < 0)
+    {
+      if((n & 1) == 0)
+        throw new ArithmeticException("Cannot compute even root of a negative number.");
+      return this.negate().nthRoot(n, epsilon).negate();
+    }
+    
+    if(epsilon == null || epsilon.signum() <= 0)
+      throw new IllegalArgumentException("Epsilon must be positive");
+    
+    if(isZero(this))
+      return BigFraction.ZERO;
+    if(n == 1)
+      return this;
+    if(this.equals(BigFraction.ONE))
+      return this;
+    
+    //First, get the closest integer to the root of the numerator and the denominator for our first guess.
+    Object[] guessNumParts = nthRootInt(this.numerator, n);
+    Object[] guessDenParts = nthRootInt(this.denominator, n);
+    BigFraction guess = valueOf((BigInteger) guessNumParts[0], (BigInteger) guessDenParts[0]);
+    
+    //If we got exact roots for numerator and denominator, then we know the guess is exact. Otherwise we must use 
+    if(guessNumParts[1].equals(Boolean.TRUE) && guessDenParts[1].equals(Boolean.TRUE))
+      return guess;
+    
+    //implementation of nth-root algorithm: https://en.wikipedia.org/wiki/Nth_root_algorithm
+    BigFraction x = guess;
+    while(true)
+    {
+      BigFraction diff = this.divide(x.pow(n-1)).subtract(x).divide(n);
+      x = x.add(diff);
+      if(diff.abs().compareTo(epsilon) < 0)
+        break;
+    }
+    
+    return x;
+  }
+  
+  /**
+   * Helper function to calculate closest integer to the nth root of the given integer.
+   * If there is an exact answer, this function will return it.
+   * @returns Object array- first is a BigInteger, second is a boolean flag to indicate whether or not this was an exact answer.
+   */
+  private static Object[] nthRootInt(BigInteger a, int n)
+  {
+    Object[] ret = new Object[]{null, Boolean.TRUE};
+    
+    if(a.equals(BigInteger.ZERO)) {
+      ret[0] = BigInteger.ZERO;
+      return ret;
+    }
+    if(n == 1 || a.equals(BigInteger.ONE)) {
+      ret[0] = a;
+      return ret;
+    }
+    
+    // solve for x:  x^n = a
+    // start by computing a lower/upper bound on x
+    BigInteger lowerX = BigInteger.ONE;
+    BigInteger lowerPow = BigInteger.ONE;
+    
+    BigInteger upperX = BIGINT_TWO;
+    BigInteger upperPow = upperX.pow(n);
+    
+    while(upperPow.compareTo(a) < 0) {
+      lowerX = upperX;
+      lowerPow = upperPow;
+      upperX = lowerX.multiply(BIGINT_TWO);
+      upperPow = upperX.pow(n);
+    }
+    
+    //if we happened to find the exact answer, just return it
+    if(upperPow.equals(a)) {
+      ret[0] = upperX;
+      return ret;
+    }
+    
+    //now we know lowerX < x < upperX
+    //next do binary search between lowerX and upperX
+    while(true) {
+      BigInteger testX = lowerX.add(upperX).divide(BIGINT_TWO);
+      if(testX.equals(lowerX) || testX.equals(upperX))
+        break;
+      
+      BigInteger testPow = testX.pow(n);
+      if(testPow.equals(a)) {
+        //we found an exact answer
+        ret[0] = testX;
+        return ret;
+      }
+      else if(testPow.compareTo(a) > 0) {
+        //still too high so set upper to the test value
+        upperX = testX;
+        upperPow = testPow;
+      }
+      else {
+        //still too low
+        lowerX = testX;
+        lowerPow = testPow;
+      }
+    }
+    
+    //we didn't get an exact answer, but we know the two integers closest to the exact value.
+    //now we just need to figure out which is closer and return that
+    ret[1] = Boolean.FALSE;
+    if(a.subtract(lowerPow).compareTo(upperPow.subtract(a)) < 0)
+      ret[0] = lowerX;
+    else
+      ret[0] = upperX;
+    
+    return ret;
   }
   
   /**
