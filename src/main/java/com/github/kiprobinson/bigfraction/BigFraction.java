@@ -1037,7 +1037,7 @@ public final class BigFraction extends Number implements Comparable<Number>
       throw new ArithmeticException("Cannot compute even root of a negative number.");
     
     //x^(a/b) == (x^a)^(1/b)
-    return this.pow(exponent.numerator.intValueExact()).nthRoot(exponent.denominator.intValueExact(), epsilon);
+    return this.pow(intValueExact(exponent.numerator)).nthRoot(intValueExact(exponent.denominator), epsilon);
   }
   
   
