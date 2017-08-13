@@ -503,6 +503,7 @@ public class LongFractionTest {
   public void testPow() {
     //Note: 0^0 returns 1 (just like Math.pow())
     assertEquals("(0/1)^(0)", "1/1", lf(0,1).pow(0).toString());
+    assertEquals("(0/1)^(10)", "0/1", lf(0,1).pow(10).toString());
     assertEquals("(11/17)^(5)", "161051/1419857", lf(11,17).pow(5).toString());
     assertEquals("(11/17)^(-5)", "1419857/161051", lf(11,17).pow(-5).toString());
     assertEquals("(5/8)^(0)", "1/1", lf(5,8).pow(0).toString());
