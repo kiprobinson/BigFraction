@@ -13,7 +13,9 @@ import java.util.concurrent.atomic.LongAdder;
 import com.github.kiprobinson.bigfraction.util.DoubleUtil;
 
 /**
- * Fraction interface
+ * Extract Fraction interface, for
+ *    1. define the API;
+ *    2. encapsulate shared code 
  * 
  * @author Wayne Zhang
  */
