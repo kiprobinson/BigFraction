@@ -552,10 +552,10 @@ public class LongFractionTest {
         assertEquals("lcm(" + a + "," + b + ")", exp_lcm, act_lcm);
         
         //make sure basic properties of gcd/lcm hold up
-        assertEquals("(" + a + ")/(" + exp_gcd + ") is not an integer!", 1L, a.divide(act_gcd).getDenominator());
-        assertEquals("(" + b + ")/(" + exp_gcd + ") is not an integer!", 1L, a.divide(act_gcd).getDenominator());
-        assertEquals("(" + exp_lcm + ")/(" + a + ") is not an integer!", 1L, exp_lcm.divide(a).getDenominator());
-        assertEquals("(" + exp_lcm + ")/(" + b + ") is not an integer!", 1L, exp_lcm.divide(b).getDenominator());
+        assertEquals("(" + a + ")/(" + exp_gcd + ") is not an integer!", (Long)1L, a.divide(act_gcd).getDenominator());
+        assertEquals("(" + b + ")/(" + exp_gcd + ") is not an integer!", (Long)1L, a.divide(act_gcd).getDenominator());
+        assertEquals("(" + exp_lcm + ")/(" + a + ") is not an integer!", (Long)1L, exp_lcm.divide(a).getDenominator());
+        assertEquals("(" + exp_lcm + ")/(" + b + ") is not an integer!", (Long)1L, exp_lcm.divide(b).getDenominator());
         assertEquals("|(" + a + ")*(" + b + ")| != (" + exp_lcm + ")*(" + exp_gcd + ")", a.multiply(b), exp_gcd.multiply(exp_lcm));
         
         assertEquals("gcd(" + a + "," + b + ") != gcd(" + b + "," + a + ")", act_gcd, b.gcd(a));
@@ -1467,14 +1467,14 @@ public class LongFractionTest {
     //smallest positive double that can fit in a LongFraction: 1 / 2^62
     final double MIN_DBL_LF = DoubleUtil.getDouble(0, -62, 0, false);
     f = lf(MIN_DBL_LF);
-    assertEquals(1, f.getNumerator());
-    assertEquals(0x4000000000000000L, f.getDenominator());
+    assertEquals(new Long(1), f.getNumerator());
+    assertEquals(0x4000000000000000L, (Object)f.getDenominator());
     assertEquals(Double.doubleToRawLongBits(MIN_DBL_LF), Double.doubleToRawLongBits(f.doubleValueExact()));
     
     //since sign is carried by numerator, negation won't change anything
     f = lf(-MIN_DBL_LF);
-    assertEquals(-1, f.getNumerator());
-    assertEquals(0x4000000000000000L, f.getDenominator());
+    assertEquals(new Long(-1), f.getNumerator());
+    assertEquals(0x4000000000000000L, (Object)f.getDenominator());
     assertEquals(Double.doubleToRawLongBits(-MIN_DBL_LF), Double.doubleToRawLongBits(f.doubleValueExact()));
     
     //largest positive double that can fit in a LongFraction.
@@ -1484,22 +1484,22 @@ public class LongFractionTest {
     //Denominator is just 1; anything larger would make the value of the fraction smaller.
     final double MAX_DBL_LF = DoubleUtil.getDouble(0, 62, DoubleUtil.MAX_MANTISSA, false);
     f = lf(MAX_DBL_LF);
-    assertEquals(0x7ffffffffffffc00L, f.getNumerator());
-    assertEquals(Long.MAX_VALUE & ~0x3ffL, f.getNumerator()); //validate my assumptions...
-    assertEquals(1, f.getDenominator());
+    assertEquals(0x7ffffffffffffc00L, (Object)f.getNumerator());
+    assertEquals(Long.MAX_VALUE & ~0x3ffL, (Object)f.getNumerator()); //validate my assumptions...
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Double.doubleToRawLongBits(MAX_DBL_LF), Double.doubleToRawLongBits(f.doubleValueExact()));
     
     f = lf(-MAX_DBL_LF);
-    assertEquals(0x8000000000000400L, f.getNumerator());
-    assertEquals(1, f.getDenominator());
+    assertEquals(0x8000000000000400L, (Object)f.getNumerator());
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Double.doubleToRawLongBits(-MAX_DBL_LF), Double.doubleToRawLongBits(f.doubleValueExact()));
     
     //largest (greatest absolute value) negative double that can fit in a LongFraction.
     //Long.MIN_VALUE only has 1 significant bit (it is equal to -(2^63), so that can be stored exactly as a double
     final double MAX_NEG_DBL_LF = DoubleUtil.getDouble(1, 63, 0, false);
     f = lf(MAX_NEG_DBL_LF);
-    assertEquals(Long.MIN_VALUE, f.getNumerator());
-    assertEquals(1, f.getDenominator());
+    assertEquals(Long.MIN_VALUE, (Object)f.getNumerator());
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Double.doubleToRawLongBits(MAX_NEG_DBL_LF), Double.doubleToRawLongBits(f.doubleValueExact()));
   }
   
@@ -1574,14 +1574,14 @@ public class LongFractionTest {
     //smallest positive float that can fit in a LongFraction: 1 / 2^62
     final float MIN_FLT_LF = (float)DoubleUtil.getDouble(0, -62, 0, false);
     f = lf(MIN_FLT_LF);
-    assertEquals(1, f.getNumerator());
-    assertEquals(0x4000000000000000L, f.getDenominator());
+    assertEquals(new Long(1), f.getNumerator());
+    assertEquals(0x4000000000000000L, (Object)f.getDenominator());
     assertEquals(Float.floatToRawIntBits(MIN_FLT_LF), Float.floatToRawIntBits(f.floatValueExact()));
     
     //since sign is carried by numerator, negation won't change anything
     f = lf(-MIN_FLT_LF);
-    assertEquals(-1, f.getNumerator());
-    assertEquals(0x4000000000000000L, f.getDenominator());
+    assertEquals(new Long(-1), f.getNumerator());
+    assertEquals(0x4000000000000000L, (Object)f.getDenominator());
     assertEquals(Float.floatToRawIntBits(-MIN_FLT_LF), Float.floatToRawIntBits(f.floatValueExact()));
     
     //largest positive float that can fit in a LongFraction.
@@ -1591,22 +1591,22 @@ public class LongFractionTest {
     //Denominator is just 1; anything larger would make the value of the fraction smaller.
     final float MAX_FLT_LF = FloatUtil.getFloat(0, 62, FloatUtil.MAX_MANTISSA, false);
     f = lf(MAX_FLT_LF);
-    assertEquals(0x7fffff8000000000L, f.getNumerator());
-    assertEquals(Long.MAX_VALUE & ~0x7fffffffffL, f.getNumerator()); //validate my assumptions...
-    assertEquals(1, f.getDenominator());
+    assertEquals(0x7fffff8000000000L, (Object)f.getNumerator());
+    assertEquals(Long.MAX_VALUE & ~0x7fffffffffL, (Object)f.getNumerator()); //validate my assumptions...
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Float.floatToRawIntBits(MAX_FLT_LF), Float.floatToRawIntBits(f.floatValueExact()));
     
     f = lf(-MAX_FLT_LF);
-    assertEquals(0x8000008000000000L, f.getNumerator());
-    assertEquals(1, f.getDenominator());
+    assertEquals(0x8000008000000000L, (Object)f.getNumerator());
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Float.floatToRawIntBits(-MAX_FLT_LF), Float.floatToRawIntBits(f.floatValueExact()));
     
     //largest (greatest absolute value) negative float that can fit in a LongFraction.
     //Long.MIN_VALUE only has 1 significant bit (it is equal to -(2^63), so that can be stored exactly as a float
     final float MAX_NEG_FLT_LF = FloatUtil.getFloat(1, 63, 0, false);
     f = lf(MAX_NEG_FLT_LF);
-    assertEquals(Long.MIN_VALUE, f.getNumerator());
-    assertEquals(1, f.getDenominator());
+    assertEquals(Long.MIN_VALUE, (Object)f.getNumerator());
+    assertEquals(new Long(1), f.getDenominator());
     assertEquals(Float.floatToRawIntBits(MAX_NEG_FLT_LF), Float.floatToRawIntBits(f.floatValueExact()));
   }
   
@@ -2121,7 +2121,7 @@ public class LongFractionTest {
   
   @Test(expected=IllegalArgumentException.class)
   public void testRoundToDenominatorNull() {
-    lf(4,3).roundToDenominator(7, null);
+    lf(4,3).roundToDenominator(7l, null);
   }
   
   @Test(expected=IllegalArgumentException.class)

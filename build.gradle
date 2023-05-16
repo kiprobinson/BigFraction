@@ -13,14 +13,14 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
 apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'eclipse'
 
 //jacoco: code coverage tool. Binary file is always generated (build/jacoco/*.exec).
 //To generate HTML report, run:  gradle jacoco
 apply plugin: 'jacoco'
-
-// Java compatibility. 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+    
+sourceCompatibility=1.8
+targetCompatibility=1.8
 
 group = "com.github.kiprobinson"
 archivesBaseName = "bigfraction"
@@ -88,13 +88,14 @@ uploadArchives {
     mavenDeployer {
       beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
       
+      /*
       repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
         authentication(userName: ossrhUsername, password: ossrhPassword)
       }
       
       snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
         authentication(userName: ossrhUsername, password: ossrhPassword)
-      }
+      }*/
       
       pom.project {
         name 'Big Fraction'
@@ -128,17 +129,19 @@ uploadArchives {
   }
 }
 
+/*
 nexusStaging {
   packageGroup = 'com.github.kiprobinson'
   stagingProfileId = '5ff5b050a01221'
   username = ossrhUsername
   password = ossrhPassword
   //numberOfRetries = 3
-}
+}*/
 
 jacoco {
   toolVersion = "0.7.+"
 }
+
 jacocoTestReport {
   dependsOn test
   reports {
