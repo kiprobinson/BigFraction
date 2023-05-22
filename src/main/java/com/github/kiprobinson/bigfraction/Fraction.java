@@ -15,27 +15,44 @@ import com.github.kiprobinson.bigfraction.util.DoubleUtil;
 /**
  * Extract Fraction interface, for
  *    1. define the API;
- *    2. encapsulate shared code 
+ *    2. encapsulate shared code, make implementations DRY.
  * 
  * @author Wayne Zhang
  */
 public interface Fraction<V extends Number, T extends Fraction<V, T>> {
-	static enum Reduced {
-		YES, NO
-	};
+    // Enumerations
+    static enum Reduced {
+            YES, NO
+    };
 
-	static enum FareyMode {
-		NEXT, PREV, CLOSEST
-	};
+    static enum FareyMode {
+            NEXT, PREV, CLOSEST
+    };
 
-	static enum RemainderMode {
-		QUOTIENT, REMAINDER, BOTH
-	};
+    static enum RemainderMode {
+            QUOTIENT, REMAINDER, BOTH
+    };
+    
+    /**
+     * Convenient builder of fraction with string arithmetic expression, e.g
+     * 1/3. 
+     * 
+     * Precision of LongFraction is good enough in most cases; When higher
+     * precision required, use BigFraction directly
+     * 
+     * @param expression fraction arithmetic expression
+     * @return LongFraction instance
+     */
+    static Fraction<? extends Number, ? extends Fraction<?, ?>> valueOf(String expression){
+        return LongFraction.valueOf(expression);
+    }
 	
    /*
-    * Check if a number is Java integer type, that is
-    *   byte, short, int, long, AtomicInteger, AmoticLong, 
-    *   LongAdder and LongAccumlator
+    * Check if a number is Java integer type, that is byte, short, int, long, AtomicInteger, AmoticLong, 
+    * LongAdder and LongAccumlator
+    *   
+    * @param n number to check
+    * @return true if number is Java integer
     */
     static boolean isJavaInteger(Number n){
         return n instanceof Long || 
@@ -49,14 +66,18 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
     }	
     
     /**
-     * Returns true if n is a type that can be converted to a double without loss of precision (Float, Double, DoubleAdder, and DoubleAccumulator)
+     * Returns true if n is a type that can be converted to a double without 
+     * loss of precision (Float, Double, DoubleAdder, and DoubleAccumulator)
+     * 
+     * @param n number to check
+     * @return true if number is float/double
      */
     static boolean isFloat(Number n)
     {
       return n instanceof Double ||
-      	   n instanceof Float || 
-      	   n instanceof DoubleAdder || 
-      	   n instanceof DoubleAccumulator;
+      	     n instanceof Float || 
+      	     n instanceof DoubleAdder || 
+      	     n instanceof DoubleAccumulator;
     }
     
     /**
@@ -66,9 +87,13 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
      * <br>
      * For LongFraction, returns true if denominator is 1.<br>
      * <br>
-     * For double, float, DoubleAdder, DoubleAccumulator, and BigDecimal, analyzes the data. Otherwise returns false.<br>
+     * For double, float, DoubleAdder, DoubleAccumulator, and BigDecimal, 
+     * analyzes the data. Otherwise returns false.<br>
      * <br>
      * Used to determine if a Number is appropriate to be passed into toBigInteger() method.
+     * 
+     * @param n number to check
+     * @return true if number is integer
      */
     static boolean isInt(Number n)
     {
@@ -93,7 +118,7 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
       if(Double.isInfinite(d) || Double.isNaN(d))
         return false;
       
-      return (DoubleUtil.getExponent(d) >= 52);
+      return DoubleUtil.getExponent(d) >= 52;
     }
     
     // Exception helpers
@@ -104,7 +129,7 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
     } 
     
     // short hand of new ArithmeticException
-    static ArithmeticException arithExp(Object... msgs){
+    static ArithmeticException arithmeticException(Object... msgs){
         StringBuilder message = new StringBuilder();
         for(Object msg : msgs){
             message.append(msg);
@@ -113,16 +138,127 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
         return new ArithmeticException(message.toString());
     }    
   
+    /**
+     * Returns a byte representation of this fraction. This value is
+     * obtained by integer division of numerator by denominator. If
+     * the value is greater than {@link Byte#MAX_VALUE}, {@link Byte#MAX_VALUE} will be
+     * returned. Similarly, if the value is below {@link Byte#MIN_VALUE},
+     * {@link Byte#MIN_VALUE} will be returned.
+     * 
+     * @return byte representation of this fraction
+     */
+     byte byteValue();
+          
+    /**
+     * Returns an exact byte representation of this fraction.
+     * 
+     * @return exact byte representation of this fraction
+     * @throws ArithmeticException if this has a nonzero fractional
+     *                             part, or will not fit in a byte.
+     */
     byte byteValueExact();
 
+    /**
+     * Returns a short representation of this fraction. This value is
+     * obtained by integer division of numerator by denominator. If
+     * the value is greater than {@link Short#MAX_VALUE}, {@link Short#MAX_VALUE} will be
+     * returned. Similarly, if the value is below {@link Short#MIN_VALUE},
+     * {@link Short#MIN_VALUE} will be returned.
+     * 
+     * @return short representation of this fraction
+     */
+    short shortValue();
+    
+    /**
+     * Returns an exact short representation of this fraction.
+     * 
+     * @return exact short representation of this fraction
+     * @throws ArithmeticException if this has a nonzero fractional
+     *                             part, or will not fit in a short.
+     */    
     short shortValueExact();
 
+    /**
+     * Returns an int representation of this fraction. This value is
+     * obtained by integer division of numerator by denominator. If
+     * the value is greater than {@link Integer#MAX_VALUE}, {@link Integer#MAX_VALUE} will be
+     * returned. Similarly, if the value is below {@link Integer#MIN_VALUE},
+     * {@link Integer#MIN_VALUE} will be returned.
+     * 
+     * @return int representation of this fraction
+     */
+    int intValue();
+    
+    /**
+     * Returns an exact int representation of this fraction.
+     * 
+     * @return exact int representation of this fraction
+     * @throws ArithmeticException if this has a nonzero fractional
+     *                             part, or will not fit in an int.
+     */    
     int intValueExact();
 
+    /**
+     * Returns a long representation of this fraction. This value is
+     * obtained by integer division of numerator by denominator. If
+     * the value is greater than {@link Long#MAX_VALUE}, {@link Long#MAX_VALUE} will be
+     * returned. Similarly, if the value is below {@link Long#MIN_VALUE},
+     * {@link Long#MIN_VALUE} will be returned.
+     * 
+     * @return long representation of this fraction
+     */
+    long longValue();  
+  
+    /**
+     * Returns an exact long representation of this fraction.
+     * 
+     * 
+     * @return exact long representation of this fraction
+     * @throws ArithmeticException if this has a nonzero fractional
+     *                             part, or will not fit in a long.
+     */    
     long longValueExact();
 
+    /**
+     * Returns the value of this fraction. If this value is beyond the
+     * range of a float, {@link Float#POSITIVE_INFINITY} or {@link Float#NEGATIVE_INFINITY} will
+     * be returned.
+     * 
+     * @return float representation of this fraction
+     */
+    float floatValue();
+    
+    /**
+     * Returns an exact float representation of this fraction.<br>
+     * <br>
+     * <b>Warning</b>: Current algorithm is simply to convert to float, then convert back to
+     * BigFraction, then make sure the copy of copy is identical to the original. This is not
+     * optimized, and fails on some edge cases. This will be addressed in future updates.
+     * 
+     * @return exact float representation of this fraction
+     * @throws ArithmeticException if this cannot be represented exactly as a float.
+     */    
     float floatValueExact();
 
+    /**
+     * Returns the value of this fraction. If this value is beyond the
+     * range of a double, {@link Double#POSITIVE_INFINITY} or {@link Double#NEGATIVE_INFINITY} will
+     * be returned.
+     * 
+     * @return double representation of this fraction
+     */
+     double doubleValue();
+          
+    /**
+     * Returns an exact double representation of this fraction.<br>
+     * <br>
+     * <b>Warning</b>: Current algorithm is simply to convert to double, then convert back to
+     * BigFraction, then make sure the copy of copy is identical to the original. This is not
+     * optimized, and fails on some edge cases. This will be addressed in future updates.
+     * 
+     * @return exact double representation of this fraction
+     * @throws ArithmeticException if this cannot be represented exactly as a double.
+     */    
     double doubleValueExact();
     
     /**
@@ -565,7 +701,7 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
      * @throws IllegalArgumentException If newDenominator is null.
      * @throws ArithmeticException If newDenominator is zero or negative.
      *
-     * @see #roundToDenominator(BigInteger, RoundingMode)
+     * {@link #roundToDenominator(Number, RoundingMode) roundToDenominator(&lt;V&gt;, RoundingMode)}
      */
     V roundToDenominator(V newDenominator);
 
@@ -695,4 +831,83 @@ public interface Fraction<V extends Number, T extends Fraction<V, T>> {
      * @throws IllegalArgumentException if {@code epsilon == null || epsilon <= 0}.
      */
 //    T nthRoot(int n, T epsilon);
+    
+	/**
+	* Returns string representation of this, in the form of numerator/denominator, with numerator
+	* and denominator represented in the given radix. The digit-to-character mapping provided by
+	* {@link Character#forDigit} is used.
+	* 
+	* @param radix radix of the String representation. If the radix is outside the range from
+	*              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, it will default to 10
+	*              (as is the case for Integer.toString)
+	* @return This fraction, represented as a string in the format {@code numerator/denominator}.
+	*/
+	String toString(int radix);
+
+	/**
+	* Converts the fraction to a radixed string with the given number of fraction digits
+	* after the radix point. Rounds using HALF_UP rounding mode. 
+	* The digit-to-character mapping provided by {@link Character#forDigit} is used.
+	* 
+	* @param radix radix of the String representation. If the radix is outside the range from
+	*              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, 
+	*              it will default to 10 (as is the case for Integer.toString)
+	* @param numFractionalDigits number of digits to be displayed after the radix point.
+	* @return radixed string representation of this fraction.
+	*/
+	String toRadixedString(int radix, int numFractionalDigits);
+
+	/**
+	* Returns string representation of this object as a mixed fraction.
+	* For example, 4/3 would be "1 1/3". For negative fractions, the
+	* sign is carried only by the whole number and assumed to be distributed
+	* across the whole value. For example, -4/3 would be "-1 1/3". For
+	* fractions that are equal to whole numbers, only the whole number will
+	* be displayed. For fractions which have absolute value less than 1,
+	* this will be equivalent to {@link #toString}.
+	* 
+	* @return String representation of this fraction as a mixed fraction.
+	*/
+	String toMixedString();  
+
+	/**
+	* Returns string representation of this object as a mixed fraction.
+	* For example, 4/3 would be "1 1/3". For negative fractions, the
+	* sign is carried only by the whole number and assumed to be distributed
+	* across the whole value. For example, -4/3 would be "-1 1/3". For
+	* fractions that are equal to whole numbers, only the whole number will
+	* be displayed. For fractions which have absolute value less than 1,
+	* this will be equivalent to {@link #toString(int radix)}.<br>
+	* <br>
+	* The numbers are represented in the given radix. The digit-to-character mapping provided by
+	* {@link Character#forDigit} is used.
+	* 
+	* @param radix radix of the String representation. If the radix is outside the range from
+	*              {@link Character#MIN_RADIX} to {@link Character#MAX_RADIX} inclusive, 
+	*              it will default to 10 (as is the case for Integer.toString)
+	* @return String representation of this fraction as a mixed fraction.
+	*/
+	String toMixedString(int radix);  
+
+	/**
+	* Returns decimal string representation of the fraction with the given number
+	* of decimal digits using roundingMode ROUND_HALF_UP.
+	* 
+	* @param numDecimalDigits number of digits to be displayed after the decimal
+	* @return decimal string representation of this fraction.
+	* 
+	* @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
+	*/
+	String toDecimalString(int numDecimalDigits);
+
+	/**
+	* Converts the fraction to a radixed string with repeating digits. The
+	* repeating digits are indicated by parenthesis: 1/9 becomes 0.(1)<br>
+	* <br>
+	* Equivalent to {@code toRepeatingString(10, false)}
+	* 
+	* @return radixed string representation of this fraction with repeating 
+	*         digits denoted in parenthesis.
+	*/
+	String toRepeatingDigitString(); 
 }

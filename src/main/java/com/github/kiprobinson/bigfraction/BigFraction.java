@@ -1,6 +1,6 @@
 package com.github.kiprobinson.bigfraction;
 
-import static com.github.kiprobinson.bigfraction.Fraction.arithExp;
+import static com.github.kiprobinson.bigfraction.Fraction.arithmeticException;
 import static com.github.kiprobinson.bigfraction.Fraction.isFloat;
 import static com.github.kiprobinson.bigfraction.Fraction.isInt;
 import static com.github.kiprobinson.bigfraction.Fraction.isJavaInteger;
@@ -41,20 +41,15 @@ public final class BigFraction extends Number
   private final static BigInteger BIGINT_FIVE = BigInteger.valueOf(5);
   
   /** The value 0/1. */
-  public final static BigFraction ZERO = 
-          new BigFraction(BigInteger.ZERO, BigInteger.ONE, Reduced.YES);
+  public final static BigFraction ZERO = new BigFraction(BigInteger.ZERO, BigInteger.ONE, Reduced.YES);
   /** The value 1/1. */
-  public final static BigFraction ONE = 
-          new BigFraction(BigInteger.ONE, BigInteger.ONE, Reduced.YES);
+  public final static BigFraction ONE = new BigFraction(BigInteger.ONE, BigInteger.ONE, Reduced.YES);
   /** The value 1/2. */
-  public final static BigFraction ONE_HALF = 
-          new BigFraction(BigInteger.ONE, BIGINT_TWO, Reduced.YES);
+  public final static BigFraction ONE_HALF =  new BigFraction(BigInteger.ONE, BIGINT_TWO, Reduced.YES);
   /** The value 1/10. */
-  public final static BigFraction ONE_TENTH = 
-          new BigFraction(BigInteger.ONE, BigInteger.TEN, Reduced.YES);
+  public final static BigFraction ONE_TENTH = new BigFraction(BigInteger.ONE, BigInteger.TEN, Reduced.YES);
   /** The value 10/1. */
-  public final static BigFraction TEN = 
-          new BigFraction(BigInteger.TEN, BigInteger.ONE, Reduced.YES);
+  public final static BigFraction TEN = new BigFraction(BigInteger.TEN, BigInteger.ONE, Reduced.YES);
   
 
   /**
@@ -86,6 +81,7 @@ public final class BigFraction extends Number
   public BigFraction(Number numerator, Number denominator)
   {
     BigFraction bf = valueOf(numerator, denominator);
+    
     this.numerator = bf.numerator;
     this.denominator = bf.denominator;
   }
@@ -719,7 +715,7 @@ public final class BigFraction extends Number
     if(divisionMode == null)
       throw new IllegalArgumentException("Null argument");
     else if(isZero(nb))
-      throw arithExp("Divide by zero.");
+      throw arithmeticException("Divide by zero.");
     else if(isZero(na))
       return divideAndRemainderReturner(
               BigInteger.ZERO, BigFraction.ZERO, remainderMode);
@@ -821,7 +817,6 @@ public final class BigFraction extends Number
     //We know that a/b = num/den, and q = q". So we are left with:
     //  (r"/b)=(r/den)
     //  r" = r * b / den = (r * b.n)/(b.d * den)
-    
     BigFraction rFract = 
         r == null ? null : new BigFraction(
                                 r.multiply(b.numerator), 
@@ -1067,12 +1062,12 @@ public final class BigFraction extends Number
   {
     if(exponent < 0) {
       if(isZero(this))
-        throw arithExp("Divide by zero: raising zero to negative exponent.");
+        throw arithmeticException("Divide by zero: raising zero to negative exponent.");
       
       //edge case: because we negate the exponent if it's negative, 
       //we would get into an infinite loop because -MIN_VALUE == MIN_VALUE
       if (exponent == Integer.MIN_VALUE)
-        throw arithExp("Overflow: exponent cannot be negated");
+        throw arithmeticException("Overflow: exponent cannot be negated");
       
       return new BigFraction(
               denominator.pow(-exponent), 
@@ -1119,14 +1114,14 @@ public final class BigFraction extends Number
   {
     if(exponent.signum() < 0) {
       if(isZero(this))
-        throw arithExp("Divide by zero: raising zero to negative exponent.");
+        throw arithmeticException("Divide by zero: raising zero to negative exponent.");
 
       return this.reciprocal().pow(exponent.negate(), epsilon);
     }
     
     if(exponent.numerator.bitLength() > 31 || 
        exponent.denominator.bitLength() > 31)
-      throw arithExp("Overflow: numerator and denominator of ", 
+      throw arithmeticException("Overflow: numerator and denominator of ", 
               "exponent cannot exceed Integer.MAX_VALUE."
       );
     
@@ -1141,7 +1136,7 @@ public final class BigFraction extends Number
       return this;
     
     if(this.signum() < 0 && (expDen & 1) == 0)
-      throw arithExp("Cannot compute even root of a negative number.");
+      throw arithmeticException("Cannot compute even root of a negative number.");
     
     //x^(a/b) == (x^a)^(1/b)
     return this.pow(exponent.numerator.intValueExact())
@@ -1177,10 +1172,10 @@ public final class BigFraction extends Number
   public BigFraction nthRoot(int n, BigFraction epsilon)
   {
     if(n == 0)
-      throw arithExp("Divide by zero: zeroth root is not defined.");
+      throw arithmeticException("Divide by zero: zeroth root is not defined.");
     
     if(n == Integer.MIN_VALUE)
-      throw arithExp("Overflow: n cannot be negated");
+      throw arithmeticException("Overflow: n cannot be negated");
     
     if(n < 0)
       return this.reciprocal().nthRoot(-n, epsilon);
@@ -1188,7 +1183,7 @@ public final class BigFraction extends Number
     if(this.signum() < 0)
     {
       if((n & 1) == 0)
-        throw arithExp("Cannot compute even root of a negative number.");
+        throw arithmeticException("Cannot compute even root of a negative number.");
       
       return this.negate().nthRoot(n, epsilon).negate();
     }
@@ -1317,7 +1312,7 @@ public final class BigFraction extends Number
   public BigFraction reciprocal()
   {
     if(isZero(this))
-      throw arithExp("Divide by zero: reciprocal of zero.");
+      throw arithmeticException("Divide by zero: reciprocal of zero.");
     
     return new BigFraction(denominator, numerator, Reduced.YES);
   }
@@ -1602,7 +1597,7 @@ public final class BigFraction extends Number
     
     //If the denominator was not 1, rounding will be required.
     if(roundingMode == RoundingMode.UNNECESSARY)
-      throw arithExp("Rounding necessary");
+      throw arithmeticException("Rounding necessary");
     
     final Set<RoundingMode> ROUND_HALF_MODES = 
             EnumSet.of(RoundingMode.HALF_UP, 
@@ -1733,7 +1728,7 @@ public final class BigFraction extends Number
     BigFraction f = valueOf(n);
     
     if(f.signum() <= 0)
-      throw arithExp("newDenominator must be positive");
+      throw arithmeticException("newDenominator must be positive");
     
     return product(this.divide(f).round(roundingMode), f);
   }
@@ -1789,7 +1784,7 @@ public final class BigFraction extends Number
       throw new IllegalArgumentException("Null argument");
     
     if(newDenominator.compareTo(BigInteger.ZERO) <= 0)
-      throw arithExp("newDenominator must be positive");
+      throw arithmeticException("newDenominator must be positive");
     
     //n1/d1 = x/d2  =>   x = (n1/d1)*d2
     return this.multiply(newDenominator).round(roundingMode);
@@ -1818,6 +1813,7 @@ public final class BigFraction extends Number
    *              (as is the case for Integer.toString)
    * @return This fraction, represented as a string in the format {@code numerator/denominator}.
    */
+  @Override
   public String toString(int radix)
   {
     return toString(radix, false);
@@ -1869,6 +1865,7 @@ public final class BigFraction extends Number
    * 
    * @return String representation of this fraction as a mixed fraction.
    */
+  @Override
   public String toMixedString()
   {
     return toMixedString(10);
@@ -1892,6 +1889,7 @@ public final class BigFraction extends Number
    *              it will default to 10 (as is the case for Integer.toString)
    * @return String representation of this fraction as a mixed fraction.
    */
+  @Override
   public String toMixedString(int radix)
   {
     if(denominator.equals(BigInteger.ONE))
@@ -1916,6 +1914,7 @@ public final class BigFraction extends Number
    * 
    * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
+  @Override
   public String toDecimalString(int numDecimalDigits)
   {
     return toRadixedString(10, numDecimalDigits, RoundingMode.HALF_UP);
@@ -1949,6 +1948,7 @@ public final class BigFraction extends Number
    * @param numFractionalDigits number of digits to be displayed after the radix point.
    * @return radixed string representation of this fraction.
    */
+  @Override
   public String toRadixedString(int radix, int numFractionalDigits)
   {
     return toRadixedString(radix, numFractionalDigits, RoundingMode.HALF_UP);
@@ -2071,6 +2071,7 @@ public final class BigFraction extends Number
    * 
    * @see #toRepeatingDigitString(int, boolean)
    */
+  @Override
   public String toRepeatingDigitString() {
     return toRepeatingDigitString(10, false);
   }
@@ -2960,7 +2961,7 @@ public final class BigFraction extends Number
   private static BigFraction valueOfHelper(double numerator, double denominator)
   {
     if(denominator == 0.0)
-      throw arithExp("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     if(numerator == 0.0)
       return BigFraction.ZERO;
@@ -3066,7 +3067,7 @@ public final class BigFraction extends Number
   {
     //Note:  Cannot use .equals(BigDecimal.ZERO), because "0.00" != "0.0".
     if(denominator.unscaledValue().equals(BigInteger.ZERO))
-      throw arithExp("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     //Format of BigDecimal: unscaled / 10^scale
     BigInteger tmpNumerator = numerator.unscaledValue();
@@ -3208,13 +3209,15 @@ public final class BigFraction extends Number
    * numerator/denominator are not null. A check is still done to maintain a positive
    * denominator.
    * 
-   * @param isReduced  Indicates whether or not the fraction is already known to be
-   *                   reduced to lowest terms.
+   * @param numerator numerator of fraction
+   * @param denominator denominator of fraction
+   * @param reduced  Indicates whether or not the fraction is already known to be
+   *                 reduced to lowest terms.
    */
   private BigFraction(BigInteger numerator, BigInteger denominator, Reduced reduced)
   {
     if(isZero(denominator))
-      throw arithExp("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     //if numerator is zero, we don't care about the denominator. force it to 1.
     if(reduced == Reduced.NO && isZero(numerator))

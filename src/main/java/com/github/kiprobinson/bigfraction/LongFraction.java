@@ -1,6 +1,6 @@
 package com.github.kiprobinson.bigfraction;
 
-import static com.github.kiprobinson.bigfraction.Fraction.arithExp;
+import static com.github.kiprobinson.bigfraction.Fraction.arithmeticException;
 import static com.github.kiprobinson.bigfraction.Fraction.isFloat;
 import static com.github.kiprobinson.bigfraction.Fraction.isInt;
 import static com.github.kiprobinson.bigfraction.Fraction.isJavaInteger;
@@ -25,7 +25,7 @@ import com.github.kiprobinson.bigfraction.util.DoubleUtil;
  * Denominator will always be positive (so sign is carried by numerator,
  * and a zero-denominator is impossible).<br>
  * <br>
- * Because mathematical operations are done natively, they will perform
+ * Because mathematical operations are done negatively, they will perform
  * much better than with {@link BigFraction}, but with the risk of overflow.<br>
  * <br>
  * Any operations that overflow throw an ArithmeticException.
@@ -129,8 +129,7 @@ public final class LongFraction extends Number
    * the double-precision floating-point number. (Which, for {@code 1.1}, is:
    * {@code (-1)^0 * 2^0 * (1 + 0x199999999999aL / 0x10000000000000L)}.)<br>
    * <br>
-   * In many cases, {@code LongFraction.valueOf(Double.toString(d))} may give the result
-   * the user expects.
+   * In many cases, {@code LongFraction.valueOf(Double.toString(d))} may give the result the user expects.
    * 
    * @param n Any Number to be converted to a LongFraction
    * @return a fully reduced fraction equivalent to {@code n}. Guaranteed to be non-null.
@@ -547,8 +546,7 @@ public final class LongFraction extends Number
   }
   
   /**
-   * Returns n / this. Sometimes this results in cleaner code than
-   * rearranging the code to use divide().
+   * Returns n / this. Sometimes this results in cleaner code than rearranging the code to use divide().
    * 
    * @param n number to be divided by this (dividend)
    * @return n / this
@@ -718,7 +716,7 @@ public final class LongFraction extends Number
     if(divisionMode == null)
       throw new IllegalArgumentException("Null argument");
     else if(isZero(nb))
-      throw new ArithmeticException("Divide by zero.");
+      throw arithmeticException("Divide by zero.");
     else if(isZero(na))
       return divideAndRemainderReturner(0L, LongFraction.ZERO, remainderMode);
     
@@ -1049,7 +1047,7 @@ public final class LongFraction extends Number
   public LongFraction pow(int exponent)
   {
     if(exponent < 0 && isZero(this))
-      throw new ArithmeticException("Divide by zero: raising zero to negative exponent.");
+      throw arithmeticException("Divide by zero: raising zero to negative exponent.");
     
     if(exponent == 0)
       return LongFraction.ONE;
@@ -1077,7 +1075,7 @@ public final class LongFraction extends Number
   public LongFraction reciprocal()
   {
     if(isZero(this))
-      throw new ArithmeticException("Divide by zero: reciprocal of zero.");
+      throw arithmeticException("Divide by zero: reciprocal of zero.");
     
     return new LongFraction(denominator, numerator, Reduced.YES);
   }
@@ -1348,7 +1346,7 @@ public final class LongFraction extends Number
     
     //If the denominator was not 1, rounding will be required.
     if(roundingMode == RoundingMode.UNNECESSARY)
-      throw new ArithmeticException("Rounding necessary");
+      throw arithmeticException("Rounding necessary");
     
     final Set<RoundingMode> ROUND_HALF_MODES = 
             EnumSet.of(RoundingMode.HALF_UP, 
@@ -1464,7 +1462,7 @@ public final class LongFraction extends Number
     LongFraction f = valueOf(n);
     
     if(f.signum() <= 0)
-      throw new ArithmeticException("newDenominator must be positive");
+      throw arithmeticException("newDenominator must be positive");
     
     return product(this.divide(f).round(roundingMode), f);
   }
@@ -1480,7 +1478,7 @@ public final class LongFraction extends Number
    * @throws IllegalArgumentException If newDenominator is null.
    * @throws ArithmeticException If newDenominator is zero or negative.
    * 
-   * @see #roundToDenominator(long, RoundingMode)
+   * @see #roundToDenominator(Long, RoundingMode)
    */
   @Override
   public Long roundToDenominator(Long newDenominator)
@@ -1518,7 +1516,7 @@ public final class LongFraction extends Number
       throw new IllegalArgumentException("Null argument");
     
     if(newDenominator <= 0L)
-      throw new ArithmeticException("newDenominator must be positive");
+      throw arithmeticException("newDenominator must be positive");
     
     //n1/d1 = x/d2  =>   x = (n1/d1)*d2
     return this.multiply(newDenominator).round(roundingMode);
@@ -1547,6 +1545,7 @@ public final class LongFraction extends Number
    *              (as is the case for Integer.toString)
    * @return This fraction, represented as a string in the format {@code numerator/denominator}.
    */
+  @Override
   public String toString(int radix)
   {
     return toString(radix, false);
@@ -1598,6 +1597,7 @@ public final class LongFraction extends Number
    * 
    * @return String representation of this fraction as a mixed fraction.
    */
+  @Override
   public String toMixedString()
   {
     return toMixedString(10);
@@ -1621,6 +1621,7 @@ public final class LongFraction extends Number
    *              (as is the case for Integer.toString)
    * @return String representation of this fraction as a mixed fraction.
    */
+  @Override
   public String toMixedString(int radix)
   {
     if(denominator == 1L)
@@ -1647,6 +1648,7 @@ public final class LongFraction extends Number
    * 
    * @throws ArithmeticException if roundingMode is UNNECESSARY but rounding is required.
    */
+  @Override
   public String toDecimalString(int numDecimalDigits)
   {
     return toRadixedString(10, numDecimalDigits, RoundingMode.HALF_UP);
@@ -1680,6 +1682,7 @@ public final class LongFraction extends Number
    * @param numFractionalDigits number of digits to be displayed after the radix point.
    * @return radixed string representation of this fraction.
    */
+  @Override
   public String toRadixedString(int radix, int numFractionalDigits)
   {
     return toRadixedString(radix, numFractionalDigits, RoundingMode.HALF_UP);
@@ -1799,6 +1802,7 @@ public final class LongFraction extends Number
    * 
    * @see #toRepeatingDigitString(int, boolean)
    */
+  @Override
   public String toRepeatingDigitString() {
     return toRepeatingDigitString(10, false);
   }
@@ -2666,7 +2670,7 @@ public final class LongFraction extends Number
   private static LongFraction valueOfHelper(double numerator, double denominator)
   {
     if(denominator == 0.0)
-      throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     if(numerator == 0.0)
       return LongFraction.ZERO;
@@ -2759,7 +2763,7 @@ public final class LongFraction extends Number
   {
     //Note:  Cannot use .equals(BigDecimal.ZERO), because "0.00" != "0.0".
     if(denominator.unscaledValue().equals(BigInteger.ZERO))
-      throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     //Format of BigDecimal: unscaled / 10^scale
     long tmpNumerator = numerator.unscaledValue().longValueExact();
@@ -2897,13 +2901,15 @@ public final class LongFraction extends Number
    * lowest terms. No check is done to reduce numerator/denominator. A check is still
    * done to maintain a positive denominator.
    * 
-   * @param isReduced  Indicates whether or not the fraction is already known to be
-   *                   reduced to lowest terms.
+   * @param numerator numerator of fraction
+   * @param denominator denominator of fraction
+   * @param reduced  Indicates whether or not the fraction is already known to be
+   *                 reduced to lowest terms.
    */
   private LongFraction(long numerator, long denominator, Reduced reduced)
   {
     if(denominator == 0L)
-      throw new ArithmeticException("Divide by zero: fraction denominator is zero.");
+      throw arithmeticException("Divide by zero: fraction denominator is zero.");
     
     //if numerator is zero, we don't care about the denominator. force it to 1.
     if(reduced == Reduced.NO && numerator == 0)
@@ -3089,7 +3095,7 @@ public final class LongFraction extends Number
    */
   private static long absAndCheck(long n) {
     if(n == Long.MIN_VALUE)
-      throw arithExp("Integer Overflow: abs(", n, "L)");
+      throw arithmeticException("Integer Overflow: abs(", n, "L)");
     return (n < 0 ? -n : n);
   }
   
@@ -3110,7 +3116,7 @@ public final class LongFraction extends Number
    */
   private static long negateAndCheck(long n) {
     if(n == Long.MIN_VALUE)
-      throw arithExp("Integer Overflow: -(" , n, "L)");
+      throw arithmeticException("Integer Overflow: -(" , n, "L)");
     return -n;
   }
   
@@ -3125,9 +3131,9 @@ public final class LongFraction extends Number
       return addAndCheck(b, a);
     
     if(a < 0 && b < 0 && a < Long.MIN_VALUE - b)
-      throw arithExp("Integer Overflow: ", a, "L + ", b, "L");
+      throw arithmeticException("Integer Overflow: ", a, "L + ", b, "L");
     if(a > 0 && b > 0 && a > Long.MAX_VALUE - b)
-      throw arithExp("Integer Overflow: ", a, "L + ", b, "L");
+      throw arithmeticException("Integer Overflow: ", a, "L + ", b, "L");
     
     return a + b;
   }
@@ -3144,7 +3150,7 @@ public final class LongFraction extends Number
     if (a < 0)
       return a - b;
     
-    throw arithExp("Integer Overflow: ", a , "L - ", b, "L");
+    throw arithmeticException("Integer Overflow: ", a , "L - ", b, "L");
   }
   
   /**
@@ -3164,11 +3170,11 @@ public final class LongFraction extends Number
     boolean bPos = (b > 0L);
     
     if(aPos && a > Long.MAX_VALUE / b) //both positive (a < b, so aPos implies bPos)
-      throw arithExp("Integer Overflow: ", a, "L * ", b, "L");
+      throw arithmeticException("Integer Overflow: ", a, "L * ", b, "L");
     else if (!aPos && bPos && a < Long.MIN_VALUE / b) //positive a, negative b
-      throw arithExp("Integer Overflow: ", a, "L * ", b, "L");
+      throw arithmeticException("Integer Overflow: ", a, "L * ", b, "L");
     else if (!aPos && !bPos && a < Long.MAX_VALUE / b) //both negative
-      throw arithExp("Integer Overflow: ", a, "L * ", b, "L");
+      throw arithmeticException("Integer Overflow: ", a, "L * ", b, "L");
     
     return a*b;
   }
@@ -3187,7 +3193,7 @@ public final class LongFraction extends Number
     }
     catch(ArithmeticException e)
     {
-      throw arithExp("Integer Overflow: (", n, "L)^(", x, ")");
+      throw arithmeticException("Integer Overflow: (", n, "L)^(", x, ")");
     }
     
     return ret;

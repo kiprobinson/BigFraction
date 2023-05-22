@@ -129,14 +129,13 @@ uploadArchives {
   }
 }
 
-/*
 nexusStaging {
   packageGroup = 'com.github.kiprobinson'
   stagingProfileId = '5ff5b050a01221'
   username = ossrhUsername
   password = ossrhPassword
   //numberOfRetries = 3
-}*/
+}
 
 jacoco {
   toolVersion = "0.7.+"
@@ -147,7 +146,7 @@ jacocoTestReport {
   reports {
     xml.enabled false
     csv.enabled false
-    html.destination "${buildDir}/reports/jacoco"
+    html.destination new File("${buildDir}/reports/jacoco")
   }
 }
 

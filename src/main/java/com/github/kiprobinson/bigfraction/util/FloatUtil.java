@@ -6,7 +6,8 @@ package com.github.kiprobinson.bigfraction.util;
  * 
  * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  * 
- * @see <a href="https://en.wikipedia.org/wiki/Float-precision_floating-point_format">Wikipedia overview of IEEE 754 float-precision floating point specifications</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Float-precision_floating-point_format">
+ * Wikipedia overview of IEEE 754 float-precision floating point specifications</a>
  */
 public final class FloatUtil
 {
@@ -67,8 +68,8 @@ public final class FloatUtil
   }
   
   /**
-   * Returns the exponent, after adding the exponent offset to the exponent bits. In other words, the value
-   * in bits 62-52, plus 0x3ff.<br>
+   * Returns the exponent, after adding the exponent offset to the exponent bits. 
+   * In other words, the value in bits 62-52, plus 0x3ff.<br>
    * <br>
    * Examples:<ul>
    *   <li>{@code getExponent(0.5) == -1} because {@code 1.0 == 1.0 * 2^-1}</li>
@@ -89,8 +90,8 @@ public final class FloatUtil
   }
   
   /**
-   * Returns the raw exponent bits, without adjusting for the offset. In other words, the value
-   * in bits 62-52.<br>
+   * Returns the raw exponent bits, without adjusting for the offset. 
+   * In other words, the value in bits 62-52.<br>
    * <br>
    * Examples:<ul>
    *   <li>{@code getExponentBits(0.5) == 0x3fe}</li>
@@ -107,7 +108,8 @@ public final class FloatUtil
    */
   public static int getExponentBits(float f)
   {
-    return (int)((Float.floatToRawIntBits(f) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
+    return (int)
+        ((Float.floatToRawIntBits(f) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
   }
   
   /**
@@ -133,7 +135,8 @@ public final class FloatUtil
   
   
   /**
-   * Returns an array containing the parts of the float. Avoids the overhead of four separate function calls.
+   * Returns an array containing the parts of the float. Avoids the overhead of 
+   * four separate function calls.
    * 
    * @param f a float value
    * @return array with four elements:<ul>
@@ -149,7 +152,8 @@ public final class FloatUtil
   }
   
   /**
-   * Returns an array containing the parts of the float. Avoids the overhead of four separate function calls.
+   * Returns an array containing the parts of the float. 
+   * Avoids the overhead of four separate function calls.
    * 
    * @param f a float value
    * @param exponentAsBits whether to return exponent as raw bits rather than adjusted value
@@ -177,7 +181,8 @@ public final class FloatUtil
   }
   
   /**
-   * Creates a new float primitive using the provided component bits. Assumes the exponent parameter is signed.
+   * Creates a new float primitive using the provided component bits. 
+   * Assumes the exponent parameter is signed.
    * 
    * @param sign sign bit
    * @param exponent adjusted exponent
@@ -205,7 +210,8 @@ public final class FloatUtil
    * 
    * @throws IllegalArgumentException if any of the parts contain invalid bits.
    */
-  public static float getFloat(int sign, int exponent, int mantissa, boolean exponentAsBits)
+  public static float getFloat(int sign, int exponent, int mantissa, 
+          boolean exponentAsBits)
   {
     if(sign < 0 || sign > 1)
       throw new IllegalArgumentException("Illegal sign bit: " + sign);
@@ -218,7 +224,7 @@ public final class FloatUtil
     if(0 != (offsetExponent & ~MAX_EXPONENT_BITS))
       throw new IllegalArgumentException("Illegal exponent: " + exponent);
     
-    return Float.intBitsToFloat((((int)sign) << SIGN_POS) | (((int)offsetExponent) << EXPONENT_POS) | mantissa);
+    return Float.intBitsToFloat((((int)sign) << SIGN_POS) | 
+           (((int)offsetExponent) << EXPONENT_POS) | mantissa);
   }
-
 }

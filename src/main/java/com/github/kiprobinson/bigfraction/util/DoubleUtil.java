@@ -6,7 +6,8 @@ package com.github.kiprobinson.bigfraction.util;
  * 
  * @author Kip Robinson, <a href="https://github.com/kiprobinson">https://github.com/kiprobinson</a>
  * 
- * @see <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">Wikipedia overview of IEEE 754 double-precision floating point specifications</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">
+ * Wikipedia overview of IEEE 754 double-precision floating point specifications</a>
  */
 public final class DoubleUtil
 {
@@ -56,7 +57,8 @@ public final class DoubleUtil
   }
   
   /**
-   * Returns the sign bit (bit 63). 0=positive, 1=negative. This is returned even for NaN values.
+   * Returns the sign bit (bit 63). 0=positive, 1=negative. 
+   * This is returned even for NaN values.
    * 
    * @param d a double value
    * @return the sign bit
@@ -67,8 +69,8 @@ public final class DoubleUtil
   }
   
   /**
-   * Returns the exponent, after adding the exponent offset to the exponent bits. In other words, the value
-   * in bits 62-52, plus 0x3ff.<br>
+   * Returns the exponent, after adding the exponent offset to the exponent bits. 
+   * In other words, the value in bits 62-52, plus 0x3ff.<br>
    * <br>
    * Examples:<ul>
    *   <li>{@code getExponent(0.5) == -1} because {@code 1.0 == 1.0 * 2^-1}</li>
@@ -107,7 +109,8 @@ public final class DoubleUtil
    */
   public static int getExponentBits(double d)
   {
-    return (int)((Double.doubleToRawLongBits(d) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
+    return (int)
+        ((Double.doubleToRawLongBits(d) & EXPONENT_BITS_MASK) >>> EXPONENT_POS);
   }
   
   /**
@@ -177,7 +180,8 @@ public final class DoubleUtil
   }
   
   /**
-   * Creates a new double primitive using the provided component bits. Assumes the exponent parameter is signed.
+   * Creates a new double primitive using the provided component bits. 
+   * Assumes the exponent parameter is signed.
    * 
    * @param sign sign bit
    * @param exponent adjusted exponent
@@ -198,14 +202,15 @@ public final class DoubleUtil
    * @param sign            sign bit
    * @param exponent        exponent (either raw bits or adjusted value)
    * @param mantissa        mantissa bits
-   * @param exponentAsBits  If true, assumes that exponent parameter represents the actual exponent bits. If false,
-   *                        IEEE exponent offset value will be added to the offset to get the bits.
+   * @param exponentAsBits  If true, assumes that exponent parameter represents the actual exponent bits. 
+   *                        If false, IEEE exponent offset value will be added to the offset to get the bits.
    * 
    * @return The double value represented by the provided binary parts.
    * 
    * @throws IllegalArgumentException if any of the parts contain invalid bits.
    */
-  public static double getDouble(int sign, int exponent, long mantissa, boolean exponentAsBits)
+  public static double getDouble(int sign, int exponent, long mantissa, 
+          boolean exponentAsBits)
   {
     if(sign < 0 || sign > 1)
       throw new IllegalArgumentException("Illegal sign bit: " + sign);
@@ -218,7 +223,8 @@ public final class DoubleUtil
     if(0 != (offsetExponent & ~MAX_EXPONENT_BITS))
       throw new IllegalArgumentException("Illegal exponent: " + exponent);
     
-    return Double.longBitsToDouble((((long)sign) << SIGN_POS) | (((long)offsetExponent) << EXPONENT_POS) | mantissa);
+    return Double.longBitsToDouble((((long)sign) << SIGN_POS) | 
+           (((long)offsetExponent) << EXPONENT_POS) | mantissa);
   }
 
 }
